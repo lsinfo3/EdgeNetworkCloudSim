@@ -2,6 +2,7 @@ package org.cloudbus.cloudsim.ext.counter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cloudbus.cloudsim.core.CloudSim;
 
 /**
  * TimeDependentCounter class 
@@ -92,16 +93,20 @@ public class TimeDependentCounter extends Counter {
 	@Override
 	public void count(double x)
 	{
-		double tdiff = SimState.getNow() - this.lastSampleTime;
+//		double tdiff = SimState.getNow() - this.lastSampleTime;
+		double tdiff = CloudSim.clock() - this.lastSampleTime;
 		if (tdiff < 0)
 		{
+//			logger.info("last = " + this.lastSampleTime + " now = "
+//					+ SimState.getNow());
 			logger.info("last = " + this.lastSampleTime + " now = "
-					+ SimState.getNow());
+					+ CloudSim.clock());
 			System.exit(-1);
 		}
 		this.sumPowerOne += (x * tdiff);
 		this.sumPowerTwo += (x * x * tdiff);
-		this.lastSampleTime = SimState.getNow();
+//		this.lastSampleTime = SimState.getNow();
+		this.lastSampleTime = (long) CloudSim.clock();
 	}
 	
 	/**

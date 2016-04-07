@@ -18,7 +18,6 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.cloudbus.cloudsim.ext.Service;
 import org.cloudbus.cloudsim.lists.CloudletList;
 import org.cloudbus.cloudsim.lists.VmList;
 
@@ -34,8 +33,6 @@ public class DatacenterBroker extends SimEntity {
 
 	/** The vm list. */
 	protected List<? extends Vm> vmList;
-	/** The service list. */
-	protected List<? extends Service> serviceList;
 
 	/** The vms created list. */
 	protected List<? extends Vm> vmsCreatedList;
@@ -654,21 +651,5 @@ public class DatacenterBroker extends SimEntity {
 	protected void setDatacenterRequestedIdsList(List<Integer> datacenterRequestedIdsList) {
 		this.datacenterRequestedIdsList = datacenterRequestedIdsList;
 	}
-
-	/**
-	 * @return the serviceList
-	 */
-	public List<? extends Service> getServiceList() {
-		return serviceList;
-	}
-
-	/**
-	 * @param serviceList the serviceList to set
-	 */
-	public void setServiceList(List<? extends Service> serviceList) {
-		this.serviceList = serviceList;
-	}
-	
-	
 
 }

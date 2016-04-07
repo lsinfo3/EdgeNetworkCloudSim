@@ -119,7 +119,7 @@ public class CloudSimExample1 {
 			// Sixth step: Starts the simulation
 			CloudSim.startSimulation();
 
-			CloudSim.stopSimulation();
+//			CloudSim.stopSimulation();
 
 			//Final step: Print results when simulation is over
 			List<Cloudlet> newList = broker.getCloudletReceivedList();

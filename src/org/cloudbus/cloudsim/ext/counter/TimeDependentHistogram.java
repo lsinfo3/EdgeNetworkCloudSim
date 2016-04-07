@@ -1,5 +1,7 @@
 package org.cloudbus.cloudsim.ext.counter;
 
+import org.cloudbus.cloudsim.core.CloudSim;
+
 /**
  * TimeDependentHistogram class 
  * Class representing a time dependent histogram
@@ -49,8 +51,10 @@ public class TimeDependentHistogram extends Histogram {
 	public void reset()
 	{
 		super.reset();
-		this.lastSampleTime = SimState.getNow();
-		this.firstSampleTime = SimState.getNow();
+//		this.lastSampleTime = SimState.getNow();
+		this.lastSampleTime = (long) CloudSim.clock();
+//		this.firstSampleTime = SimState.getNow();
+		this.firstSampleTime = (long) CloudSim.clock();
 	}
 	
 	/**
@@ -64,9 +68,11 @@ public class TimeDependentHistogram extends Histogram {
 	public void count(double x)
 	{
 		int bin_index = this.getBinNumber(x);
-		double tdiff = SimState.getNow() - this.lastSampleTime;
+//		double tdiff = SimState.getNow() - this.lastSampleTime;
+		double tdiff = CloudSim.clock() - this.lastSampleTime;
 		this.bins.set(bin_index, (double) this.bins.get(bin_index) + tdiff);
-		this.lastSampleTime = SimState.getNow();
+//		this.lastSampleTime = SimState.getNow();
+		this.lastSampleTime = (long) CloudSim.clock();
 	}
 	
 	/**

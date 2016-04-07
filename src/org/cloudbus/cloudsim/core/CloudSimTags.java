@@ -264,16 +264,7 @@ public class CloudSimTags {
 	public static final int Network_Event_Host = BASE + 47;
 
 	public static final int NextCycle = BASE + 48;
-	
-	
-	
-	/**
-	 * Denotes events for interactions between User(Broker) and Service
-	 */
-	public static final int CLOUDLET_SERVICE_SUBMIT = BASE + 100;
-	public static final int VM_SERVICE_SUBMIT = BASE + 101;
-	
-	
+
 	/** Private Constructor */
 	private CloudSimTags() {
 		throw new UnsupportedOperationException("CloudSim Tags cannot be instantiated");
