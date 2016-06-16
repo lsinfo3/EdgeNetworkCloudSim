@@ -21,4 +21,20 @@ public class PresetEvent {
         this.data = data;
         this.delay = delay;
     }
+
+	public int getId() {
+		return id;
+	}
+
+	public int getTag() {
+		return tag;
+	}
+
+	public Object getData() {
+		return data;
+	}
+
+	public double getDelay() {
+		return delay;
+	}
 }

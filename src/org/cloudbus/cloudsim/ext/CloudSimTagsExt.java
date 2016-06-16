@@ -33,6 +33,14 @@ public class CloudSimTagsExt {
 	public static final int BROKER_SUBMIT_VMS_NOW = BASE + 5;
 	public static final int BROKER_CLOUDLETS_NOW = BASE + 6;
 	public static final int DATACENTER_BOOT_VM_TAG = BASE + 7;
+	public static final int SERVICE_DESTROY_ITSELF_NOW = BASE + 8;
+	public static final int CLOUDLET_DESTROY_ITSELF_NOW = BASE + 8;
+	public static final int BROKER_MESSAGE = BASE + 9;
+	public static final int BROKER_MESSAGE_RETURN = BASE + 10;
+	public static final int VM_DC_MAPPING = BASE + 11;
+	public static final int SERVICE_CLOUDLET_DONE = BASE + 12;
+	public static final int SERVICE_CLOUDLET_DONE_VM = BASE + 13;
+	
 	
 	
 	/** Private Constructor */

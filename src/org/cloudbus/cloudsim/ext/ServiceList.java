@@ -2,6 +2,8 @@ package org.cloudbus.cloudsim.ext;
 
 import java.util.List;
 
+import org.cloudbus.cloudsim.ext.service.Service;
+
 
 /**
  * @author Brice Kamneng Kwam
