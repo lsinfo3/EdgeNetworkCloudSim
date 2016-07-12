@@ -13,9 +13,9 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.cloudbus.cloudsim.ext.util.CustomLog;
-import org.cloudbus.cloudsim.ext.vm.VMStatus;
-import org.cloudbus.cloudsim.ext.vm.VMex;
+import org.cloudbus.cloudsim.edge.util.CustomLog;
+import org.cloudbus.cloudsim.edge.vm.VMStatus;
+import org.cloudbus.cloudsim.edge.vm.VMex;
 import org.cloudbus.cloudsim.lists.VmList;
 
 /**

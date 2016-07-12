@@ -21,25 +21,25 @@ package org.cloudbus.cloudsim.ext;
 public class CloudSimTagsExt {
 
 	/** Starting constant value for cloud-related tags **/
-	private static final int BASE = 5000;
+	private static final int BASEEXT = 5000;
 	
 	/**
 	 * Denotes events for interactions between User(Broker) and Service
 	 */
-	public static final int CLOUDLET_SERVICE_SUBMIT = BASE + 1;
-	public static final int VM_SERVICE_SUBMIT = BASE + 2;
-	public static final int BROKER_DESTROY_ITSELF_NOW = BASE + 3;
-	public static final int BROKER_DESTROY_VMS_NOW = BASE + 4;
-	public static final int BROKER_SUBMIT_VMS_NOW = BASE + 5;
-	public static final int BROKER_CLOUDLETS_NOW = BASE + 6;
-	public static final int DATACENTER_BOOT_VM_TAG = BASE + 7;
-	public static final int SERVICE_DESTROY_ITSELF_NOW = BASE + 8;
-	public static final int CLOUDLET_DESTROY_ITSELF_NOW = BASE + 8;
-	public static final int BROKER_MESSAGE = BASE + 9;
-	public static final int BROKER_MESSAGE_RETURN = BASE + 10;
-	public static final int VM_DC_MAPPING = BASE + 11;
-	public static final int SERVICE_CLOUDLET_DONE = BASE + 12;
-	public static final int SERVICE_CLOUDLET_DONE_VM = BASE + 13;
+	public static final int CLOUDLET_SERVICE_SUBMIT = BASEEXT + 1;
+	public static final int VM_SERVICE_SUBMIT = BASEEXT + 2;
+	public static final int BROKER_DESTROY_ITSELF_NOW = BASEEXT + 3;
+	public static final int BROKER_DESTROY_VMS_NOW = BASEEXT + 4;
+	public static final int BROKER_SUBMIT_VMS_NOW = BASEEXT + 5;
+	public static final int BROKER_CLOUDLETS_NOW = BASEEXT + 6;
+	public static final int DATACENTER_BOOT_VM_TAG = BASEEXT + 7;
+	public static final int SERVICE_DESTROY_ITSELF_NOW = BASEEXT + 8;
+	public static final int CLOUDLET_DESTROY_ITSELF_NOW = BASEEXT + 8;
+	public static final int BROKER_MESSAGE = BASEEXT + 9;
+	public static final int BROKER_MESSAGE_RETURN = BASEEXT + 10;
+	public static final int VM_DC_MAPPING = BASEEXT + 11;
+	public static final int SERVICE_CLOUDLET_DONE = BASEEXT + 12;
+	public static final int SERVICE_CLOUDLET_DONE_VM = BASEEXT + 13;
 	
 	
 	

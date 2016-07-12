@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ext.vm;
+package org.cloudbus.cloudsim.edge.vm;
 
 import java.util.EnumSet;
 import java.util.Objects;
@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.ext.util.Id;
+import org.cloudbus.cloudsim.edge.util.Id;
 
 /**
  * An extension of the base cloudsim VM, adding information about:

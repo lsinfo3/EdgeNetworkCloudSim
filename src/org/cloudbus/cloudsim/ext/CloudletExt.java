@@ -12,7 +12,7 @@ import org.cloudbus.cloudsim.UtilizationModel;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.cloudbus.cloudsim.ext.util.Id;
+import org.cloudbus.cloudsim.edge.util.Id;
 
 public class CloudletExt extends SimEntity {
 
@@ -161,182 +161,49 @@ public class CloudletExt extends SimEntity {
 	private List<String> requiredFiles = null; // list of required filenames
 
 	/**
-	 * Allocates a new Cloudlet object. The Cloudlet length, input and output
-	 * file sizes should be greater than or equal to 1. By default this
-	 * constructor sets the history of this object.
+	 * Allocates a new Cloudlet object. The Cloudlet length, input and output file sizes should be
+	 * greater than or equal to 1.
 	 * 
-	 * @param cloudletLength
-	 *            the length or size (in MI) of this cloudlet to be executed in
-	 *            a PowerDatacenter
-	 * @param cloudletFileSize
-	 *            the file size (in byte) of this cloudlet <tt>BEFORE</tt>
-	 *            submitting to a PowerDatacenter
-	 * @param cloudletOutputSize
-	 *            the file size (in byte) of this cloudlet <tt>AFTER</tt> finish
+	 * @param cloudletId the unique ID of this cloudlet
+	 * @param cloudletLength the length or size (in MI) of this cloudlet to be executed in a
+	 *            PowerDatacenter
+	 * @param cloudletFileSize the file size (in byte) of this cloudlet <tt>BEFORE</tt> submitting
+	 *            to a PowerDatacenter
+	 * @param cloudletOutputSize the file size (in byte) of this cloudlet <tt>AFTER</tt> finish
 	 *            executing by a PowerDatacenter
-	 * @param pesNumber
-	 *            the pes number
-	 * @param utilizationModelCpu
-	 *            the utilization model cpu
-	 * @param utilizationModelRam
-	 *            the utilization model ram
-	 * @param utilizationModelBw
-	 *            the utilization model bw
+	 * @param record record the history of this object or not
+	 * @param fileList list of files required by this cloudlet
+	 * @param pesNumber the pes number
+	 * @param utilizationModelCpu the utilization model cpu
+	 * @param utilizationModelRam the utilization model ram
+	 * @param utilizationModelBw the utilization model bw
 	 * @pre cloudletID >= 0
 	 * @pre cloudletLength >= 0.0
 	 * @pre cloudletFileSize >= 1
 	 * @pre cloudletOutputSize >= 1
 	 * @post $none
 	 */
-	public CloudletExt(final long cloudletLength, final int pesNumber,
-			final long cloudletFileSize, final long cloudletOutputSize,
-			final UtilizationModel utilizationModelCpu,
-			final UtilizationModel utilizationModelRam,
-			final UtilizationModel utilizationModelBw) {
-		this(Id.pollId(CloudletExt.class), cloudletLength, pesNumber,
-				cloudletFileSize, cloudletOutputSize, utilizationModelCpu,
-				utilizationModelRam, utilizationModelBw, false);
-		vmId = -1;
-		accumulatedBwCost = 0.0;
-		costPerBw = 0.0;
-
-		requiredFiles = new LinkedList<String>();
-	}
-
-	/**
-	 * Allocates a new Cloudlet object. The Cloudlet length, input and output
-	 * file sizes should be greater than or equal to 1. By default this
-	 * constructor sets the history of this object.
-	 * 
-	 * @param userId
-	 *            the ID of the broker/user
-	 * @param cloudletLength
-	 *            the length or size (in MI) of this cloudlet to be executed in
-	 *            a PowerDatacenter
-	 * @param cloudletFileSize
-	 *            the file size (in byte) of this cloudlet <tt>BEFORE</tt>
-	 *            submitting to a PowerDatacenter
-	 * @param cloudletOutputSize
-	 *            the file size (in byte) of this cloudlet <tt>AFTER</tt> finish
-	 *            executing by a PowerDatacenter
-	 * @param pesNumber
-	 *            the pes number
-	 * @param utilizationModelCpu
-	 *            the utilization model cpu
-	 * @param utilizationModelRam
-	 *            the utilization model ram
-	 * @param utilizationModelBw
-	 *            the utilization model bw
-	 * @pre cloudletID >= 0
-	 * @pre cloudletLength >= 0.0
-	 * @pre cloudletFileSize >= 1
-	 * @pre cloudletOutputSize >= 1
-	 * @post $none
-	 */
-	public CloudletExt(final long cloudletLength,
-			final int pesNumber, final long cloudletFileSize,
+	public CloudletExt(
+			final int cloudletId,
+			final long cloudletLength,
+			final int pesNumber,
+			final long cloudletFileSize,
 			final long cloudletOutputSize,
 			final UtilizationModel utilizationModelCpu,
 			final UtilizationModel utilizationModelRam,
-			final UtilizationModel utilizationModelBw, final int userId) {
-		this(Id.pollId(CloudletExt.class), cloudletLength, pesNumber,
-				cloudletFileSize, cloudletOutputSize, utilizationModelCpu,
-				utilizationModelRam, utilizationModelBw, false);
-		vmId = -1;
-		setUserId(userId);
-		accumulatedBwCost = 0.0;
-		costPerBw = 0.0;
-
-		requiredFiles = new LinkedList<String>();
-	}
-
-	/**
-	 * Allocates a new Cloudlet object. The Cloudlet length, input and output
-	 * file sizes should be greater than or equal to 1. By default this
-	 * constructor sets the history of this object.
-	 * 
-	 * @param userId
-	 *            the ID of the broker/user
-	 * @param cloudletLength
-	 *            the length or size (in MI) of this cloudlet to be executed in
-	 *            a PowerDatacenter
-	 * @param cloudletFileSize
-	 *            the file size (in byte) of this cloudlet <tt>BEFORE</tt>
-	 *            submitting to a PowerDatacenter
-	 * @param cloudletOutputSize
-	 *            the file size (in byte) of this cloudlet <tt>AFTER</tt> finish
-	 *            executing by a PowerDatacenter
-	 * @param pesNumber
-	 *            the pes number
-	 * @param utilizationModelCpu
-	 *            the utilization model cpu
-	 * @param utilizationModelRam
-	 *            the utilization model ram
-	 * @param utilizationModelBw
-	 *            the utilization model bw
-	 * @pre cloudletID >= 0
-	 * @pre cloudletLength >= 0.0
-	 * @pre cloudletFileSize >= 1
-	 * @pre cloudletOutputSize >= 1
-	 * @post $none
-	 */
-	public CloudletExt(final int userId, final double lifeLength,
-			final long cloudletLength, final int pesNumber,
-			final long cloudletFileSize, final long cloudletOutputSize,
-			final UtilizationModel utilizationModelCpu,
-			final UtilizationModel utilizationModelRam,
-			final UtilizationModel utilizationModelBw) {
-		this(Id.pollId(CloudletExt.class), cloudletLength, pesNumber,
-				cloudletFileSize, cloudletOutputSize, utilizationModelCpu,
-				utilizationModelRam, utilizationModelBw, false);
-		vmId = -1;
-		setUserId(userId);
-		accumulatedBwCost = 0.0;
-		costPerBw = 0.0;
-
-		requiredFiles = new LinkedList<String>();
-	}
-
-	/**
-	 * Allocates a new Cloudlet object. The Cloudlet length, input and output
-	 * file sizes should be greater than or equal to 1.
-	 * 
-	 * @param cloudletLength
-	 *            the length or size (in MI) of this cloudlet to be executed in
-	 *            a PowerDatacenter
-	 * @param cloudletFileSize
-	 *            the file size (in byte) of this cloudlet <tt>BEFORE</tt>
-	 *            submitting to a PowerDatacenter
-	 * @param cloudletOutputSize
-	 *            the file size (in byte) of this cloudlet <tt>AFTER</tt> finish
-	 *            executing by a PowerDatacenter
-	 * @param record
-	 *            record the history of this object or not
-	 * @param fileList
-	 *            list of files required by this cloudlet
-	 * @param pesNumber
-	 *            the pes number
-	 * @param utilizationModelCpu
-	 *            the utilization model cpu
-	 * @param utilizationModelRam
-	 *            the utilization model ram
-	 * @param utilizationModelBw
-	 *            the utilization model bw
-	 * @pre cloudletID >= 0
-	 * @pre cloudletLength >= 0.0
-	 * @pre cloudletFileSize >= 1
-	 * @pre cloudletOutputSize >= 1
-	 * @post $none
-	 */
-	public CloudletExt(final long cloudletLength, final int pesNumber,
-			final long cloudletFileSize, final long cloudletOutputSize,
-			final UtilizationModel utilizationModelCpu,
-			final UtilizationModel utilizationModelRam,
-			final UtilizationModel utilizationModelBw, final boolean record,
+			final UtilizationModel utilizationModelBw,
+			final boolean record,
 			final List<String> fileList) {
-		this(Id.pollId(CloudletExt.class), cloudletLength, pesNumber,
-				cloudletFileSize, cloudletOutputSize, utilizationModelCpu,
-				utilizationModelRam, utilizationModelBw, record);
+		this(
+				cloudletId,
+				cloudletLength,
+				pesNumber,
+				cloudletFileSize,
+				cloudletOutputSize,
+				utilizationModelCpu,
+				utilizationModelRam,
+				utilizationModelBw,
+				record);
 		vmId = -1;
 		accumulatedBwCost = 0.0;
 		costPerBw = 0.0;
@@ -345,44 +212,47 @@ public class CloudletExt extends SimEntity {
 	}
 
 	/**
-	 * Allocates a new Cloudlet object. The Cloudlet length, input and output
-	 * file sizes should be greater than or equal to 1. By default this
-	 * constructor sets the history of this object.
+	 * Allocates a new Cloudlet object. The Cloudlet length, input and output file sizes should be
+	 * greater than or equal to 1. By default this constructor sets the history of this object.
 	 * 
-	 * @param cloudletLength
-	 *            the length or size (in MI) of this cloudlet to be executed in
-	 *            a PowerDatacenter
-	 * @param cloudletFileSize
-	 *            the file size (in byte) of this cloudlet <tt>BEFORE</tt>
-	 *            submitting to a PowerDatacenter
-	 * @param cloudletOutputSize
-	 *            the file size (in byte) of this cloudlet <tt>AFTER</tt> finish
+	 * @param cloudletId the unique ID of this Cloudlet
+	 * @param cloudletLength the length or size (in MI) of this cloudlet to be executed in a
+	 *            PowerDatacenter
+	 * @param cloudletFileSize the file size (in byte) of this cloudlet <tt>BEFORE</tt> submitting
+	 *            to a PowerDatacenter
+	 * @param cloudletOutputSize the file size (in byte) of this cloudlet <tt>AFTER</tt> finish
 	 *            executing by a PowerDatacenter
-	 * @param fileList
-	 *            list of files required by this cloudlet
-	 * @param pesNumber
-	 *            the pes number
-	 * @param utilizationModelCpu
-	 *            the utilization model cpu
-	 * @param utilizationModelRam
-	 *            the utilization model ram
-	 * @param utilizationModelBw
-	 *            the utilization model bw
+	 * @param fileList list of files required by this cloudlet
+	 * @param pesNumber the pes number
+	 * @param utilizationModelCpu the utilization model cpu
+	 * @param utilizationModelRam the utilization model ram
+	 * @param utilizationModelBw the utilization model bw
 	 * @pre cloudletID >= 0
 	 * @pre cloudletLength >= 0.0
 	 * @pre cloudletFileSize >= 1
 	 * @pre cloudletOutputSize >= 1
 	 * @post $none
 	 */
-	public CloudletExt(final long cloudletLength, final int pesNumber,
-			final long cloudletFileSize, final long cloudletOutputSize,
+	public CloudletExt(
+			final int cloudletId,
+			final long cloudletLength,
+			final int pesNumber,
+			final long cloudletFileSize,
+			final long cloudletOutputSize,
 			final UtilizationModel utilizationModelCpu,
 			final UtilizationModel utilizationModelRam,
 			final UtilizationModel utilizationModelBw,
 			final List<String> fileList) {
-		this(Id.pollId(CloudletExt.class), cloudletLength, pesNumber,
-				cloudletFileSize, cloudletOutputSize, utilizationModelCpu,
-				utilizationModelRam, utilizationModelBw, false);
+		this(
+				cloudletId,
+				cloudletLength,
+				pesNumber,
+				cloudletFileSize,
+				cloudletOutputSize,
+				utilizationModelCpu,
+				utilizationModelRam,
+				utilizationModelBw,
+				false);
 		vmId = -1;
 		accumulatedBwCost = 0.0;
 		costPerBw = 0.0;
@@ -391,50 +261,44 @@ public class CloudletExt extends SimEntity {
 	}
 
 	/**
-	 * Allocates a new Cloudlet object. The Cloudlet length, input and output
-	 * file sizes should be greater than or equal to 1.
+	 * Allocates a new Cloudlet object. The Cloudlet length, input and output file sizes should be
+	 * greater than or equal to 1.
 	 * 
-	 * @param cloudletId
-	 *            the unique ID of this cloudlet
-	 * @param cloudletLength
-	 *            the length or size (in MI) of this cloudlet to be executed in
-	 *            a PowerDatacenter
-	 * @param cloudletFileSize
-	 *            the file size (in byte) of this cloudlet <tt>BEFORE</tt>
-	 *            submitting to a PowerDatacenter
-	 * @param cloudletOutputSize
-	 *            the file size (in byte) of this cloudlet <tt>AFTER</tt> finish
+	 * @param cloudletId the unique ID of this cloudlet
+	 * @param cloudletLength the length or size (in MI) of this cloudlet to be executed in a
+	 *            PowerDatacenter
+	 * @param cloudletFileSize the file size (in byte) of this cloudlet <tt>BEFORE</tt> submitting
+	 *            to a PowerDatacenter
+	 * @param cloudletOutputSize the file size (in byte) of this cloudlet <tt>AFTER</tt> finish
 	 *            executing by a PowerDatacenter
-	 * @param record
-	 *            record the history of this object or not
-	 * @param pesNumber
-	 *            the pes number
-	 * @param utilizationModelCpu
-	 *            the utilization model cpu
-	 * @param utilizationModelRam
-	 *            the utilization model ram
-	 * @param utilizationModelBw
-	 *            the utilization model bw
+	 * @param record record the history of this object or not
+	 * @param pesNumber the pes number
+	 * @param utilizationModelCpu the utilization model cpu
+	 * @param utilizationModelRam the utilization model ram
+	 * @param utilizationModelBw the utilization model bw
 	 * @pre cloudletID >= 0
 	 * @pre cloudletLength >= 0.0
 	 * @pre cloudletFileSize >= 1
 	 * @pre cloudletOutputSize >= 1
 	 * @post $none
 	 */
-	public CloudletExt(final int cloudletId, final long cloudletLength,
-			final int pesNumber, final long cloudletFileSize,
+	public CloudletExt(
+			final int cloudletId,
+			final long cloudletLength,
+			final int pesNumber,
+			final long cloudletFileSize,
 			final long cloudletOutputSize,
 			final UtilizationModel utilizationModelCpu,
 			final UtilizationModel utilizationModelRam,
-			final UtilizationModel utilizationModelBw, final boolean record) {
-
+			final UtilizationModel utilizationModelBw,
+			final boolean record) {
 		super("CloudletExt" + cloudletId);
-		userId = -1; // to be set by a Broker or user
+		userId = -1;          // to be set by a Broker or user
 		status = CREATED;
 		this.cloudletId = cloudletId;
 		numberOfPes = pesNumber;
 		execStartTime = 0.0;
-		finishTime = -1.0; // meaning this Cloudlet hasn't finished yet
+		finishTime = -1.0;    // meaning this Cloudlet hasn't finished yet
 		classType = 0;
 		netToS = 0;
 
@@ -459,6 +323,55 @@ public class CloudletExt extends SimEntity {
 		setUtilizationModelCpu(utilizationModelCpu);
 		setUtilizationModelRam(utilizationModelRam);
 		setUtilizationModelBw(utilizationModelBw);
+	}
+	
+	/**
+	 * Allocates a new Cloudlet object. The Cloudlet length, input and output file sizes should be
+	 * greater than or equal to 1. By default this constructor sets the history of this object.
+	 * The Id of this Cloudlet Object is automatically generated {@link Id} class. 
+	 * 
+	 * @param cloudletLength the length or size (in MI) of this cloudlet to be executed in a
+	 *            PowerDatacenter
+	 * @param cloudletFileSize the file size (in byte) of this cloudlet <tt>BEFORE</tt> submitting
+	 *            to a PowerDatacenter
+	 * @param cloudletOutputSize the file size (in byte) of this cloudlet <tt>AFTER</tt> finish
+	 *            executing by a PowerDatacenter
+	 * @param pesNumber the pes number
+	 * @param utilizationModelCpu the utilization model cpu
+	 * @param utilizationModelRam the utilization model ram
+	 * @param utilizationModelBw the utilization model bw
+	 * @pre cloudletID >= 0
+	 * @pre cloudletLength >= 0.0
+	 * @pre cloudletFileSize >= 1
+	 * @pre cloudletOutputSize >= 1
+	 * @post $none
+	 */
+	public CloudletExt(
+			final long cloudletLength,
+			final int pesNumber,
+			final long cloudletFileSize,
+			final long cloudletOutputSize,
+			final UtilizationModel utilizationModelCpu,
+			final UtilizationModel utilizationModelRam,
+			final UtilizationModel utilizationModelBw,
+			final int userId) {
+		this(
+				Id.pollId(Cloudlet.class),
+				cloudletLength,
+				pesNumber,
+				cloudletFileSize,
+				cloudletOutputSize,
+				utilizationModelCpu,
+				utilizationModelRam,
+				utilizationModelBw,
+				false);
+		vmId = -1;
+		accumulatedBwCost = 0.0;
+		costPerBw = 0.0;
+
+		requiredFiles = new LinkedList<String>();
+		
+		setUserId(userId);
 	}
 
 	// ////////////////////// INTERNAL CLASS ///////////////////////////////////

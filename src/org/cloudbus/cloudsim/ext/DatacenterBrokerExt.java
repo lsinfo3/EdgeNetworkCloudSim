@@ -25,10 +25,10 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.edge.util.CustomLog;
+import org.cloudbus.cloudsim.edge.vm.VMStatus;
+import org.cloudbus.cloudsim.edge.vm.VMex;
 import org.cloudbus.cloudsim.ext.service.Service;
-import org.cloudbus.cloudsim.ext.util.CustomLog;
-import org.cloudbus.cloudsim.ext.vm.VMStatus;
-import org.cloudbus.cloudsim.ext.vm.VMex;
 import org.cloudbus.cloudsim.lists.VmList;
 
 /**
@@ -196,6 +196,9 @@ public class DatacenterBrokerExt extends SimEntity {
 		case CloudSimTagsExt.BROKER_MESSAGE_RETURN:
 			processBrokerMessageReturn(ev);
 			break;
+		case CloudSimTagsExt.BROKER_DESTROY_ITSELF_NOW:
+			// do nothing
+			break;
 		// if the simulation finishes
 		case CloudSimTags.END_OF_SIMULATION:
 			shutdownEntity();
@@ -213,7 +216,7 @@ public class DatacenterBrokerExt extends SimEntity {
 	 */
 	protected void processBrokerMessageReturn(SimEvent ev){
 		// to continu...
-		Log.printLine(getName() + " Message was successfully executed by Service...");
+		Log.printLine(getName() + " Message was successfully executed by Service #" + ev.getSource());
 	}
 
 	/**
@@ -378,11 +381,15 @@ public class DatacenterBrokerExt extends SimEntity {
 
 		switch (ev.getTag()) {
 		case CloudSimTagsExt.SERVICE_CLOUDLET_DONE:
-			clearDatacenters();
-			finishExecution();
+			System.out.println(CloudSim.clock() + ": " + getName() + ": Service #" + ev.getSource()
+					+ ": all Cloudlets processed!");
+			//			d();
+//			finishExecution();
 			break;
 		case CloudSimTagsExt.SERVICE_CLOUDLET_DONE_VM:
-			clearDatacenters();
+			System.out.println(CloudSim.clock() + ": " + getName() + ": Service #" + ev.getSource() + ": almost all Cloudlets processed, but some are still waiting for their VMs to be created!");
+			
+//			clearDatacenters();
 			createVmsInDatacenter(0);
 			break;
 		case CloudSimTags.VM_DESTROY_ACK:
@@ -399,12 +406,12 @@ public class DatacenterBrokerExt extends SimEntity {
 				createVmsInDatacenter(nextDatacenterId);
 			}
 			break;
-		case CloudSimTagsExt.BROKER_DESTROY_ITSELF_NOW:
-			closeDownBroker();
-			break;
+//		case CloudSimTagsExt.BROKER_DESTROY_ITSELF_NOW:
+//			closeDownBroker();
+//			break;
 		default:
 			Log.printLine(getName() + ".processOtherEvent(): "
-					+ "Error - event unknown by this DatacenterBroker.");
+					+ "Error - event unknown by this DatacenterBroker: " + ev.getTag());
 			break;
 		}
 	}
@@ -421,12 +428,12 @@ public class DatacenterBrokerExt extends SimEntity {
 		// send as much vms as possible for this datacenter before trying the
 		// next one
 		int requestedVms = 0;
-		String datacenterName = CloudSim.getEntityName(datacenterId);
+//		String datacenterName = CloudSim.getEntityName(datacenterId);
 		for (Vm vm : getVmList()) {
 			if (!getVmsToDatacentersMap().containsKey(vm.getId())) {
 				Log.printLine(CloudSim.clock() + ": " + getName()
-						+ ": Trying to Create VM #" + vm.getId() + " in "
-						+ datacenterName);
+						+ ": Trying to Create VM #" + vm.getId() + " in Datacenter #"
+						+ datacenterId);
 				sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
 				requestedVms++;
 			}
@@ -472,7 +479,31 @@ public class DatacenterBrokerExt extends SimEntity {
 	 */
 	@Override
 	public void shutdownEntity() {
-		Log.printLine(getName() + " is shutting down...");
+		for (Vm vm : getVmList()) {
+			finilizeVM(vm);
+		}
+		clearDatacenters();
+		Log.printLine(CloudSim.clock() + ": " + getName() + " is shutting down...");
+	}
+	
+	/**
+	 * Terminates the broker, releases all its resources and state.
+	 */
+//	public void closeDownBroker() {
+//		for (Vm vm : getVmList()) {
+//			finilizeVM(vm);
+//		}
+//		clearDatacenters();
+//		finishExecution();
+//	}
+	
+	private void finilizeVM(final Vm vm) {
+		if (vm instanceof VMex) {
+			VMex vmEX = ((VMex) vm);
+			if (vmEX.getStatus() != VMStatus.TERMINATED) {
+				vmEX.setStatus(VMStatus.TERMINATED);
+			}
+		}
 	}
 
 	/*
@@ -482,7 +513,7 @@ public class DatacenterBrokerExt extends SimEntity {
 	 */
 	@Override
 	public void startEntity() {
-		Log.printLine(getName() + " is starting...");
+		Log.printLine(CloudSim.clock() + ": " + getName() + " is starting...");
 		schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST);
 	}
 
@@ -723,25 +754,9 @@ public class DatacenterBrokerExt extends SimEntity {
 		return presetEvents;
 	}
 
-	private void finilizeVM(final Vm vm) {
-		if (vm instanceof VMex) {
-			VMex vmEX = ((VMex) vm);
-			if (vmEX.getStatus() != VMStatus.TERMINATED) {
-				vmEX.setStatus(VMStatus.TERMINATED);
-			}
-		}
-	}
+	
 
-	/**
-	 * Terminates the broker, releases all its resources and state.
-	 */
-	public void closeDownBroker() {
-		for (Vm vm : getVmList()) {
-			finilizeVM(vm);
-		}
-		clearDatacenters();
-		finishExecution();
-	}
+	
 
 	/**
 	 * Returns the number of requested VM destructions.
@@ -793,10 +808,10 @@ public class DatacenterBrokerExt extends SimEntity {
 	 * Schedule an event that will be run with a given delay after the
 	 * simulation has started.
 	 * 
-	 * @param id
-	 * @param tag
-	 * @param data
-	 * @param delay
+	 * @param id target entity
+	 * @param tag Tag
+	 * @param data the data
+	 * @param delay the delay before processing this event
 	 */
 	public void presetEvent(final int id, final int tag, final Object data,
 			final double delay) {

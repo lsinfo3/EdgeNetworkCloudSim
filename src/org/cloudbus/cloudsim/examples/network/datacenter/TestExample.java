@@ -75,7 +75,7 @@ public class TestExample {
 			List<Cloudlet> newList = broker.getCloudletReceivedList();
 			printCloudletList(newList);
 			System.out.println("numberofcloudlet " + newList.size() + " Cached "
-					+ NetDatacenterBroker.cachedcloudlet + " Data transfered "
+					+ broker.cachedcloudlet + " Data transfered "
 					+ NetworkConstants.totaldatatransfer);
 
 			Log.printLine("CloudSimExample1 finished!");

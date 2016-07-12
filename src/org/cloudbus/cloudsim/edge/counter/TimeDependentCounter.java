@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ext.counter;
+package org.cloudbus.cloudsim.edge.counter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

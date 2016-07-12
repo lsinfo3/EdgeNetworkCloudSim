@@ -27,18 +27,21 @@ import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 
 /**
- * NetworkDatacenter class is a Datacenter whose hostList are virtualized and networked. It contains
- * all the information about internal network. For example, which VM is connected to Switch etc. It
- * deals with processing of VM queries (i.e., handling of VMs) instead of processing
- * Cloudlet-related queries. So, even though an AllocPolicy will be instantiated (in the init()
- * method of the superclass, it will not be used, as processing of cloudlets are handled by the
- * CloudletScheduler and processing of VirtualMachines are handled by the VmAllocationPolicy.
+ * NetworkDatacenter class is a Datacenter whose hostList are virtualized and
+ * networked. It contains all the information about internal network. For
+ * example, which VM is connected to Switch etc. It deals with processing of VM
+ * queries (i.e., handling of VMs) instead of processing Cloudlet-related
+ * queries. So, even though an AllocPolicy will be instantiated (in the init()
+ * method of the superclass, it will not be used, as processing of cloudlets are
+ * handled by the CloudletScheduler and processing of VirtualMachines are
+ * handled by the VmAllocationPolicy.
  * 
  * Please refer to following publication for more details:
  * 
- * Saurabh Kumar Garg and Rajkumar Buyya, NetworkCloudSim: Modelling Parallel Applications in Cloud
- * Simulations, Proceedings of the 4th IEEE/ACM International Conference on Utility and Cloud
- * Computing (UCC 2011, IEEE CS Press, USA), Melbourne, Australia, December 5-7, 2011.
+ * Saurabh Kumar Garg and Rajkumar Buyya, NetworkCloudSim: Modelling Parallel
+ * Applications in Cloud Simulations, Proceedings of the 4th IEEE/ACM
+ * International Conference on Utility and Cloud Computing (UCC 2011, IEEE CS
+ * Press, USA), Melbourne, Australia, December 5-7, 2011.
  * 
  * @author Saurabh Kumar Garg
  * @since CloudSim Toolkit 3.0
@@ -48,31 +51,35 @@ public class NetworkDatacenter extends Datacenter {
 	/**
 	 * Allocates a new NetworkDatacenter object.
 	 * 
-	 * @param name the name to be associated with this entity (as required by Sim_entity class from
-	 *        simjava package)
-	 * @param characteristics an object of DatacenterCharacteristics
-	 * @param storageList a LinkedList of storage elements, for data simulation
-	 * @param vmAllocationPolicy the vmAllocationPolicy
+	 * @param name
+	 *            the name to be associated with this entity (as required by
+	 *            Sim_entity class from simjava package)
+	 * @param characteristics
+	 *            an object of DatacenterCharacteristics
+	 * @param storageList
+	 *            a LinkedList of storage elements, for data simulation
+	 * @param vmAllocationPolicy
+	 *            the vmAllocationPolicy
 	 * 
-	 * @throws Exception This happens when one of the following scenarios occur:
-	 *         <ul>
-	 *         <li>creating this entity before initializing CloudSim package
-	 *         <li>this entity name is <tt>null</tt> or empty
-	 *         <li>this entity has <tt>zero</tt> number of PEs (Processing Elements). <br>
-	 *         No PEs mean the Cloudlets can't be processed. A CloudResource must contain one or
-	 *         more Machines. A Machine must contain one or more PEs.
-	 *         </ul>
+	 * @throws Exception
+	 *             This happens when one of the following scenarios occur:
+	 *             <ul>
+	 *             <li>creating this entity before initializing CloudSim package
+	 *             <li>this entity name is <tt>null</tt> or empty
+	 *             <li>this entity has <tt>zero</tt> number of PEs (Processing
+	 *             Elements). <br>
+	 *             No PEs mean the Cloudlets can't be processed. A CloudResource
+	 *             must contain one or more Machines. A Machine must contain one
+	 *             or more PEs.
+	 *             </ul>
 	 * 
 	 * @pre name != null
 	 * @pre resource != null
 	 * @post $none
 	 */
-	public NetworkDatacenter(
-			String name,
-			DatacenterCharacteristics characteristics,
-			VmAllocationPolicy vmAllocationPolicy,
-			List<Storage> storageList,
-			double schedulingInterval) throws Exception {
+	public NetworkDatacenter(String name, DatacenterCharacteristics characteristics,
+			VmAllocationPolicy vmAllocationPolicy, List<Storage> storageList, double schedulingInterval)
+			throws Exception {
 		super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
 		VmToSwitchid = new HashMap<Integer, Integer>();
 		HostToSwitchid = new HashMap<Integer, Integer>();
@@ -89,8 +96,8 @@ public class NetworkDatacenter extends Datacenter {
 	public Map<Integer, Integer> VmtoHostlist;
 
 	/**
-	 * Get list of all EdgeSwitches in the Datacenter network One can design similar functions for
-	 * other type of switches.
+	 * Get list of all EdgeSwitches in the Datacenter network One can design
+	 * similar functions for other type of switches.
 	 * 
 	 */
 	public Map<Integer, Switch> getEdgeSwitch() {
@@ -105,8 +112,8 @@ public class NetworkDatacenter extends Datacenter {
 	}
 
 	/**
-	 * Create the VM within the NetworkDatacenter. It can be directly accessed by Datacenter Broker
-	 * which manage allocation of Cloudlets.
+	 * Create the VM within the NetworkDatacenter. It can be directly accessed
+	 * by Datacenter Broker which manage allocation of Cloudlets.
 	 * 
 	 * 
 	 */
@@ -117,12 +124,13 @@ public class NetworkDatacenter extends Datacenter {
 		if (result) {
 			VmToSwitchid.put(vm.getId(), ((NetworkHost) vm.getHost()).sw.getId());
 			VmtoHostlist.put(vm.getId(), vm.getHost().getId());
-			System.out.println(vm.getId() + " VM is created on " + vm.getHost().getId());
+			System.out.println("Datacenter ID: " + getId() + " - VM Id: " + vm.getUid() + " is created on Host Id "
+					+ vm.getHost().getId() + " owned by: " + vm.getUserId());
 
 			getVmList().add(vm);
 
-			vm.updateVmProcessing(CloudSim.clock(), getVmAllocationPolicy().getHost(vm).getVmScheduler()
-					.getAllocatedMipsForVm(vm));
+			vm.updateVmProcessing(CloudSim.clock(),
+					getVmAllocationPolicy().getHost(vm).getVmScheduler().getAllocatedMipsForVm(vm));
 		}
 		return result;
 	}
@@ -130,8 +138,10 @@ public class NetworkDatacenter extends Datacenter {
 	/**
 	 * Processes a Cloudlet submission.
 	 * 
-	 * @param ev a SimEvent object
-	 * @param ack an acknowledgement
+	 * @param ev
+	 *            a SimEvent object
+	 * @param ack
+	 *            an acknowledgement
 	 * 
 	 * @pre ev != null
 	 * @post $none
@@ -174,8 +184,8 @@ public class NetworkDatacenter extends Datacenter {
 			}
 
 			// process this Cloudlet to this CloudResource
-			cl.setResourceParameter(getId(), getCharacteristics().getCostPerSecond(), getCharacteristics()
-					.getCostPerBw());
+			cl.setResourceParameter(getId(), getCharacteristics().getCostPerSecond(),
+					getCharacteristics().getCostPerBw());
 
 			int userId = cl.getUserId();
 			int vmId = cl.getVmId();

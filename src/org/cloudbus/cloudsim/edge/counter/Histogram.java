@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ext.counter;
+package org.cloudbus.cloudsim.edge.counter;
 
 import java.io.File;
 import java.io.FileOutputStream;

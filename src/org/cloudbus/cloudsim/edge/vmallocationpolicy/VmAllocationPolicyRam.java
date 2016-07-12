@@ -6,33 +6,37 @@
  * Copyright (c) 2009-2012, The University of Melbourne, Australia
  */
 
-package org.cloudbus.cloudsim;
+package org.cloudbus.cloudsim.edge.vmallocationpolicy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudbus.cloudsim.Host;
+import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.core.CloudSim;
 
 /**
  * VmAllocationPolicySimple is an VmAllocationPolicy that chooses, as the host for a VM, the host
- * with less PEs in use.
+ * with less RAM in use.
  * 
  * @author Rodrigo N. Calheiros
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-public class VmAllocationPolicySimple extends VmAllocationPolicy {
+public class VmAllocationPolicyRam extends VmAllocationPolicy {
 
 	/** The vm table. */
 	private Map<String, Host> vmTable;
 
-	/** The used pes. */
-	private Map<String, Integer> usedPes;
+	/** The used ram. */
+	private Map<String, Integer> usedRam;
 
-	/** The free pes. */
-	private List<Integer> freePes;
+	/** The free ram. */
+	private List<Integer> freeRam;
 
 	/**
 	 * Creates the new VmAllocationPolicySimple object.
@@ -41,12 +45,12 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	 * @pre $none
 	 * @post $none
 	 */
-	public VmAllocationPolicySimple(List<? extends Host> list) {
+	public VmAllocationPolicyRam(List<? extends Host> list) {
 		super(list);
 
 		setFreeRam(new ArrayList<Integer>());
 		for (Host host : getHostList()) {
-			getFreeRam().add(host.getNumberOfPes());
+			getFreeRam().add(host.getRam());
 
 		}
 
@@ -64,12 +68,12 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	 */
 	@Override
 	public boolean allocateHostForVm(Vm vm) {
-		int requiredPes = vm.getNumberOfPes();
+		int requiredRam = vm.getRam();
 		boolean result = false;
 		int tries = 0;
-		List<Integer> freePesTmp = new ArrayList<Integer>();
-		for (Integer freePes : getFreeRam()) {
-			freePesTmp.add(freePes);
+		List<Integer> freeRamTmp = new ArrayList<Integer>();
+		for (Integer freeRam : getFreeRam()) {
+			freeRamTmp.add(freeRam);
 		}
 
 		if (!getVmTable().containsKey(vm.getUid())) { // if this vm was not created
@@ -77,10 +81,10 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 				int moreFree = Integer.MIN_VALUE;
 				int idx = -1;
 
-				// we want the host with less pes in use
-				for (int i = 0; i < freePesTmp.size(); i++) {
-					if (freePesTmp.get(i) > moreFree) {
-						moreFree = freePesTmp.get(i);
+				// we want the host with less ram in use
+				for (int i = 0; i < freeRamTmp.size(); i++) {
+					if (freeRamTmp.get(i) > moreFree) {
+						moreFree = freeRamTmp.get(i);
 						idx = i;
 					}
 				}
@@ -90,12 +94,12 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 
 				if (result) { // if vm were succesfully created in the host
 					getVmTable().put(vm.getUid(), host);
-					getUsedRam().put(vm.getUid(), requiredPes);
-					getFreeRam().set(idx, getFreeRam().get(idx) - requiredPes);
+					getUsedRam().put(vm.getUid(), requiredRam);
+					getFreeRam().set(idx, getFreeRam().get(idx) - requiredRam);
 					result = true;
 					break;
 				} else {
-					freePesTmp.set(idx, Integer.MIN_VALUE);
+					freeRamTmp.set(idx, Integer.MIN_VALUE);
 				}
 				tries++;
 			} while (!result && tries < getFreeRam().size());
@@ -116,10 +120,10 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	public void deallocateHostForVm(Vm vm) {
 		Host host = getVmTable().remove(vm.getUid());
 		int idx = getHostList().indexOf(host);
-		int pes = getUsedRam().remove(vm.getUid());
+		int ram = getUsedRam().remove(vm.getUid());
 		if (host != null) {
 			host.vmDestroy(vm);
-			getFreeRam().set(idx, getFreeRam().get(idx) + pes);
+			getFreeRam().set(idx, getFreeRam().get(idx) + ram);
 		}
 	}
 
@@ -169,39 +173,39 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	}
 
 	/**
-	 * Gets the used pes.
+	 * Gets the used ram.
 	 * 
-	 * @return the used pes
+	 * @return the used ram
 	 */
 	protected Map<String, Integer> getUsedRam() {
-		return usedPes;
+		return usedRam;
 	}
 
 	/**
-	 * Sets the used pes.
+	 * Sets the used ram.
 	 * 
-	 * @param usedPes the used pes
+	 * @param usedRam the used ram
 	 */
-	protected void setUsedRam(Map<String, Integer> usedPes) {
-		this.usedPes = usedPes;
+	protected void setUsedRam(Map<String, Integer> usedRam) {
+		this.usedRam = usedRam;
 	}
 
 	/**
-	 * Gets the free pes.
+	 * Gets the free ram.
 	 * 
-	 * @return the free pes
+	 * @return the free ram
 	 */
 	protected List<Integer> getFreeRam() {
-		return freePes;
+		return freeRam;
 	}
 
 	/**
-	 * Sets the free pes.
+	 * Sets the free ram.
 	 * 
-	 * @param freePes the new free pes
+	 * @param freeRam the new free ram
 	 */
-	protected void setFreeRam(List<Integer> freePes) {
-		this.freePes = freePes;
+	protected void setFreeRam(List<Integer> freeRam) {
+		this.freeRam = freeRam;
 	}
 
 	/*
@@ -224,10 +228,10 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 		if (host.vmCreate(vm)) { // if vm has been succesfully created in the host
 			getVmTable().put(vm.getUid(), host);
 
-			int requiredPes = vm.getNumberOfPes();
+			int requiredRam = vm.getRam();
 			int idx = getHostList().indexOf(host);
-			getUsedRam().put(vm.getUid(), requiredPes);
-			getFreeRam().set(idx, getFreeRam().get(idx) - requiredPes);
+			getUsedRam().put(vm.getUid(), requiredRam);
+			getFreeRam().set(idx, getFreeRam().get(idx) - requiredRam);
 
 			Log.formatLine(
 					"%.2f: VM #" + vm.getId() + " has been allocated to the host #" + host.getId(),

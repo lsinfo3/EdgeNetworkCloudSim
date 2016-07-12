@@ -6,33 +6,37 @@
  * Copyright (c) 2009-2012, The University of Melbourne, Australia
  */
 
-package org.cloudbus.cloudsim;
+package org.cloudbus.cloudsim.edge.vmallocationpolicy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudbus.cloudsim.Host;
+import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.core.CloudSim;
 
 /**
  * VmAllocationPolicySimple is an VmAllocationPolicy that chooses, as the host for a VM, the host
- * with less PEs in use.
+ * with less bw in use.
  * 
  * @author Rodrigo N. Calheiros
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-public class VmAllocationPolicySimple extends VmAllocationPolicy {
+public class VmAllocationPolicyBw extends VmAllocationPolicy {
 
 	/** The vm table. */
 	private Map<String, Host> vmTable;
 
-	/** The used pes. */
-	private Map<String, Integer> usedPes;
+	/** The used bw. */
+	private Map<String, Long> usedBw;
 
-	/** The free pes. */
-	private List<Integer> freePes;
+	/** The free bw. */
+	private List<Long> freeBw;
 
 	/**
 	 * Creates the new VmAllocationPolicySimple object.
@@ -41,17 +45,17 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	 * @pre $none
 	 * @post $none
 	 */
-	public VmAllocationPolicySimple(List<? extends Host> list) {
+	public VmAllocationPolicyBw(List<? extends Host> list) {
 		super(list);
 
-		setFreeRam(new ArrayList<Integer>());
+		setFreeBw(new ArrayList<Long>());
 		for (Host host : getHostList()) {
-			getFreeRam().add(host.getNumberOfPes());
+			getFreeBw().add(host.getBw());
 
 		}
 
 		setVmTable(new HashMap<String, Host>());
-		setUsedRam(new HashMap<String, Integer>());
+		setUsedBw(new HashMap<String, Long>());
 	}
 
 	/**
@@ -64,23 +68,23 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	 */
 	@Override
 	public boolean allocateHostForVm(Vm vm) {
-		int requiredPes = vm.getNumberOfPes();
+		long requiredBw = vm.getSize();
 		boolean result = false;
 		int tries = 0;
-		List<Integer> freePesTmp = new ArrayList<Integer>();
-		for (Integer freePes : getFreeRam()) {
-			freePesTmp.add(freePes);
+		List<Long> freeBwTmp = new ArrayList<Long>();
+		for (long freeBw : getFreeBw()) {
+			freeBwTmp.add(freeBw);
 		}
 
 		if (!getVmTable().containsKey(vm.getUid())) { // if this vm was not created
 			do {// we still trying until we find a host or until we try all of them
-				int moreFree = Integer.MIN_VALUE;
+				long moreFree = Long.MIN_VALUE;
 				int idx = -1;
 
-				// we want the host with less pes in use
-				for (int i = 0; i < freePesTmp.size(); i++) {
-					if (freePesTmp.get(i) > moreFree) {
-						moreFree = freePesTmp.get(i);
+				// we want the host with less bw in use
+				for (int i = 0; i < freeBwTmp.size(); i++) {
+					if (freeBwTmp.get(i) > moreFree) {
+						moreFree = freeBwTmp.get(i);
 						idx = i;
 					}
 				}
@@ -90,15 +94,15 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 
 				if (result) { // if vm were succesfully created in the host
 					getVmTable().put(vm.getUid(), host);
-					getUsedRam().put(vm.getUid(), requiredPes);
-					getFreeRam().set(idx, getFreeRam().get(idx) - requiredPes);
+					getUsedBw().put(vm.getUid(), requiredBw);
+					getFreeBw().set(idx, getFreeBw().get(idx) - requiredBw);
 					result = true;
 					break;
 				} else {
-					freePesTmp.set(idx, Integer.MIN_VALUE);
+					freeBwTmp.set(idx, Long.MIN_VALUE);
 				}
 				tries++;
-			} while (!result && tries < getFreeRam().size());
+			} while (!result && tries < getFreeBw().size());
 
 		}
 
@@ -116,10 +120,13 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	public void deallocateHostForVm(Vm vm) {
 		Host host = getVmTable().remove(vm.getUid());
 		int idx = getHostList().indexOf(host);
-		int pes = getUsedRam().remove(vm.getUid());
+		
+		
+		
+		long bw = getUsedBw().remove(vm.getUid());
 		if (host != null) {
 			host.vmDestroy(vm);
-			getFreeRam().set(idx, getFreeRam().get(idx) + pes);
+			getFreeBw().set(idx, getFreeBw().get(idx) + bw);
 		}
 	}
 
@@ -169,39 +176,39 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	}
 
 	/**
-	 * Gets the used pes.
+	 * Gets the used bw.
 	 * 
-	 * @return the used pes
+	 * @return the used bw
 	 */
-	protected Map<String, Integer> getUsedRam() {
-		return usedPes;
+	protected Map<String, Long> getUsedBw() {
+		return usedBw;
 	}
 
 	/**
-	 * Sets the used pes.
+	 * Sets the used bw.
 	 * 
-	 * @param usedPes the used pes
+	 * @param usedBw the used bw
 	 */
-	protected void setUsedRam(Map<String, Integer> usedPes) {
-		this.usedPes = usedPes;
+	protected void setUsedBw(Map<String, Long> usedBw) {
+		this.usedBw = usedBw;
 	}
 
 	/**
-	 * Gets the free pes.
+	 * Gets the free bw.
 	 * 
-	 * @return the free pes
+	 * @return the free bw
 	 */
-	protected List<Integer> getFreeRam() {
-		return freePes;
+	protected List<Long> getFreeBw() {
+		return freeBw;
 	}
 
 	/**
-	 * Sets the free pes.
+	 * Sets the free bw.
 	 * 
-	 * @param freePes the new free pes
+	 * @param freeBw the new free bw
 	 */
-	protected void setFreeRam(List<Integer> freePes) {
-		this.freePes = freePes;
+	protected void setFreeBw(List<Long> freeBw) {
+		this.freeBw = freeBw;
 	}
 
 	/*
@@ -224,10 +231,10 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 		if (host.vmCreate(vm)) { // if vm has been succesfully created in the host
 			getVmTable().put(vm.getUid(), host);
 
-			int requiredPes = vm.getNumberOfPes();
+			long requiredBw = vm.getSize();
 			int idx = getHostList().indexOf(host);
-			getUsedRam().put(vm.getUid(), requiredPes);
-			getFreeRam().set(idx, getFreeRam().get(idx) - requiredPes);
+			getUsedBw().put(vm.getUid(), requiredBw);
+			getFreeBw().set(idx, getFreeBw().get(idx) - requiredBw);
 
 			Log.formatLine(
 					"%.2f: VM #" + vm.getId() + " has been allocated to the host #" + host.getId(),

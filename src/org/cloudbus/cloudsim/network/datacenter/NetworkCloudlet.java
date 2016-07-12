@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.UtilizationModel;
+import org.cloudbus.cloudsim.edge.util.Id;
 
 /**
  * NetworkCloudlet class extends Cloudlet to support simulation of complex applications. Each such
@@ -54,6 +55,27 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 		currStagenum = -1;
 		this.memory = memory;
 		stages = new ArrayList<TaskStage>();
+	}
+	
+	public NetworkCloudlet(
+			long cloudletLength,
+			int pesNumber,
+			long cloudletFileSize,
+			long cloudletOutputSize,
+			long memory,
+			UtilizationModel utilizationModelCpu,
+			UtilizationModel utilizationModelRam,
+			UtilizationModel utilizationModelBw) {
+		this(
+				Id.pollId(NetworkCloudlet.class),
+				cloudletLength,
+				pesNumber,
+				cloudletFileSize,
+				cloudletOutputSize,
+				memory,
+				utilizationModelCpu,
+				utilizationModelRam,
+				utilizationModelBw);
 	}
 
 	public double submittime; // time when cloudlet will be submitted

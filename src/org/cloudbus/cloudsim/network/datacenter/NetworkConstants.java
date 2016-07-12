@@ -17,6 +17,9 @@ public class NetworkConstants {
 
 	public static int currentCloudletId = 0;
 	public static int currentAppId = 0;
+	public static int currentHostId = 0;
+	public static int currentPeId = 0;
+	public static int currentVMId = 0;
 
 	// stage type
 	public static final int EXECUTION = 0; 

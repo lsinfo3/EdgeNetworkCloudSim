@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ext.util;
+package org.cloudbus.cloudsim.edge.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.logging.ErrorManager;

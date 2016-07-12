@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.edge.util.Id;
 
 /**
  * Cloudlet is an extension to the cloudlet. It stores, despite all the information encapsulated in
@@ -148,6 +149,10 @@ public class Cloudlet {
 	// Data cloudlet
 	/** The required files. */
 	private List<String> requiredFiles = null;   // list of required filenames
+	/**
+	 * the Id of the Service which owns this Cloudlet if it was started by a Service.
+	 */
+	private int serviceId = -1;
 
 	/**
 	 * Allocates a new Cloudlet object. The Cloudlet length, input and output file sizes should be
@@ -358,6 +363,57 @@ public class Cloudlet {
 		setUtilizationModelCpu(utilizationModelCpu);
 		setUtilizationModelRam(utilizationModelRam);
 		setUtilizationModelBw(utilizationModelBw);
+	}
+	
+	/**
+	 * Allocates a new Cloudlet object. The Cloudlet length, input and output file sizes should be
+	 * greater than or equal to 1. By default this constructor sets the history of this object.
+	 * The Id of this Cloudlet Object is automatically generated {@link Id} class. 
+	 * 
+	 * @param cloudletLength the length or size (in MI) of this cloudlet to be executed in a
+	 *            PowerDatacenter
+	 * @param cloudletFileSize the file size (in byte) of this cloudlet <tt>BEFORE</tt> submitting
+	 *            to a PowerDatacenter
+	 * @param cloudletOutputSize the file size (in byte) of this cloudlet <tt>AFTER</tt> finish
+	 *            executing by a PowerDatacenter
+	 * @param pesNumber the pes number
+	 * @param utilizationModelCpu the utilization model cpu
+	 * @param utilizationModelRam the utilization model ram
+	 * @param utilizationModelBw the utilization model bw
+	 * @pre cloudletID >= 0
+	 * @pre cloudletLength >= 0.0
+	 * @pre cloudletFileSize >= 1
+	 * @pre cloudletOutputSize >= 1
+	 * @post $none
+	 */
+	public Cloudlet(
+			final long cloudletLength,
+			final int pesNumber,
+			final long cloudletFileSize,
+			final long cloudletOutputSize,
+			final UtilizationModel utilizationModelCpu,
+			final UtilizationModel utilizationModelRam,
+			final UtilizationModel utilizationModelBw,
+			final int userId,
+			final int serviceId) {
+		this(
+				Id.pollId(Cloudlet.class),
+				cloudletLength,
+				pesNumber,
+				cloudletFileSize,
+				cloudletOutputSize,
+				utilizationModelCpu,
+				utilizationModelRam,
+				utilizationModelBw,
+				false);
+		vmId = -1;
+		accumulatedBwCost = 0.0;
+		costPerBw = 0.0;
+
+		requiredFiles = new LinkedList<String>();
+		
+		setUserId(userId);
+		setServiceId(serviceId);
 	}
 
 	// ////////////////////// INTERNAL CLASS ///////////////////////////////////
@@ -661,6 +717,21 @@ public class Cloudlet {
 			write("Assigns the Cloudlet to " + CloudSim.getEntityName(id) + " (ID #" + id + ")");
 		}
 	}
+	
+	/**
+	 * Sets the ID of the Service which owns Cloudlet. It is <tt>VERY</tt> important to set the Service ID,
+	 * when the cloudlet is started by a Service.
+	 * 
+	 * @param id the user ID
+	 * @pre id >= 0
+	 * @post $none
+	 */
+	public void setServiceId(final int id) {
+		serviceId = id;
+		if (record) {
+			write("Assigns the Cloudlet to Service" + CloudSim.getEntityName(id) + " (ID #" + id + ")");
+		}
+	}
 
 	/**
 	 * Gets the user or owner ID of this Cloudlet.
@@ -672,6 +743,19 @@ public class Cloudlet {
 	public int getUserId() {
 		return userId;
 	}
+	
+	/**
+	 * Gets the ID of the Service which owns this Cloudlet,
+	 * in case it was started by a Service.
+	 * 
+	 * @return the user ID or <tt>-1</tt> if the user ID has not been set before
+	 * @pre $none
+	 * @post $result >= -1
+	 */
+	public int getServiceId() {
+		return serviceId;
+	}
+	
 
 	/**
 	 * Gets the latest resource ID that processes this Cloudlet.

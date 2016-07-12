@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ext.vm;
+package org.cloudbus.cloudsim.edge.vm;
 
 import java.util.Arrays;
 import java.util.HashSet;
