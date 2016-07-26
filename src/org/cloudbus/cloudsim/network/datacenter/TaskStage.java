@@ -26,27 +26,67 @@ public class TaskStage {
 
 	public TaskStage(int type, double data, double time, double stageid, long memory, int peer, int vpeer) {
 		super();
-		this.type = type;
-		this.data = data;
-		this.time = time;
+		this.setType(type);
+		this.setData(data);
+		this.setTime(time);
 		this.stageid = stageid;
 		this.memory = memory;
+		this.setPeer(peer);
+		this.setVpeer(vpeer);
+	}
+
+	public double getTime() {
+		return time;
+	}
+
+	public void setTime(double time) {
+		this.time = time;
+	}
+
+	public int getPeer() {
+		return peer;
+	}
+
+	public void setPeer(int peer) {
 		this.peer = peer;
+	}
+
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
+	}
+
+	public int getVpeer() {
+		return vpeer;
+	}
+
+	public void setVpeer(int vpeer) {
 		this.vpeer = vpeer;
 	}
 
-	int vpeer;
+	public double getData() {
+		return data;
+	}
 
-	int type;// execution, recv, send,
+	public void setData(double data) {
+		this.data = data;
+	}
 
-	double data;// data generated or send or recv
+	private int vpeer;
 
-	double time;// execution time for this stage
+	private int type;// execution, recv, send,
+
+	private double data;// data generated or send or recv
+
+	private double time;// execution time for this stage
 
 	double stageid;
 
 	long memory;
 
-	int peer;// from whom data needed to be recieved or send
+	private int peer;// from whom data needed to be recieved or send (VM)
 
 }

@@ -89,8 +89,8 @@ public class AppCloudlet {
 			// setting the owner of these Cloudlets
 			NetworkConstants.currentCloudletId++;
 			cl.setUserId(userId);
-			cl.submittime = CloudSim.clock();
-			cl.currStagenum = -1;
+			cl.setSubmittime(CloudSim.clock());
+			cl.setCurrStagenum(-1);
 			clist.add(cl);
 
 		}

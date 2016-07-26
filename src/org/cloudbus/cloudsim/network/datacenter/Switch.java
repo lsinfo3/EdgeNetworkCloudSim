@@ -81,12 +81,11 @@ public class Switch extends SimEntity {
 	@Override
 	public void startEntity() {
 		Log.printLine(getName() + " is starting...");
-		schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST);
 	}
 
 	@Override
 	public void processEvent(SimEvent ev) {
-		// Log.printLine(CloudSim.clock()+"[Broker]: event received:"+ev.getTag());
+//		 Log.printLine(CloudSim.clock()+" [DEBUG]:[Switch]: event received:"+ev.getTag());
 		switch (ev.getTag()) {
 		// Resource characteristics request
 			case CloudSimTags.Network_Event_UP:
@@ -130,7 +129,7 @@ public class Switch extends SimEntity {
 		// add packet in the host list
 		// int src=ev.getSource();
 		NetworkPacket hspkt = (NetworkPacket) ev.getData();
-		int recvVMid = hspkt.pkt.reciever;
+		int recvVMid = hspkt.pkt.getReciever();
 		CloudSim.cancelAll(getId(), new PredicateType(CloudSimTags.Network_Event_send));
 		schedule(getId(), latency, CloudSimTags.Network_Event_send);
 		if (level == NetworkConstants.EDGE_LEVEL) {
@@ -168,7 +167,7 @@ public class Switch extends SimEntity {
 		//
 		// int src=ev.getSource();
 		NetworkPacket hspkt = (NetworkPacket) ev.getData();
-		int recvVMid = hspkt.pkt.reciever;
+		int recvVMid = hspkt.pkt.getReciever();
 		CloudSim.cancelAll(getId(), new PredicateType(CloudSimTags.Network_Event_send));
 		schedule(getId(), switching_delay, CloudSimTags.Network_Event_send);
 		if (level == NetworkConstants.EDGE_LEVEL) {
@@ -274,7 +273,7 @@ public class Switch extends SimEntity {
 	}
 
 	private void processOtherEvent(SimEvent ev) {
-
+		Log.printLine(CloudSim.clock()+" [DEBUG]:[Switch]: do not know this event #"+ev.getTag());
 	}
 
 	protected void processpacketforward(SimEvent ev) {

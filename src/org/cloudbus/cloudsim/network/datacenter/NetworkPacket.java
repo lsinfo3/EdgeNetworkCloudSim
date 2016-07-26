@@ -29,9 +29,17 @@ public class NetworkPacket {
 		sendervmid = vmid;
 		this.cloudletid = cloudletid;
 		senderhostid = id;
-		stime = pkt.sendtime;
-		recievervmid = pkt2.reciever;
+		stime = pkt.getSendtime();
+		setRecievervmid(pkt2.getReciever());
 
+	}
+
+	public int getRecievervmid() {
+		return recievervmid;
+	}
+
+	public void setRecievervmid(int recievervmid) {
+		this.recievervmid = recievervmid;
 	}
 
 	HostPacket pkt;
@@ -42,11 +50,111 @@ public class NetworkPacket {
 
 	int sendervmid;
 
-	int recievervmid;
+	private int recievervmid;
 
 	int cloudletid;
 
 	double stime;// time when sent
 
 	double rtime;// time when received
+
+	/**
+	 * @return the pkt
+	 */
+	public HostPacket getPkt() {
+		return pkt;
+	}
+
+	/**
+	 * @param pkt the pkt to set
+	 */
+	public void setPkt(HostPacket pkt) {
+		this.pkt = pkt;
+	}
+
+	/**
+	 * @return the senderhostid
+	 */
+	public int getSenderhostid() {
+		return senderhostid;
+	}
+
+	/**
+	 * @param senderhostid the senderhostid to set
+	 */
+	public void setSenderhostid(int senderhostid) {
+		this.senderhostid = senderhostid;
+	}
+
+	/**
+	 * @return the recieverhostid
+	 */
+	public int getRecieverhostid() {
+		return recieverhostid;
+	}
+
+	/**
+	 * @param recieverhostid the recieverhostid to set
+	 */
+	public void setRecieverhostid(int recieverhostid) {
+		this.recieverhostid = recieverhostid;
+	}
+
+	/**
+	 * @return the sendervmid
+	 */
+	public int getSendervmid() {
+		return sendervmid;
+	}
+
+	/**
+	 * @param sendervmid the sendervmid to set
+	 */
+	public void setSendervmid(int sendervmid) {
+		this.sendervmid = sendervmid;
+	}
+
+	/**
+	 * @return the cloudletid
+	 */
+	public int getCloudletid() {
+		return cloudletid;
+	}
+
+	/**
+	 * @param cloudletid the cloudletid to set
+	 */
+	public void setCloudletid(int cloudletid) {
+		this.cloudletid = cloudletid;
+	}
+
+	/**
+	 * @return the stime
+	 */
+	public double getStime() {
+		return stime;
+	}
+
+	/**
+	 * @param stime the stime to set
+	 */
+	public void setStime(double stime) {
+		this.stime = stime;
+	}
+
+	/**
+	 * @return the rtime
+	 */
+	public double getRtime() {
+		return rtime;
+	}
+
+	/**
+	 * @param rtime the rtime to set
+	 */
+	public void setRtime(double rtime) {
+		this.rtime = rtime;
+	}
+	
+	
 }

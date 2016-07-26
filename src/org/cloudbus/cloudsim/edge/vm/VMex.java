@@ -1,5 +1,6 @@
 package org.cloudbus.cloudsim.edge.vm;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Objects;
 
@@ -7,6 +8,8 @@ import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.edge.util.Id;
+import org.cloudbus.cloudsim.network.datacenter.HostPacket;
+import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
 
 /**
  * An extension of the base cloudsim VM, adding information about:
@@ -26,6 +29,25 @@ public class VMex extends Vm {
     private double submissionTime;
     private double startTime;
     private double endTime;
+    
+    ///// NetworkCloudlet Var ////
+    public ArrayList<NetworkCloudlet> cloudletlist;
+    
+    int type;
+
+	public ArrayList<HostPacket> recvPktlist;
+
+	public double memory;
+
+	public boolean flagfree;// if true it is free
+
+	public double finishtime;
+	/// NetworkCloudlet Var ////
+	
+	public boolean isFree() {
+		return flagfree;
+	}
+	
 
     /**
      * Constr.
@@ -68,6 +90,7 @@ public class VMex extends Vm {
         super(Id.pollId(Vm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
         this.name = name;
         this.metadata = metadata;
+        cloudletlist = new ArrayList<NetworkCloudlet>();
     }
 
     // Unfortunately the super class already has a boolean property if the VM is

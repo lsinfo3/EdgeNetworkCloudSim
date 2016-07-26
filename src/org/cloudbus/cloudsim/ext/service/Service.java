@@ -267,6 +267,13 @@ public abstract class Service extends SimEntity {
 	 */
 	@Override
 	public void shutdownEntity() {
+		System.out.println(cloudletsSubmitted);
+		if ((getCloudletList().size() > 0 && cloudletsSubmitted > 0)) {
+			System.out.println(CloudSim.clock() + ": [DEBUG]: " + cloudletsSubmitted + " Cloudlet submitted und "
+					+ getCloudletReceivedList().size() + " Cloudlet received");
+//			send(getId(), 100.0, CloudSimTags.END_OF_SIMULATION);
+
+		}
 		Log.printLine(CloudSim.clock() + ": " + getName() + " is shutting down...");
 
 	}
@@ -448,6 +455,7 @@ public abstract class Service extends SimEntity {
 	 */
 	protected void processCloudletReturn(SimEvent ev) {
 		Cloudlet cloudlet = (Cloudlet) ev.getData();
+//		int clId = cloudlet.getCloudletId();
 		getCloudletReceivedList().add(cloudlet);
 		Log.printLine(CloudSim.clock() + ": " + getName() + ": Cloudlet " + cloudlet.getCloudletId() + " received");
 		cloudletsSubmitted--;
@@ -575,10 +583,14 @@ public abstract class Service extends SimEntity {
 	protected void generateCloudlets() {
 		// TODO Auto-generated method stub
 		List<Cloudlet> cList = new ArrayList<Cloudlet>();
-		for (int i = 0; i < getCloudletNum(); i++) {
+		// for (int i = 0; i < getCloudletNum(); i++) {
+		for (int i = 0; i < 3; i++) {
 			cList.add(createCloudlet());
 		}
 		setCloudletList(cList);
+		if (this instanceof EdgeService) {
+			((EdgeService) this).createStages();
+		}
 		cloudletGenerated = true;
 
 	}

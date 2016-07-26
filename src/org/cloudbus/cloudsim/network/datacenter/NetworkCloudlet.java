@@ -30,7 +30,7 @@ import org.cloudbus.cloudsim.edge.util.Id;
  */
 public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 
-	long memory;
+	private long memory;
 
 	public NetworkCloudlet(
 			int cloudletId,
@@ -53,7 +53,7 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 				utilizationModelBw);
 
 		currStagenum = -1;
-		this.memory = memory;
+		this.setMemory(memory);
 		stages = new ArrayList<TaskStage>();
 	}
 	
@@ -77,28 +77,55 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 				utilizationModelRam,
 				utilizationModelBw);
 	}
+	
+	public NetworkCloudlet(
+			long cloudletLength,
+			int pesNumber,
+			long cloudletFileSize,
+			long cloudletOutputSize,
+			long memory,
+			UtilizationModel utilizationModelCpu,
+			UtilizationModel utilizationModelRam,
+			UtilizationModel utilizationModelBw,
+			int userId,
+			int serviceId) {
+		super(
+				cloudletLength,
+				pesNumber,
+				cloudletFileSize,
+				cloudletOutputSize,
+				utilizationModelCpu,
+				utilizationModelRam,
+				utilizationModelBw,
+				userId,
+				serviceId);
+		
+		currStagenum = -1;
+		this.setMemory(memory);
+		stages = new ArrayList<TaskStage>();
+	}
 
-	public double submittime; // time when cloudlet will be submitted
+	private double submittime; // time when cloudlet will be submitted
 
-	public double finishtime; // time when cloudlet finish execution
+	private double finishtime; // time when cloudlet finish execution
 
-	public double exetime; // execution time for cloudlet
+	private double exetime; // execution time for cloudlet
 
-	public double numStage;// number of stages in cloudlet
+	private double numStage;// number of stages in cloudlet
 
-	public int currStagenum; // current stage of cloudlet execution
+	private int currStagenum; // current stage of cloudlet execution
 
-	public double timetostartStage;
+	private double timetostartStage;
 
-	public double timespentInStage; // how much time spent in particular stage
+	private double timespentInStage; // how much time spent in particular stage
 
-	public Map<Double, HostPacket> timeCommunicate;
+	private Map<Double, HostPacket> timeCommunicate;
 
-	public ArrayList<TaskStage> stages; // all stages which cloudlet execution
+	private ArrayList<TaskStage> stages; // all stages which cloudlet execution
 
 	// consists of.
 
-	public double starttime;
+	private double starttime;
 
 	@Override
 	public int compareTo(Object arg0) {
@@ -108,5 +135,149 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	public double getSubmittime() {
 		return submittime;
 	}
+
+	public long getMemory() {
+		return memory;
+	}
+
+	public void setMemory(long memory) {
+		this.memory = memory;
+	}
+
+	/**
+	 * @return the finishtime
+	 */
+	public double getFinishtime() {
+		return finishtime;
+	}
+
+	/**
+	 * @param finishtime the finishtime to set
+	 */
+	public void setFinishtime(double finishtime) {
+		this.finishtime = finishtime;
+	}
+
+	/**
+	 * @return the exetime
+	 */
+	public double getExetime() {
+		return exetime;
+	}
+
+	/**
+	 * @param exetime the exetime to set
+	 */
+	public void setExetime(double exetime) {
+		this.exetime = exetime;
+	}
+
+	/**
+	 * @return the numStage
+	 */
+	public double getNumStage() {
+		return numStage;
+	}
+
+	/**
+	 * @param numStage the numStage to set
+	 */
+	public void setNumStage(double numStage) {
+		this.numStage = numStage;
+	}
+
+	/**
+	 * @return the currStagenum
+	 */
+	public int getCurrStagenum() {
+		return currStagenum;
+	}
+
+	/**
+	 * @param currStagenum the currStagenum to set
+	 */
+	public void setCurrStagenum(int currStagenum) {
+		this.currStagenum = currStagenum;
+	}
+
+	/**
+	 * @return the timetostartStage
+	 */
+	public double getTimetostartStage() {
+		return timetostartStage;
+	}
+
+	/**
+	 * @param timetostartStage the timetostartStage to set
+	 */
+	public void setTimetostartStage(double timetostartStage) {
+		this.timetostartStage = timetostartStage;
+	}
+
+	/**
+	 * @return the timespentInStage
+	 */
+	public double getTimespentInStage() {
+		return timespentInStage;
+	}
+
+	/**
+	 * @param timespentInStage the timespentInStage to set
+	 */
+	public void setTimespentInStage(double timespentInStage) {
+		this.timespentInStage = timespentInStage;
+	}
+
+	/**
+	 * @return the timeCommunicate
+	 */
+	public Map<Double, HostPacket> getTimeCommunicate() {
+		return timeCommunicate;
+	}
+
+	/**
+	 * @param timeCommunicate the timeCommunicate to set
+	 */
+	public void setTimeCommunicate(Map<Double, HostPacket> timeCommunicate) {
+		this.timeCommunicate = timeCommunicate;
+	}
+
+	/**
+	 * @return the stages
+	 */
+	public ArrayList<TaskStage> getStages() {
+		return stages;
+	}
+
+	/**
+	 * @param stages the stages to set
+	 */
+	public void setStages(ArrayList<TaskStage> stages) {
+		this.stages = stages;
+	}
+
+	/**
+	 * @return the starttime
+	 */
+	public double getStarttime() {
+		return starttime;
+	}
+
+	/**
+	 * @param starttime the starttime to set
+	 */
+	public void setStarttime(double starttime) {
+		this.starttime = starttime;
+	}
+
+	/**
+	 * @param submittime the submittime to set
+	 */
+	public void setSubmittime(double submittime) {
+		this.submittime = submittime;
+	}
+	
+	
+	
 
 }

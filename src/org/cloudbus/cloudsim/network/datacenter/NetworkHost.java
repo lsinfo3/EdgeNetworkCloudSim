@@ -107,13 +107,13 @@ public class NetworkHost extends Host {
 	 * 
 	 * 
 	 */
-	private void recvpackets() {
+	protected void recvpackets() {
 
 		for (NetworkPacket hs : packetrecieved) {
-			hs.pkt.recievetime = CloudSim.clock();
+			hs.pkt.setRecievetime(CloudSim.clock());
 
 			// insertthe packet in recievedlist of VM
-			Vm vm = VmList.getById(getVmList(), hs.pkt.reciever);
+			Vm vm = VmList.getById(getVmList(), hs.pkt.getReciever());
 			List<HostPacket> pktlist = ((NetworkCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv
 					.get(hs.pkt.sender);
 
@@ -135,7 +135,7 @@ public class NetworkHost extends Host {
 	 * 
 	 * 
 	 */
-	private void sendpackets() {
+	protected void sendpackets() {
 
 		for (Vm vm : super.getVmList()) {
 			for (Entry<Integer, List<HostPacket>> es : ((NetworkCloudletSpaceSharedScheduler) vm
@@ -143,7 +143,7 @@ public class NetworkHost extends Host {
 				List<HostPacket> pktlist = es.getValue();
 				for (HostPacket pkt : pktlist) {
 					NetworkPacket hpkt = new NetworkPacket(getId(), pkt, vm.getId(), pkt.sender);
-					Vm vm2 = VmList.getById(this.getVmList(), hpkt.recievervmid);
+					Vm vm2 = VmList.getById(this.getVmList(), hpkt.getRecievervmid());
 					if (vm2 != null) {
 						packetTosendLocal.add(hpkt);
 					} else {
@@ -161,9 +161,9 @@ public class NetworkHost extends Host {
 		for (NetworkPacket hs : packetTosendLocal) {
 			flag = true;
 			hs.stime = hs.rtime;
-			hs.pkt.recievetime = CloudSim.clock();
+			hs.pkt.setRecievetime(CloudSim.clock());
 			// insertthe packet in recievedlist
-			Vm vm = VmList.getById(getVmList(), hs.pkt.reciever);
+			Vm vm = VmList.getById(getVmList(), hs.pkt.getReciever());
 
 			List<HostPacket> pktlist = ((NetworkCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv
 					.get(hs.pkt.sender);

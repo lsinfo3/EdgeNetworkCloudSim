@@ -69,7 +69,7 @@ public class EdgeSwitch extends Switch {
 		//
 		// int src=ev.getSource();
 		NetworkPacket hspkt = (NetworkPacket) ev.getData();
-		int recvVMid = hspkt.pkt.reciever;
+		int recvVMid = hspkt.getPkt().getReciever();
 		CloudSim.cancelAll(getId(), new PredicateType(CloudSimTags.Network_Event_send));
 		schedule(getId(), switching_delay, CloudSimTags.Network_Event_send);
 
@@ -78,7 +78,7 @@ public class EdgeSwitch extends Switch {
 
 		int hostid = dc.VmtoHostlist.get(recvVMid);
 		NetworkHost hs = hostlist.get(hostid);
-		hspkt.recieverhostid = hostid;
+		hspkt.setRecieverhostid(hostid);
 
 		// packet needs to go to a host which is connected directly to switch
 		if (hs != null) {

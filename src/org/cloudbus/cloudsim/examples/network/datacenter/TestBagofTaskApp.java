@@ -50,18 +50,18 @@ public class TestBagofTaskApp extends AppCloudlet {
     		NetworkCloudlet cl = new NetworkCloudlet(NetworkConstants.currentCloudletId, executionTime/numbervm, pesNumber, fileSize, outputSize, memory, utilizationModel, utilizationModel, utilizationModel);
     		NetworkConstants.currentCloudletId++;
     		cl.setUserId(userId);
-			cl.submittime=CloudSim.clock();
-    		cl.currStagenum=-1;
+			cl.setSubmittime(CloudSim.clock());
+    		cl.setCurrStagenum(-1);
 			cl.setVmId(vmIdList.get(i));
 			//compute and send data to node 0
-    		cl.stages.add(new TaskStage(NetworkConstants.EXECUTION, NetworkConstants.COMMUNICATION_LENGTH, executionTime/numbervm, stgId++, memory, vmIdList.get(0),cl.getCloudletId()));
+    		cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, NetworkConstants.COMMUNICATION_LENGTH, executionTime/numbervm, stgId++, memory, vmIdList.get(0),cl.getCloudletId()));
     		
     		//0 has an extra stage of waiting for results; others send
     		if (i==0){
     			for(int j=1;j<numbervm;j++)
-    				cl.stages.add(new TaskStage(NetworkConstants.WAIT_RECV, NetworkConstants.COMMUNICATION_LENGTH, 0, stgId++, memory, vmIdList.get(j),cl.getCloudletId()+j));
+    				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, NetworkConstants.COMMUNICATION_LENGTH, 0, stgId++, memory, vmIdList.get(j),cl.getCloudletId()+j));
     		} else {
-    			cl.stages.add(new TaskStage(NetworkConstants.WAIT_SEND, NetworkConstants.COMMUNICATION_LENGTH, 0, stgId++, memory, vmIdList.get(0),t));
+    			cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, NetworkConstants.COMMUNICATION_LENGTH, 0, stgId++, memory, vmIdList.get(0),t));
     		}
     		
     		clist.add(cl);    			

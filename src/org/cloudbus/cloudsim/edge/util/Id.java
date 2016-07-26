@@ -26,11 +26,11 @@ public final class Id {
     private static int globalCounter = 1;
 
     static {
-        COUNTERS.put(Cloudlet.class, 1);
-        COUNTERS.put(Vm.class, 1);
-        COUNTERS.put(Host.class, 1);
-        COUNTERS.put(DatacenterBroker.class, 1);
-        COUNTERS.put(Pe.class, 1);
+        COUNTERS.put(Cloudlet.class, 0);
+        COUNTERS.put(Vm.class, 0);
+        COUNTERS.put(Host.class, 0);
+        COUNTERS.put(DatacenterBroker.class, 0);
+        COUNTERS.put(Pe.class, 0);
     }
 
     private Id() {
