@@ -6,7 +6,7 @@
  * Copyright (c) 2009-2012, The University of Melbourne, Australia
  */
 
-package org.cloudbus.cloudsim.ext;
+package org.cloudbus.cloudsim.edge;
 
 /**
  * Contains various static command tags that indicate a type of action that needs to be undertaken

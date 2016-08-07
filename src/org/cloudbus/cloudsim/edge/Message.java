@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.cloudbus.cloudsim.ext;
+package org.cloudbus.cloudsim.edge;
 
 /** Enum which represent the size of a cloudlet.
  * it gives the amount of mips.

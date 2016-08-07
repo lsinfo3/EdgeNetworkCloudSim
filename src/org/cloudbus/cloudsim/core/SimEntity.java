@@ -674,6 +674,7 @@ public abstract class SimEntity implements Cloneable {
 	 */
 	private double getNetworkDelay(int src, int dst) {
 		if (NetworkTopology.isNetworkEnabled()) {
+//			System.out.println(CloudSim.clock() + " [DEBUG]: Network delay from #" + src + " To #" + dst + " = " + NetworkTopology.getDelay(src, dst));
 			return NetworkTopology.getDelay(src, dst);
 		}
 		return 0.0;

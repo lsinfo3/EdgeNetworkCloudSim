@@ -11,6 +11,7 @@ package org.cloudbus.cloudsim.network.datacenter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 
 import org.cloudbus.cloudsim.Cloudlet;
@@ -455,4 +456,9 @@ public class NetworkDatacenter extends Datacenter {
 			sendNow(serviceId, CloudSimTags.CLOUDLET_RESUME_ACK, data);
 		}
 	}
+	
+	@Override
+    public String toString() {
+        return String.format("DC(%s,%d)", Objects.toString(getName(), "N/A"), getId());
+    }
 }

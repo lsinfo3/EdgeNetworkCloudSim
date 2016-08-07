@@ -66,6 +66,7 @@ public class NetworkTopology {
 			graph = reader.readGraphFile(fileName);
 			map = new HashMap<Integer, Integer>();
 			generateMatrices();
+			Log.printLine("Network activated...");
 		} catch (IOException e) {
 			// problem with the file. Does not simulate network
 			Log.printLine("Problem in processing BRITE file. Network simulation is disabled. Error: "

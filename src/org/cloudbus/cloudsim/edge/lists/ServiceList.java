@@ -1,8 +1,8 @@
-package org.cloudbus.cloudsim.ext;
+package org.cloudbus.cloudsim.edge.lists;
 
 import java.util.List;
 
-import org.cloudbus.cloudsim.ext.service.Service;
+import org.cloudbus.cloudsim.edge.service.Service;
 
 
 /**

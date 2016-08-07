@@ -21,7 +21,6 @@ import org.cloudbus.cloudsim.ResCloudlet;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
-import org.cloudbus.cloudsim.ext.DatacenterBrokerExt;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.network.datacenter.HostPacket;
 import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
@@ -849,7 +848,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 
 	public Datacenter getCloudletDC(Cloudlet cl) {
 		if (cl.getVmId() != -1) {
-			DatacenterBrokerExt clBroker = (DatacenterBrokerExt) CloudSim.getEntity(cl.getUserId());
+			DatacenterBrokerEdge clBroker = (DatacenterBrokerEdge) CloudSim.getEntity(cl.getUserId());
 			Vm vm = VmList.getById(clBroker.getVmList(), cl.getVmId());
 			return vm.getHost().getDatacenter();
 		}

@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ext;
+package org.cloudbus.cloudsim.edge;
 
 /**
  * CloudSim does not execute events that are fired before the simulation has

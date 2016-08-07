@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ext.service;
+package org.cloudbus.cloudsim.edge.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,10 +14,10 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.cloudbus.cloudsim.ext.CloudSimTagsExt;
-import org.cloudbus.cloudsim.ext.DatacenterBrokerExt;
-import org.cloudbus.cloudsim.ext.Message;
-import org.cloudbus.cloudsim.ext.PresetEvent;
+import org.cloudbus.cloudsim.edge.CloudSimTagsExt;
+import org.cloudbus.cloudsim.edge.DatacenterBrokerEdge;
+import org.cloudbus.cloudsim.edge.Message;
+import org.cloudbus.cloudsim.edge.PresetEvent;
 import org.cloudbus.cloudsim.lists.CloudletList;
 import org.cloudbus.cloudsim.lists.VmList;
 
@@ -499,9 +499,9 @@ public abstract class Service extends SimEntity {
 			// if user didn't bind this cloudlet and it has not been executed
 			// yet
 			if (cloudlet.getVmId() == -1) {
-				vm = ((DatacenterBrokerExt) CloudSim.getEntity(getUserId())).getVmsCreatedList().get(vmIndex);
+				vm = ((DatacenterBrokerEdge) CloudSim.getEntity(getUserId())).getVmsCreatedList().get(vmIndex);
 			} else { // submit to the specific vm
-				vm = VmList.getById(((DatacenterBrokerExt) CloudSim.getEntity(getUserId())).getVmsCreatedList(),
+				vm = VmList.getById(((DatacenterBrokerEdge) CloudSim.getEntity(getUserId())).getVmsCreatedList(),
 						cloudlet.getVmId());
 				if (vm == null) { // vm was not created
 					Log.printLine(CloudSim.clock() + ": " + getName() + ": Postponing execution of cloudlet "
@@ -516,7 +516,7 @@ public abstract class Service extends SimEntity {
 			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
 			cloudletsSubmitted++;
 			vmIndex = (vmIndex + 1)
-					% ((DatacenterBrokerExt) CloudSim.getEntity(getUserId())).getVmsCreatedList().size();
+					% ((DatacenterBrokerEdge) CloudSim.getEntity(getUserId())).getVmsCreatedList().size();
 			getCloudletSubmittedList().add(cloudlet);
 			// remove submitted cloudlets from waiting list
 			toRemove.add(cloudlet);
@@ -543,9 +543,9 @@ public abstract class Service extends SimEntity {
 		// if user didn't bind this cloudlet and it has not been executed
 		// yet
 		if (cloudlet.getVmId() == -1) {
-			vm = ((DatacenterBrokerExt) CloudSim.getEntity(getUserId())).getVmsCreatedList().get(vmIndex);
+			vm = ((DatacenterBrokerEdge) CloudSim.getEntity(getUserId())).getVmsCreatedList().get(vmIndex);
 		} else { // submit to the specific vm
-			vm = VmList.getById(((DatacenterBrokerExt) CloudSim.getEntity(getUserId())).getVmsCreatedList(),
+			vm = VmList.getById(((DatacenterBrokerEdge) CloudSim.getEntity(getUserId())).getVmsCreatedList(),
 					cloudlet.getVmId());
 			if (vm == null) { // vm was not created
 				Log.printLine(CloudSim.clock() + ": " + getName() + ": Postponing execution of cloudlet "
@@ -558,7 +558,7 @@ public abstract class Service extends SimEntity {
 		cloudlet.setVmId(vm.getId());
 		sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
 		cloudletsSubmitted++;
-		vmIndex = (vmIndex + 1) % ((DatacenterBrokerExt) CloudSim.getEntity(getUserId())).getVmsCreatedList().size();
+		vmIndex = (vmIndex + 1) % ((DatacenterBrokerEdge) CloudSim.getEntity(getUserId())).getVmsCreatedList().size();
 		getCloudletSubmittedList().add(cloudlet);
 
 		// remove submitted cloudlets from waiting list

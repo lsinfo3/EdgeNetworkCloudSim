@@ -1,4 +1,4 @@
-package org.cloudbus.cloudsim.ext.service;
+package org.cloudbus.cloudsim.edge.service;
 
 import java.util.ArrayList;
 
