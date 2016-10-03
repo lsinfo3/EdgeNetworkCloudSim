@@ -20,7 +20,7 @@ import org.cloudbus.cloudsim.edge.CloudSimTagsExt;
 import org.cloudbus.cloudsim.edge.DatacenterBrokerEdge;
 import org.cloudbus.cloudsim.edge.EdgeCloudletSpaceSharedScheduler;
 import org.cloudbus.cloudsim.edge.util.Id;
-import org.cloudbus.cloudsim.edge.vm.VMex;
+import org.cloudbus.cloudsim.edge.vm.VmEdge;
 import org.cloudbus.cloudsim.edge.vmallocationpolicy.VmAllocationPolicyCpu;
 import org.cloudbus.cloudsim.network.datacenter.EdgeSwitch;
 import org.cloudbus.cloudsim.network.datacenter.NetworkConstants;
@@ -93,14 +93,14 @@ public class EdgeExample1 {
 			String vmm = "Xen"; // VMM name
 
 			// create two VMs: user1
-			VMex vmex1 = new VMex("vm1_broker1", brokerId0, mips, pesNumber, ram, bw, size, vmm,
+			VmEdge vmex1 = new VmEdge("vm1_broker1", brokerId0, mips, pesNumber, ram, bw, size, vmm,
 					new EdgeCloudletSpaceSharedScheduler());
-			VMex vmex2 = new VMex("vm2_broker1", brokerId0, mips, pesNumber, ram, bw, size, vmm,
+			VmEdge vmex2 = new VmEdge("vm2_broker1", brokerId0, mips, pesNumber, ram, bw, size, vmm,
 					new EdgeCloudletSpaceSharedScheduler());
 
-			VMex vmex3 = new VMex("vm3_broker2", brokerId1, mips, pesNumber, ram, bw, size, vmm,
+			VmEdge vmex3 = new VmEdge("vm3_broker2", brokerId1, mips, pesNumber, ram, bw, size, vmm,
 					new EdgeCloudletSpaceSharedScheduler());
-			VMex vmex4 = new VMex("vm4_broker2", brokerId1, mips, pesNumber, ram, bw, size, vmm,
+			VmEdge vmex4 = new VmEdge("vm4_broker2", brokerId1, mips, pesNumber, ram, bw, size, vmm,
 					new EdgeCloudletSpaceSharedScheduler());
 
 			// add the VMs to the vmlists

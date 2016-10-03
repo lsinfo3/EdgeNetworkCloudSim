@@ -29,7 +29,7 @@ import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.edge.service.Service;
 import org.cloudbus.cloudsim.edge.util.CustomLog;
 import org.cloudbus.cloudsim.edge.vm.VMStatus;
-import org.cloudbus.cloudsim.edge.vm.VMex;
+import org.cloudbus.cloudsim.edge.vm.VmEdge;
 import org.cloudbus.cloudsim.lists.VmList;
 
 /**
@@ -464,8 +464,8 @@ public class DatacenterBrokerEdge extends SimEntity {
 
 
 	private void finilizeVM(final Vm vm) {
-		if (vm instanceof VMex) {
-			VMex vmEX = ((VMex) vm);
+		if (vm instanceof VmEdge) {
+			VmEdge vmEX = ((VmEdge) vm);
 			if (vmEX.getStatus() != VMStatus.TERMINATED) {
 				vmEX.setStatus(VMStatus.TERMINATED);
 			}
@@ -923,5 +923,14 @@ public class DatacenterBrokerEdge extends SimEntity {
 			}
 		}
 		return datacenterId;
+	}
+	
+	/**
+	 * Add a Service to this user Service list.
+	 * @param service Service to add
+	 */
+	public void addService(Service service){
+		service.setUserId(this.getId());
+		this.getServiceList().add(service);
 	}
 }

@@ -168,7 +168,7 @@ public class NetworkDatacenter extends Datacenter {
 			VmToSwitchid.put(vm.getId(), ((NetworkHost) vm.getHost()).sw.getId());
 			VmtoHostlist.put(vm.getId(), vm.getHost().getId());
 			System.out.println("Datacenter ID: " + getId() + " - VM Id: " + vm.getUid() + " is created on Host Id "
-					+ vm.getHost().getId() + " owned by: " + vm.getUserId());
+					+ vm.getHost().getId() + " owned by service: " + vm.getUserId());
 
 			getVmList().add(vm);
 

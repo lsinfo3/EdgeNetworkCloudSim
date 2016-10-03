@@ -10,7 +10,7 @@ import org.cloudbus.cloudsim.VmScheduler;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.edge.util.Id;
-import org.cloudbus.cloudsim.edge.vm.VMex;
+import org.cloudbus.cloudsim.edge.vm.VmEdge;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.network.datacenter.HostPacket;
 import org.cloudbus.cloudsim.network.datacenter.NetworkConstants;
@@ -45,7 +45,7 @@ public class EdgeHost extends NetworkHost {
 		// insert in each vm packet recieved
 		recvpackets();
 		for (Vm vm : super.getVmList()) {
-			double time = ((VMex) vm).updateVmProcessing(currentTime, getVmScheduler()
+			double time = ((VmEdge) vm).updateVmProcessing(currentTime, getVmScheduler()
 					.getAllocatedMipsForVm(vm));
 			if (time > 0.0 && time < smallerTime) {
 				smallerTime = time;

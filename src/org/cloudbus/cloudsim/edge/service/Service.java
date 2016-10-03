@@ -57,6 +57,19 @@ public abstract class Service extends SimEntity {
 
 	private boolean cloudletGenerated;
 
+	/**
+	 * @return the cloudletGenerated
+	 */
+	public boolean isCloudletGenerated() {
+		return cloudletGenerated;
+	}
+
+	/**
+	 * @param cloudletGenerated the cloudletGenerated to set
+	 */
+	public void setCloudletGenerated(boolean cloudletGenerated) {
+		this.cloudletGenerated = cloudletGenerated;
+	}
 	/** The cloudlet list. */
 	protected List<? extends Cloudlet> cloudletList;
 
@@ -580,27 +593,12 @@ public abstract class Service extends SimEntity {
 		this.vmsToDatacentersMap = vmsToDatacentersMap;
 	}
 
-	protected void generateCloudlets() {
-		// TODO Auto-generated method stub
-		List<Cloudlet> cList = new ArrayList<Cloudlet>();
-		// for (int i = 0; i < getCloudletNum(); i++) {
-		for (int i = 0; i < 3; i++) {
-			cList.add(createCloudlet());
-		}
-		setCloudletList(cList);
-		if (this instanceof EdgeService) {
-			((EdgeService) this).createStages();
-		}
-		cloudletGenerated = true;
-
-	}
-
 	protected void addCloudlet(Cloudlet cl) {
 		if (CloudletList.getById(getCloudletList(), cl.getCloudletId()) == null) {
 			getCloudletList().add(cl);
 		}
 	}
 
-	protected abstract Cloudlet createCloudlet();
+	protected abstract void generateCloudlets();
 
 }

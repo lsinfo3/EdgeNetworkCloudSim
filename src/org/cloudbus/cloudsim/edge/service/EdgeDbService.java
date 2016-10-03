@@ -1,16 +1,23 @@
 package org.cloudbus.cloudsim.edge.service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.UtilizationModel;
 import org.cloudbus.cloudsim.UtilizationModelFull;
+import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.edge.vm.T2Nano;
+import org.cloudbus.cloudsim.edge.vm.T2Small;
+import org.cloudbus.cloudsim.edge.vm.VmType;
 import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
 import org.cloudbus.cloudsim.network.datacenter.NetworkConstants;
 import org.cloudbus.cloudsim.network.datacenter.TaskStage;
 
 public class EdgeDbService extends EdgeService {
+	
+	
 
 	public EdgeDbService(String name, double lifeLength) {
 		super("EdgeDbService-" + name, lifeLength);
@@ -23,17 +30,48 @@ public class EdgeDbService extends EdgeService {
 	}
 
 	@Override
-	protected NetworkCloudlet createCloudlet() {
+	protected void generateCloudlets() {
 		// TODO Auto-generated method stub
-		// Cloudlet properties
-		long length = 4000000;
-		long memory = 100;
-		long fileSize = 1000;
-		long outputSize = 1000;
+		List<Cloudlet> cList = new ArrayList<Cloudlet>();
 		UtilizationModel utilizationModel = new UtilizationModelFull();
-		int pesNumber = 2; // number of cpus
-		return new NetworkCloudlet(length, pesNumber, fileSize, outputSize, memory, utilizationModel, utilizationModel,
-				utilizationModel, getUserId(), getId());
+
+		NetworkCloudlet ncl = new NetworkCloudlet(4000000, 2, 1000, 1000, 100, utilizationModel, utilizationModel, utilizationModel,
+				getUserId(), getId());
+		ncl.setVmType(VmType.T2NANO);
+		cList.add(ncl);
+		
+		ncl = new NetworkCloudlet(4000000, 2, 1000, 1000, 100, utilizationModel, utilizationModel, utilizationModel,
+				getUserId(), getId());
+		ncl.setVmType(VmType.T2NANO);
+		cList.add(ncl);
+		
+		ncl = new NetworkCloudlet(4000000, 2, 1000, 1000, 100, utilizationModel, utilizationModel, utilizationModel,
+				getUserId(), getId());
+		ncl.setVmType(VmType.T2SMALL);
+		cList.add(ncl);
+
+		setCloudletList(cList);
+		createStages();
+		setCloudletGenerated(true);
+
+	}
+	
+	/**
+	 * This method is used to send to the broker the list with virtual machines
+	 * that must be created.
+	 * 
+	 * @param list
+	 *            the list
+	 * @pre list !=null
+	 * @post $none
+	 */
+	public void submitVmList() {
+		getVmList().add(new T2Nano());
+		getVmList().add(new T2Nano());
+		getVmList().add(new T2Small());
+		for (Vm vm : getVmList()) {
+			vm.setUserId(this.getId());
+		}
 	}
 
 	public void createStages() {
@@ -73,5 +111,8 @@ public class EdgeDbService extends EdgeService {
 
 		}
 	}
+	
+	
+	
 
 }

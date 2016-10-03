@@ -14,6 +14,7 @@ import java.util.Map;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.UtilizationModel;
 import org.cloudbus.cloudsim.edge.util.Id;
+import org.cloudbus.cloudsim.edge.vm.VmType;
 
 /**
  * NetworkCloudlet class extends Cloudlet to support simulation of complex applications. Each such
@@ -31,6 +32,8 @@ import org.cloudbus.cloudsim.edge.util.Id;
 public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 
 	private long memory;
+	
+	private VmType vmType;
 
 	public NetworkCloudlet(
 			int cloudletId,
@@ -275,6 +278,20 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	 */
 	public void setSubmittime(double submittime) {
 		this.submittime = submittime;
+	}
+
+	/**
+	 * @return the vmType
+	 */
+	public VmType getVmType() {
+		return vmType;
+	}
+
+	/**
+	 * @param vmType the vmType to set
+	 */
+	public void setVmType(VmType vmType) {
+		this.vmType = vmType;
 	}
 	
 	

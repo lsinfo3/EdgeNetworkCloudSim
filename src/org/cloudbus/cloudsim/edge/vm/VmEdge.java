@@ -19,7 +19,7 @@ import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
  * @author nikolay.grozev
  * 
  */
-public class VMex extends Vm {
+public class VmEdge extends Vm {
 
     private VMStatus status;
     private final VMMetadata metadata;
@@ -29,11 +29,11 @@ public class VMex extends Vm {
     private double submissionTime;
     private double startTime;
     private double endTime;
+    private VmType type;
     
     ///// NetworkCloudlet Var ////
     public ArrayList<NetworkCloudlet> cloudletlist;
     
-    int type;
 
 	public ArrayList<HostPacket> recvPktlist;
 
@@ -57,13 +57,13 @@ public class VMex extends Vm {
      * @param userId
      * @param mips
      * @param numberOfPes
-     * @param ram
+     * @param ram in MB
      * @param bw
-     * @param size
+     * @param size in MB
      * @param vmm
      * @param cloudletScheduler
      */
-    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
+    public VmEdge(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
             final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler) {
         this(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, new VMMetadata());
 
@@ -84,13 +84,13 @@ public class VMex extends Vm {
      * @param cloudletScheduler
      * @param metadata
      */
-    public VMex(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
+    public VmEdge(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
             final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler,
             final VMMetadata metadata) {
         super(Id.pollId(Vm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
         this.name = name;
         this.metadata = metadata;
-        cloudletlist = new ArrayList<NetworkCloudlet>();
+        this.cloudletlist = new ArrayList<NetworkCloudlet>();
     }
 
     // Unfortunately the super class already has a boolean property if the VM is
@@ -289,12 +289,12 @@ public class VMex extends Vm {
      *            - must not be null. Must be a valid scheduler.
      * @return a deep copy of this VM.
      */
-    public VMex clone(final CloudletScheduler scheduler) {
-        if (!getClass().equals(VMex.class)) {
+    public VmEdge clone(final CloudletScheduler scheduler) {
+        if (!getClass().equals(VmEdge.class)) {
             throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
         }
 
-        VMex result = new VMex(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(),
+        VmEdge result = new VmEdge(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(),
                 getVmm(), scheduler, getMetadata().clone());
         return result;
     }
@@ -303,4 +303,54 @@ public class VMex extends Vm {
     public String toString() {
         return String.format("VM(%s, %d)", Objects.toString(getName(), "N/A"), getId());
     }
+
+
+	/**
+	 * @return the type
+	 */
+	public VmType getType() {
+		return type;
+	}
+
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(VmType type) {
+		this.type = type;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		VmEdge other = (VmEdge) obj;
+		if (getId() != other.getId())
+			return false;
+		return true;
+	}
+	
+	
+    
+    
 }

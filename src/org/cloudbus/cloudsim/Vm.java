@@ -285,7 +285,7 @@ public class Vm {
 	 * 
 	 * @param userId the new user id
 	 */
-	protected void setUserId(int userId) {
+	public void setUserId(int userId) {
 		this.userId = userId;
 	}
 
