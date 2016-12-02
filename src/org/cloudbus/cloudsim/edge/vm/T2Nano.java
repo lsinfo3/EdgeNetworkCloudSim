@@ -17,7 +17,7 @@ public class T2Nano extends VmEdge {
 	}
 
 	public T2Nano() {
-		this("t2.nano", -1, 11270, 1, 512, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
+		this("t2.nano", -1, 1270, 1, 512, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
 		setType(VmType.T2NANO);
 	}
 

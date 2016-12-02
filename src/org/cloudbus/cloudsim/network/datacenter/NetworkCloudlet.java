@@ -17,14 +17,16 @@ import org.cloudbus.cloudsim.edge.util.Id;
 import org.cloudbus.cloudsim.edge.vm.VmType;
 
 /**
- * NetworkCloudlet class extends Cloudlet to support simulation of complex applications. Each such
- * network Cloudlet represents a task of the application. Each task consists of several stages.
+ * NetworkCloudlet class extends Cloudlet to support simulation of complex
+ * applications. Each such network Cloudlet represents a task of the
+ * application. Each task consists of several stages.
  * 
  * Please refer to following publication for more details:
  * 
- * Saurabh Kumar Garg and Rajkumar Buyya, NetworkCloudSim: Modelling Parallel Applications in Cloud
- * Simulations, Proceedings of the 4th IEEE/ACM International Conference on Utility and Cloud
- * Computing (UCC 2011, IEEE CS Press, USA), Melbourne, Australia, December 5-7, 2011.
+ * Saurabh Kumar Garg and Rajkumar Buyya, NetworkCloudSim: Modelling Parallel
+ * Applications in Cloud Simulations, Proceedings of the 4th IEEE/ACM
+ * International Conference on Utility and Cloud Computing (UCC 2011, IEEE CS
+ * Press, USA), Melbourne, Australia, December 5-7, 2011.
  * 
  * @author Saurabh Kumar Garg
  * @since CloudSim Toolkit 1.0
@@ -32,77 +34,33 @@ import org.cloudbus.cloudsim.edge.vm.VmType;
 public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 
 	private long memory;
-	
+
 	private VmType vmType;
 
-	public NetworkCloudlet(
-			int cloudletId,
-			long cloudletLength,
-			int pesNumber,
-			long cloudletFileSize,
-			long cloudletOutputSize,
-			long memory,
-			UtilizationModel utilizationModelCpu,
-			UtilizationModel utilizationModelRam,
-			UtilizationModel utilizationModelBw) {
-		super(
-				cloudletId,
-				cloudletLength,
-				pesNumber,
-				cloudletFileSize,
-				cloudletOutputSize,
-				utilizationModelCpu,
-				utilizationModelRam,
-				utilizationModelBw);
+	public NetworkCloudlet(int cloudletId, long cloudletLength, int pesNumber, long cloudletFileSize,
+			long cloudletOutputSize, long memory, UtilizationModel utilizationModelCpu,
+			UtilizationModel utilizationModelRam, UtilizationModel utilizationModelBw) {
+		super(cloudletId, cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu,
+				utilizationModelRam, utilizationModelBw);
 
 		currStagenum = -1;
 		this.setMemory(memory);
 		stages = new ArrayList<TaskStage>();
 	}
-	
-	public NetworkCloudlet(
-			long cloudletLength,
-			int pesNumber,
-			long cloudletFileSize,
-			long cloudletOutputSize,
-			long memory,
-			UtilizationModel utilizationModelCpu,
-			UtilizationModel utilizationModelRam,
+
+	public NetworkCloudlet(long cloudletLength, int pesNumber, long cloudletFileSize, long cloudletOutputSize,
+			long memory, UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam,
 			UtilizationModel utilizationModelBw) {
-		this(
-				Id.pollId(NetworkCloudlet.class),
-				cloudletLength,
-				pesNumber,
-				cloudletFileSize,
-				cloudletOutputSize,
-				memory,
-				utilizationModelCpu,
-				utilizationModelRam,
-				utilizationModelBw);
+		this(Id.pollId(NetworkCloudlet.class), cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, memory,
+				utilizationModelCpu, utilizationModelRam, utilizationModelBw);
 	}
-	
-	public NetworkCloudlet(
-			long cloudletLength,
-			int pesNumber,
-			long cloudletFileSize,
-			long cloudletOutputSize,
-			long memory,
-			UtilizationModel utilizationModelCpu,
-			UtilizationModel utilizationModelRam,
-			UtilizationModel utilizationModelBw,
-			int userId,
-			int serviceId) {
-		super(
-				cloudletLength,
-				pesNumber,
-				cloudletFileSize,
-				cloudletOutputSize,
-				utilizationModelCpu,
-				utilizationModelRam,
-				utilizationModelBw,
-				userId,
-				serviceId);
-		
+
+	public NetworkCloudlet(long cloudletLength, int pesNumber, long cloudletFileSize, long cloudletOutputSize,
+			long memory, UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam,
+			UtilizationModel utilizationModelBw, int userId, int serviceId) {
+		super(cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu, utilizationModelRam,
+				utilizationModelBw, userId, serviceId);
+
 		currStagenum = -1;
 		this.setMemory(memory);
 		stages = new ArrayList<TaskStage>();
@@ -155,7 +113,8 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	}
 
 	/**
-	 * @param finishtime the finishtime to set
+	 * @param finishtime
+	 *            the finishtime to set
 	 */
 	public void setFinishtime(double finishtime) {
 		this.finishtime = finishtime;
@@ -169,7 +128,8 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	}
 
 	/**
-	 * @param exetime the exetime to set
+	 * @param exetime
+	 *            the exetime to set
 	 */
 	public void setExetime(double exetime) {
 		this.exetime = exetime;
@@ -183,7 +143,8 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	}
 
 	/**
-	 * @param numStage the numStage to set
+	 * @param numStage
+	 *            the numStage to set
 	 */
 	public void setNumStage(double numStage) {
 		this.numStage = numStage;
@@ -197,7 +158,8 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	}
 
 	/**
-	 * @param currStagenum the currStagenum to set
+	 * @param currStagenum
+	 *            the currStagenum to set
 	 */
 	public void setCurrStagenum(int currStagenum) {
 		this.currStagenum = currStagenum;
@@ -211,7 +173,8 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	}
 
 	/**
-	 * @param timetostartStage the timetostartStage to set
+	 * @param timetostartStage
+	 *            the timetostartStage to set
 	 */
 	public void setTimetostartStage(double timetostartStage) {
 		this.timetostartStage = timetostartStage;
@@ -225,7 +188,8 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	}
 
 	/**
-	 * @param timespentInStage the timespentInStage to set
+	 * @param timespentInStage
+	 *            the timespentInStage to set
 	 */
 	public void setTimespentInStage(double timespentInStage) {
 		this.timespentInStage = timespentInStage;
@@ -239,7 +203,8 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	}
 
 	/**
-	 * @param timeCommunicate the timeCommunicate to set
+	 * @param timeCommunicate
+	 *            the timeCommunicate to set
 	 */
 	public void setTimeCommunicate(Map<Double, HostPacket> timeCommunicate) {
 		this.timeCommunicate = timeCommunicate;
@@ -253,7 +218,8 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	}
 
 	/**
-	 * @param stages the stages to set
+	 * @param stages
+	 *            the stages to set
 	 */
 	public void setStages(ArrayList<TaskStage> stages) {
 		this.stages = stages;
@@ -267,14 +233,16 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	}
 
 	/**
-	 * @param starttime the starttime to set
+	 * @param starttime
+	 *            the starttime to set
 	 */
 	public void setStarttime(double starttime) {
 		this.starttime = starttime;
 	}
 
 	/**
-	 * @param submittime the submittime to set
+	 * @param submittime
+	 *            the submittime to set
 	 */
 	public void setSubmittime(double submittime) {
 		this.submittime = submittime;
@@ -288,13 +256,40 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	}
 
 	/**
-	 * @param vmType the vmType to set
+	 * @param vmType
+	 *            the vmType to set
 	 */
 	public void setVmType(VmType vmType) {
 		this.vmType = vmType;
 	}
-	
-	
-	
+
+	public void setAccumulatedBwCost(double accumulatedBwCost) {
+		this.accumulatedBwCost = accumulatedBwCost;
+	}
+
+	public void setCostPerBw(double costPerBw) {
+		this.costPerBw = costPerBw;
+	}
+
+	/**
+	 * re-initialize the Cloudlet
+	 */
+	public void reset() {
+		try {
+			this.setCloudletStatus(CREATED);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		setExecStartTime(0.0);
+		setFinishtime(-1.0);
+		setClassType(0);
+		setIndex(-1);
+		setAccumulatedBwCost(0.0);
+		setCostPerBw(0.0);
+		setStages(new ArrayList<TaskStage>());
+		setCurrStagenum(-1);
+
+	}
 
 }

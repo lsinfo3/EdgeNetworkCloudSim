@@ -14,20 +14,22 @@ import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
 import org.cloudbus.cloudsim.edge.EdgeHost;
 import org.cloudbus.cloudsim.edge.vmallocationpolicy.VmAllocationPolicyCpu;
+import org.cloudbus.cloudsim.network.datacenter.AggregateSwitch;
 import org.cloudbus.cloudsim.network.datacenter.EdgeSwitch;
 import org.cloudbus.cloudsim.network.datacenter.NetworkConstants;
 import org.cloudbus.cloudsim.network.datacenter.NetworkDatacenter;
 import org.cloudbus.cloudsim.network.datacenter.NetworkHost;
+import org.cloudbus.cloudsim.network.datacenter.Switch;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
 public class BaseDatacenter {
 
-	private BaseDatacenter(){
-		
+	private BaseDatacenter() {
+
 	}
-	
+
 	/**
 	 * Creates the datacenter.
 	 * 
@@ -38,7 +40,7 @@ public class BaseDatacenter {
 	 * 
 	 * @return the NetworkDatacenter
 	 */
-	public static NetworkDatacenter createNetworkDatacenter(String name, int dcNum){
+	public static NetworkDatacenter createNetworkDatacenter(String name, int dcNum) {
 
 		// Here are the steps needed to create a PowerDatacenter:
 		// 1. We need to create a list to store
@@ -58,7 +60,7 @@ public class BaseDatacenter {
 
 		// 4. Create Host with its id and list of PEs and add them to the list
 		// of machines
-		int ram = 2048; // host memory (MB)
+		int ram = 8048; // host memory (MB)
 		long storage = 1000000; // host storage
 		int bw = 10000;
 		for (int i = 0; i < NetworkConstants.EdgeSwitchPort * NetworkConstants.AggSwitchPort
@@ -102,10 +104,28 @@ public class BaseDatacenter {
 			e.printStackTrace();
 		}
 		// Create Internal Datacenter network
-		CreateNetwork(datacenter, dcNum);
+		createInternalDcNetwork(datacenter, dcNum);
 		return datacenter;
 	}
-	
+
+	/**
+	 * inter-connect data centers.
+	 * 
+	 * @param dcs
+	 *            list of data centers
+	 */
+	public static void createNetwork(List<NetworkDatacenter> dcs) {
+		if (dcs.size() > 1) {
+			AggregateSwitch aggSwitch = new AggregateSwitch("Agg", NetworkConstants.Agg_LEVEL, dcs.get(0));
+			for (NetworkDatacenter netDc : dcs) {
+				for (Switch sw : netDc.Switchlist.values()) {
+					aggSwitch.downlinkswitches.add(sw);
+					sw.uplinkswitches.add(aggSwitch);
+				}
+			}
+		}
+	}
+
 	/**
 	 * define the internal network of a data center.
 	 * 
@@ -115,7 +135,7 @@ public class BaseDatacenter {
 	 *            the number of available data centers in this simulation
 	 */
 	@SuppressWarnings("unchecked")
-	public static void CreateNetwork(NetworkDatacenter dc, int dcNum) {
+	public static void createInternalDcNetwork(NetworkDatacenter dc, int dcNum) {
 
 		// Edge Switch
 		EdgeSwitch edgeswitch[] = new EdgeSwitch[1];
@@ -146,7 +166,7 @@ public class BaseDatacenter {
 		}
 
 	}
-	
+
 	/**
 	 * Prints the Cloudlet objects.
 	 * 
@@ -160,13 +180,13 @@ public class BaseDatacenter {
 		String indent = "    ";
 		Log.printLine();
 		Log.printLine(indent + indent + indent + indent + indent + "========== OUTPUT ==========");
-		Log.printLine("Cloudlet ID" + indent + "STATUS" + indent + "Data center ID" + indent + "VM ID" + indent + "Time"
+		Log.printLine("Cloudlet ID" + indent + "STATUS" + indent + "Data center ID" + indent + "VM ID" + indent + indent + "Time"
 				+ indent + "Start Time" + indent + "Finish Time");
 
 		DecimalFormat dft = new DecimalFormat("###.##");
 		for (int i = 0; i < size; i++) {
 			cloudlet = list.get(i);
-			Log.print(indent + cloudlet.getCloudletId() + indent + indent);
+			Log.print(indent + cloudlet.getCloudletId() + indent + indent + indent);
 
 			if (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS) {
 				Log.print("SUCCESS");

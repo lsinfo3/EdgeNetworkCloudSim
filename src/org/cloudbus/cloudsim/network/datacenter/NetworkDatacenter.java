@@ -113,6 +113,13 @@ public class NetworkDatacenter extends Datacenter {
 	}
 
 	/**
+	 * @return the vmtoHostlist
+	 */
+	public Map<Integer, Integer> getVmtoHostlist() {
+		return VmtoHostlist;
+	}
+
+	/**
 	 * Create the VM within the NetworkDatacenter. It can be directly accessed
 	 * by Datacenter Broker which manage allocation of Cloudlets.
 	 * 
@@ -148,6 +155,7 @@ public class NetworkDatacenter extends Datacenter {
 	@Override
 	public void processVmCreate(SimEvent ev, boolean ack) {
 		Vm vm = (Vm) ev.getData();
+		vm.setUid(vm.getUserId() + "-" + vm.getId());
 
 		boolean result = getVmAllocationPolicy().allocateHostForVm(vm);
 
@@ -235,14 +243,15 @@ public class NetworkDatacenter extends Datacenter {
 			cl.setResourceParameter(getId(), getCharacteristics().getCostPerSecond(),
 					getCharacteristics().getCostPerBw());
 
-			int userId = cl.getUserId();
+//			int userId = cl.getUserId();
+			int serviceId = cl.getServiceId();
 			int vmId = cl.getVmId();
 
 			// time to transfer the files
 			double fileTransferTime = predictFileTransferTime(cl.getRequiredFiles());
 
-			Host host = getVmAllocationPolicy().getHost(vmId, userId);
-			Vm vm = host.getVm(vmId, userId);
+			Host host = getVmAllocationPolicy().getHost(vmId, serviceId);
+			Vm vm = host.getVm(vmId, serviceId);
 			CloudletScheduler scheduler = vm.getCloudletScheduler();
 			double estimatedFinishTime = scheduler.cloudletSubmit(cl, fileTransferTime);
 

@@ -40,12 +40,12 @@ public class EdgeWebService extends EdgeService {
 		ncl.setVmType(VmType.T2SMALL);
 		cList.add(ncl);
 
-		ncl = new NetworkCloudlet(400000, 2, 300, 300, 256, utilizationModel, utilizationModel, utilizationModel,
+		ncl = new NetworkCloudlet(400000, 1, 300, 300, 256, utilizationModel, utilizationModel, utilizationModel,
 				getUserId(), getId());
 		ncl.setVmType(VmType.T2NANO);
 		cList.add(ncl);
 
-		ncl = new NetworkCloudlet(400000, 2, 300, 300, 256, utilizationModel, utilizationModel, utilizationModel,
+		ncl = new NetworkCloudlet(400000, 4, 300, 300, 256, utilizationModel, utilizationModel, utilizationModel,
 				getUserId(), getId());
 		ncl.setVmType(VmType.T2Large);
 		cList.add(ncl);
@@ -60,8 +60,6 @@ public class EdgeWebService extends EdgeService {
 	 * This method is used to send to the broker the list with virtual machines
 	 * that must be created.
 	 * 
-	 * @param list
-	 *            the list
 	 * @pre list !=null
 	 * @post $none
 	 */

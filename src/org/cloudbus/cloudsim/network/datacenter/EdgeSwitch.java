@@ -76,6 +76,7 @@ public class EdgeSwitch extends Switch {
 		// packet is recieved from host
 		// packet is to be sent to aggregate level or to another host in the same level
 
+		try{
 		int hostid = dc.VmtoHostlist.get(recvVMid);
 		NetworkHost hs = hostlist.get(hostid);
 		hspkt.setRecieverhostid(hostid);
@@ -91,6 +92,9 @@ public class EdgeSwitch extends Switch {
 			pktlist.add(hspkt);
 			return;
 
+		}
+		}catch(NullPointerException e){
+			//host(id) not found in this data center... forward packet up.
 		}
 		// otherwise
 		// packet is to be sent to upper switch

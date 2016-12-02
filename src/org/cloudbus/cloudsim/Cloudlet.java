@@ -1546,5 +1546,9 @@ public class Cloudlet {
 	public double getUtilizationOfBw(final double time) {
 		return getUtilizationModelBw().getUtilization(time);
 	}
+	
+	public void setIndex(int index){
+		this.index = index;
+	}
 
 }

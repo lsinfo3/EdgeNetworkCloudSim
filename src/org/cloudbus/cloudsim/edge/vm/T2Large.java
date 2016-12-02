@@ -17,8 +17,8 @@ public class T2Large extends VmEdge {
 	}
 
 	public T2Large() {
-		this("t2.large", -1, 11270, 1, 8192, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
-		setType(VmType.T2SMALL);
+		this("t2.large", -1, 11270, 4, 6144, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
+		setType(VmType.T2Large);
 	}
 
 }

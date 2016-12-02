@@ -21,6 +21,7 @@ import org.cloudbus.cloudsim.ResCloudlet;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
+import org.cloudbus.cloudsim.edge.service.Service;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.network.datacenter.HostPacket;
 import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
@@ -100,7 +101,8 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 	 */
 	@Override
 	public double updateVmProcessing(double currentTime, List<Double> mipsShare) {
-//		System.out.println(CloudSim.clock() + " [DEBUG]:keep calling: EdgeCloudletSpaceSharedScheduler.updateVmProcessing");
+		// System.out.println(CloudSim.clock() + " [DEBUG]:keep calling:
+		// EdgeCloudletSpaceSharedScheduler.updateVmProcessing");
 		setCurrentMipsShare(mipsShare);
 		// update
 		double capacity = 0.0;
@@ -150,8 +152,10 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 						if (pktlist.isEmpty()) {
 							System.out.println(CloudSim.clock() + " [DEBUG]:RECV: Cloudlet #" + cl.getCloudletId()
 									+ " Service #" + cl.getServiceId() + " and User #" + cl.getUserId()
-									+ " received NO packet from Cloudlet #" + st.getVpeer()+" in VM #" + st.getPeer());
-							System.out.println(CloudSim.clock() + " [DEBUG]:Cloudlet Stage type " + (st.getType() == 2 ? "RECV": st.getType()));
+									+ " received NO packet from Cloudlet #" + st.getVpeer() + " in VM #"
+									+ st.getPeer());
+							System.out.println(CloudSim.clock() + " [DEBUG]:Cloudlet Stage type "
+									+ (st.getType() == 2 ? "RECV" : st.getType()));
 							changetonextstage(cl, st);
 						}
 						Iterator<HostPacket> it = pktlist.iterator();
@@ -253,7 +257,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 	}
 
 	private void changetonextstage(NetworkCloudlet cl, TaskStage st) {
-//		for the new/next stage
+		// for the new/next stage
 		cl.setTimespentInStage(0);
 		cl.setTimetostartStage(CloudSim.clock());
 		int currstage = cl.getCurrStagenum();
@@ -532,7 +536,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 			usedPes += cloudlet.getNumberOfPes();
 		} else {// no enough free PEs: go to the waiting queue
 			System.out.println(CloudSim.clock() + ": [DEBUG]: no enough free PEs: go to the waiting queue : Cloudlet #"
-					+ cloudlet.getCloudletId());
+					+ cloudlet.getCloudletId() + " on VM #" + cloudlet.getVmId());
 			ResCloudlet rcl = new ResCloudlet(cloudlet);
 			rcl.setCloudletStatus(Cloudlet.QUEUED);
 			getCloudletWaitingList().add(rcl);
@@ -848,8 +852,8 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 
 	public Datacenter getCloudletDC(Cloudlet cl) {
 		if (cl.getVmId() != -1) {
-			DatacenterBrokerEdge clBroker = (DatacenterBrokerEdge) CloudSim.getEntity(cl.getUserId());
-			Vm vm = VmList.getById(clBroker.getVmList(), cl.getVmId());
+			Service clService = (Service) CloudSim.getEntity(cl.getServiceId());
+			Vm vm = VmList.getById(clService.getVmList(), cl.getVmId());
 			return vm.getHost().getDatacenter();
 		}
 		return null;

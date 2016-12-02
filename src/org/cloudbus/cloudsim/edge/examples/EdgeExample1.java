@@ -110,8 +110,8 @@ public class EdgeExample1 {
 			vmexlist1.add(vmex4);
 
 			// submit vm list to the broker
-			broker0.submitVmList(vmexlist0);
-			broker1.submitVmList(vmexlist1);
+//			broker0.submitVmList(vmexlist0);
+//			broker1.submitVmList(vmexlist1);
 
 			serviceList0 = new ArrayList<Service>();
 			serviceList1 = new ArrayList<Service>();
