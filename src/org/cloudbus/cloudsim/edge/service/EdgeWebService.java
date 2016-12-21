@@ -75,6 +75,7 @@ public class EdgeWebService extends EdgeService {
 	}
 
 	public void createStages() {
+		System.out.println(CloudSim.clock() + ": [DEBUG]: " + getName() + " creating stages" );
 		assignVmToCloudlets();
 		ArrayList<Cloudlet> cList = (ArrayList<Cloudlet>) getCloudletList();
 		for (int i = 0; i < cList.size(); i++) {
@@ -83,8 +84,8 @@ public class EdgeWebService extends EdgeService {
 				cl.setNumStage(5);
 				cl.setSubmittime(CloudSim.clock());
 				cl.setCurrStagenum(-1);
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 1000, 0, 2, cl.getMemory(), getFirstVmId(),
-						getFirstCloudlet().getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 1000, 0, 2, cl.getMemory(), getBrokerVmId(),
+						getBrokerCloudletId()));
 
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 1000 * 0.8, 0, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
@@ -93,8 +94,8 @@ public class EdgeWebService extends EdgeService {
 				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 1000, 0, 2, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
 
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 1000, 0, 2, cl.getMemory(), getFirstVmId(),
-						getFirstCloudlet().getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 1000, 0, 2, cl.getMemory(), getBrokerVmId(),
+						getBrokerCloudletId()));
 			}
 			if (i == 1) {
 				cl.setNumStage(5);

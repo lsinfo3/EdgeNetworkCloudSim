@@ -13,6 +13,7 @@ import org.cloudbus.cloudsim.NetworkTopology;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
+import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.edge.CloudSimTagsExt;
 import org.cloudbus.cloudsim.edge.DatacenterBrokerEdge;
 import org.cloudbus.cloudsim.edge.EdgeHost;
@@ -175,7 +176,7 @@ public class BaseDatacenter {
 	 *            list of data centers
 	 * @throws Exception
 	 */
-	public static void createNetwork() throws Exception {
+	public static void createNetworkWorking() throws Exception {
 		ArrayList<NetworkDatacenter> dcs = new ArrayList<>();
 		ArrayList<AggregateSwitch> aggSwitch = new ArrayList<>();
 		for (int i = 1; i <= 4; i++) {
@@ -236,7 +237,7 @@ public class BaseDatacenter {
 		NetworkTopology.mapNode(aggSwitch.get(2).getId(), 10);
 		NetworkTopology.mapNode(dcs.get(3).getId(), 11);
 		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(3)), 12);
-		NetworkTopology.mapNode(broker.getId(), 13);
+//		NetworkTopology.mapNode(broker.getId(), 13);
 
 	}
 
@@ -247,7 +248,7 @@ public class BaseDatacenter {
 	 *            list of data centers
 	 * @throws Exception
 	 */
-	public static void createNetworkWorking() throws Exception {
+	public static void createNetworkWorking2() throws Exception {
 		ArrayList<NetworkDatacenter> dcs = new ArrayList<>();
 		for (int i = 1; i <= 1; i++) {
 			dcs.add(createNetworkDatacenter("DC" + i, 3));
@@ -283,7 +284,7 @@ public class BaseDatacenter {
 	 *            list of data centers
 	 * @throws Exception
 	 */
-	public static void createNetwork3() throws Exception {
+	public static void createNetworkWorking3() throws Exception {
 		ArrayList<NetworkDatacenter> dcs = new ArrayList<>();
 		for (int i = 0; i <= 2; i++) {
 			dcs.add(createNetworkDatacenter("DC" + i, 1));
@@ -294,6 +295,8 @@ public class BaseDatacenter {
 		// Create Brokers
 		DatacenterBrokerEdge broker = new DatacenterBrokerEdge("Broker_1");
 		broker.setUserDC(dcs.get(0));
+		dcs.get(0).setUserDC(true);
+		System.out.println(CloudSim.clock() + ": [DEBUG]: createNetwork3()... Broker userDc #" + dcs.get(0).getId());
 
 		connectAggSwitchToDc(aggSwitch, dcs.get(0));
 		connectAggSwitchToDc(aggSwitch, dcs.get(1));
@@ -312,7 +315,6 @@ public class BaseDatacenter {
 			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 600.0);
 		}
 
-
 		NetworkTopology.mapNode(dcs.get(0).getId(), 3);
 		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(0)), 4);
 		NetworkTopology.mapNode(aggSwitch.getId(), 5);
@@ -320,6 +322,134 @@ public class BaseDatacenter {
 		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(1)), 7);
 		NetworkTopology.mapNode(dcs.get(2).getId(), 8);
 		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(2)), 9);
+
+	}
+
+	/**
+	 * inter-connect data centers.
+	 * 
+	 * @param dcs
+	 *            list of data centers
+	 * @throws Exception
+	 */
+	public static void createNetworkWorking4() throws Exception {
+		ArrayList<NetworkDatacenter> dcs = new ArrayList<>();
+		ArrayList<AggregateSwitch> aggSwitch = new ArrayList<>();
+		for (int i = 0; i <= 3; i++) {
+			dcs.add(createNetworkDatacenter("DC" + i, 1));
+		}
+
+		for (int i = 1; i <= 2; i++) {
+			aggSwitch.add(new AggregateSwitch("Agg" + i, NetworkConstants.Agg_LEVEL, dcs.get(0)));
+		}
+
+		// Create Brokers
+		DatacenterBrokerEdge broker = new DatacenterBrokerEdge("Broker_1");
+		broker.setUserDC(dcs.get(0));
+		dcs.get(0).setUserDC(true);
+		System.out.println(CloudSim.clock() + ": [DEBUG]: createNetwork3()... Broker userDc #" + dcs.get(0).getId());
+
+		connectAggSwitchToDc(aggSwitch.get(0), dcs.get(0));
+		connectAggSwitchToDc(aggSwitch.get(0), dcs.get(1));
+		connectAggSwitchToDc(aggSwitch.get(1), dcs.get(1));
+		connectAggSwitchToDc(aggSwitch.get(1), dcs.get(2));
+		connectAggSwitchToDc(aggSwitch.get(1), dcs.get(3));
+
+		aggSwitch.get(0).uplinkswitches.add(aggSwitch.get(1));
+		aggSwitch.get(1).uplinkswitches.add(aggSwitch.get(0));
+
+		// Add Services
+		broker.addService(new EdgeDbService("EDS_broker1"));
+		broker.addService(new EdgeDbService("EDS_broker2"));
+		broker.addService(new EdgeDbService("EDS_broker3"));
+
+		// Simulate the Broker sending deferred messages to the Services
+		// (e.g. new requests)
+		Object[] data = new Object[2];
+		for (Service service : broker.getServiceList()) {
+			data[0] = service.getId();
+			data[1] = Message.ZERO;
+			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 600.0);
+		}
+
+		NetworkTopology.mapNode(dcs.get(0).getId(), 0);
+		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(0)), 1);
+		NetworkTopology.mapNode(aggSwitch.get(0).getId(), 2);
+		NetworkTopology.mapNode(dcs.get(1).getId(), 3);
+		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(1)), 4);
+		NetworkTopology.mapNode(aggSwitch.get(1).getId(), 5);
+		NetworkTopology.mapNode(dcs.get(2).getId(), 6);
+		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(2)), 7);
+		NetworkTopology.mapNode(dcs.get(3).getId(), 8);
+		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(3)), 9);
+
+	}
+
+	/**
+	 * inter-connect data centers.
+	 * 
+	 * @param dcs
+	 *            list of data centers
+	 * @throws Exception
+	 */
+	public static void createNetworkWorking5() throws Exception {
+		ArrayList<NetworkDatacenter> dcs = new ArrayList<>();
+		ArrayList<AggregateSwitch> aggSwitch = new ArrayList<>();
+		for (int i = 0; i <= 4; i++) {
+			dcs.add(createNetworkDatacenter("DC" + i, 1));
+		}
+		for (int i = 1; i <= 3; i++) {
+			aggSwitch.add(new AggregateSwitch("Agg" + i, NetworkConstants.Agg_LEVEL, dcs.get(0)));
+		}
+
+		// Create Brokers
+		DatacenterBrokerEdge broker = new DatacenterBrokerEdge("Broker_1");
+		broker.setUserDC(dcs.get(0));
+		dcs.get(0).setUserDC(true);
+		System.out.println(CloudSim.clock() + ": [DEBUG]: createNetwork3()... Broker userDc #" + dcs.get(0).getId());
+
+		connectAggSwitchToDc(aggSwitch.get(0), dcs.get(0));
+		connectAggSwitchToDc(aggSwitch.get(0), dcs.get(1));
+		connectAggSwitchToDc(aggSwitch.get(1), dcs.get(1));
+		connectAggSwitchToDc(aggSwitch.get(1), dcs.get(2));
+		connectAggSwitchToDc(aggSwitch.get(1), dcs.get(3));
+		connectAggSwitchToDc(aggSwitch.get(2), dcs.get(2));
+		connectAggSwitchToDc(aggSwitch.get(2), dcs.get(3));
+		connectAggSwitchToDc(aggSwitch.get(2), dcs.get(4));
+
+		aggSwitch.get(0).uplinkswitches.add(aggSwitch.get(1));
+		aggSwitch.get(1).uplinkswitches.add(aggSwitch.get(0));
+		aggSwitch.get(1).uplinkswitches.add(aggSwitch.get(2));
+		aggSwitch.get(2).uplinkswitches.add(aggSwitch.get(1));
+
+		// Add Services
+		broker.addService(new EdgeDbService("EDS_broker1"));
+		broker.addService(new EdgeDbService("EDS_broker2"));
+		broker.addService(new EdgeDbService("EDS_broker3"));
+
+		// Simulate the Broker sending deferred messages to the Services
+		// (e.g. new requests)
+		Object[] data = new Object[2];
+		for (Service service : broker.getServiceList()) {
+			data[0] = service.getId();
+			data[1] = Message.ZERO;
+			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 600.0);
+		}
+
+		NetworkTopology.mapNode(dcs.get(0).getId(), 0);
+		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(0)), 1);
+		NetworkTopology.mapNode(aggSwitch.get(0).getId(), 2);
+		NetworkTopology.mapNode(dcs.get(1).getId(), 3);
+		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(1)), 4);
+		NetworkTopology.mapNode(aggSwitch.get(1).getId(), 5);
+		NetworkTopology.mapNode(dcs.get(2).getId(), 6);
+		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(2)), 7);
+		NetworkTopology.mapNode(dcs.get(3).getId(), 8);
+		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(3)), 9);
+		NetworkTopology.mapNode(aggSwitch.get(1).getId(), 10);
+		NetworkTopology.mapNode(dcs.get(4).getId(), 11);
+		NetworkTopology.mapNode(getDcFirstEdgeSwitch(dcs.get(3)), 12);
+//		NetworkTopology.mapNode(broker.getId(), 13);
 
 	}
 

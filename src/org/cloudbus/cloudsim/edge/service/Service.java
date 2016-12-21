@@ -677,7 +677,7 @@ public abstract class Service extends SimEntity {
 				if (NetworkTopology.getDelay(getId(), dcId) < delay
 						&& !(getDatacenterRequestedIdsList().contains(dcId))) {
 					datacenterId = dcId;
-//					delay = NetworkTopology.getDelay(getId(), dcId);
+					delay = NetworkTopology.getDelay(getId(), dcId);
 				}
 			}
 		}

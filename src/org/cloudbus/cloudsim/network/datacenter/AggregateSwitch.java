@@ -119,11 +119,15 @@ public class AggregateSwitch extends Switch {
 			// either root or another edge level swich
 			// find the id for edgelevel switch
 			// int switchid = dc.VmToSwitchid.get(recvVMid);
-			int switchid = getVmToSwitchid().get(recvVMid);
+			Map<Integer, Integer> map = getVmToSwitchid();
 			boolean flagtoswtich = false;
-			for (Switch sw : downlinkswitches) {
-				if (switchid == sw.getId()) {
-					flagtoswtich = true;
+			int switchid = -1;
+			if (map.containsKey(recvVMid)) {
+				switchid = map.get(recvVMid);
+				for (Switch sw : downlinkswitches) {
+					if (switchid == sw.getId()) {
+						flagtoswtich = true;
+					}
 				}
 			}
 			if (flagtoswtich) {
@@ -135,9 +139,14 @@ public class AggregateSwitch extends Switch {
 				pktlist.add(hspkt);
 			} else// send to up
 			{
-				int senderVMid = hspkt.pkt.getSender();
-				Switch sw = uplinkswitches.get(0).getId() != getVmToSwitchid().get(senderVMid) ? uplinkswitches.get(0)
-						: uplinkswitches.get(1);
+//				int senderVMid = hspkt.pkt.getSender();
+				Switch sw = uplinkswitches.get(0).getId() != ev.getSource() ? uplinkswitches.get(0) : uplinkswitches.get(1);;
+//				if (map.containsKey(senderVMid)) {
+//					sw = uplinkswitches.get(0).getId() != map.get(senderVMid) ? uplinkswitches.get(0)
+//							: uplinkswitches.get(1);
+//				} else {
+//					sw = uplinkswitches.get(0);
+//				}
 				List<NetworkPacket> pktlist = uplinkswitchpktlist.get(sw.getId());
 				if (pktlist == null) {
 					pktlist = new ArrayList<NetworkPacket>();

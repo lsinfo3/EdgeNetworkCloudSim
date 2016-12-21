@@ -30,9 +30,11 @@ public class EdgeExample2 {
 			.buildNetworkTopology("C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\topology.brite");
 			
 			
-			BaseDatacenter.createNetworkWorking();
-//			BaseDatacenter.createNetwork3();
-//			BaseDatacenter.createNetwork();
+//			BaseDatacenter.createNetworkWorking();
+//			BaseDatacenter.createNetworkWorking2();
+//			BaseDatacenter.createNetworkWorking3();
+//			BaseDatacenter.createNetworkWorking4();
+			BaseDatacenter.createNetworkWorking5();
 
 			
 
