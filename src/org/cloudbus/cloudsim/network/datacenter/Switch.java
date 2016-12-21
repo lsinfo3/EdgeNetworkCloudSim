@@ -80,7 +80,7 @@ public class Switch extends SimEntity {
 
 	@Override
 	public void startEntity() {
-		Log.printLine(getName() + " is starting...");
+		Log.printLine(getName() + " #" + getId() + " is starting...");
 	}
 
 	@Override

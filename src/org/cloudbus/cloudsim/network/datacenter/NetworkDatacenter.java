@@ -49,6 +49,19 @@ import org.cloudbus.cloudsim.core.SimEvent;
  */
 public class NetworkDatacenter extends Datacenter {
 
+	public Map<Integer, Integer> VmToSwitchid;
+
+	public Map<Integer, Integer> HostToSwitchid;
+
+	public Map<Integer, Switch> Switchlist;
+
+	public Map<Integer, Integer> VmtoHostlist;
+
+	/**
+	 * flag to reserve this datacenter for the user VM only.
+	 */
+	private boolean userDC;
+
 	/**
 	 * Allocates a new NetworkDatacenter object.
 	 * 
@@ -86,15 +99,8 @@ public class NetworkDatacenter extends Datacenter {
 		HostToSwitchid = new HashMap<Integer, Integer>();
 		VmtoHostlist = new HashMap<Integer, Integer>();
 		Switchlist = new HashMap<Integer, Switch>();
+		this.setUserDC(false);
 	}
-
-	public Map<Integer, Integer> VmToSwitchid;
-
-	public Map<Integer, Integer> HostToSwitchid;
-
-	public Map<Integer, Switch> Switchlist;
-
-	public Map<Integer, Integer> VmtoHostlist;
 
 	/**
 	 * Get list of all EdgeSwitches in the Datacenter network One can design
@@ -132,7 +138,7 @@ public class NetworkDatacenter extends Datacenter {
 		if (result) {
 			VmToSwitchid.put(vm.getId(), ((NetworkHost) vm.getHost()).sw.getId());
 			VmtoHostlist.put(vm.getId(), vm.getHost().getId());
-			System.out.println("Datacenter ID: " + getId() + " - VM Id: " + vm.getUid() + " is created on Host Id "
+			System.out.println(CloudSim.clock() + ": [WARN]: Datacenter #" + getId() + " - VM Id: " + vm.getUid() + " is created on Host Id "
 					+ vm.getHost().getId() + " owned by: " + vm.getUserId());
 
 			getVmList().add(vm);
@@ -142,13 +148,16 @@ public class NetworkDatacenter extends Datacenter {
 		}
 		return result;
 	}
-	
+
 	/**
-	 * Process the event for an User/Broker who wants to create a VM in this PowerDatacenter. This
-	 * PowerDatacenter will then send the status back to the User/Broker.
+	 * Process the event for an User/Broker who wants to create a VM in this
+	 * PowerDatacenter. This PowerDatacenter will then send the status back to
+	 * the User/Broker.
 	 * 
-	 * @param ev a Sim_event object
-	 * @param ack the ack
+	 * @param ev
+	 *            a Sim_event object
+	 * @param ack
+	 *            the ack
 	 * @pre ev != null
 	 * @post $none
 	 */
@@ -171,11 +180,11 @@ public class NetworkDatacenter extends Datacenter {
 			}
 			send(vm.getUserId(), CloudSim.getMinTimeBetweenEvents(), CloudSimTags.VM_CREATE_ACK, data);
 		}
-		
+
 		if (result) {
 			VmToSwitchid.put(vm.getId(), ((NetworkHost) vm.getHost()).sw.getId());
 			VmtoHostlist.put(vm.getId(), vm.getHost().getId());
-			System.out.println("Datacenter ID: " + getId() + " - VM Id: " + vm.getUid() + " is created on Host Id "
+			System.out.println(CloudSim.clock() + ": [WARN]: Datacenter #" + getId() + " - VM Id: " + vm.getUid() + " is created on Host Id "
 					+ vm.getHost().getId() + " owned by service: " + vm.getUserId());
 
 			getVmList().add(vm);
@@ -183,7 +192,7 @@ public class NetworkDatacenter extends Datacenter {
 			if (vm.isBeingInstantiated()) {
 				vm.setBeingInstantiated(false);
 			}
-			
+
 			vm.updateVmProcessing(CloudSim.clock(),
 					getVmAllocationPolicy().getHost(vm).getVmScheduler().getAllocatedMipsForVm(vm));
 		}
@@ -202,6 +211,7 @@ public class NetworkDatacenter extends Datacenter {
 	 */
 	@Override
 	protected void processCloudletSubmit(SimEvent ev, boolean ack) {
+		System.out.println(CloudSim.clock() + " [DEBUG]: " + getName() + " calls processCloudletSubmit()");
 		updateCloudletProcessing();
 
 		try {
@@ -229,11 +239,11 @@ public class NetworkDatacenter extends Datacenter {
 
 					// unique tag = operation tag
 					int tag = CloudSimTags.CLOUDLET_SUBMIT_ACK;
-//					sendNow(cl.getUserId(), tag, data);
+					// sendNow(cl.getUserId(), tag, data);
 					sendNow(cl.getServiceId(), tag, data);
 				}
 
-//				sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
+				// sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
 				sendNow(cl.getServiceId(), CloudSimTags.CLOUDLET_RETURN, cl);
 
 				return;
@@ -243,7 +253,7 @@ public class NetworkDatacenter extends Datacenter {
 			cl.setResourceParameter(getId(), getCharacteristics().getCostPerSecond(),
 					getCharacteristics().getCostPerBw());
 
-//			int userId = cl.getUserId();
+			// int userId = cl.getUserId();
 			int serviceId = cl.getServiceId();
 			int vmId = cl.getVmId();
 
@@ -272,7 +282,7 @@ public class NetworkDatacenter extends Datacenter {
 
 				// unique tag = operation tag
 				int tag = CloudSimTags.CLOUDLET_SUBMIT_ACK;
-//				sendNow(cl.getUserId(), tag, data);
+				// sendNow(cl.getUserId(), tag, data);
 				sendNow(cl.getServiceId(), tag, data);
 			}
 		} catch (ClassCastException c) {
@@ -285,11 +295,10 @@ public class NetworkDatacenter extends Datacenter {
 
 		checkCloudletCompletion();
 	}
-	
-	
+
 	/**
-	 * Verifies if some cloudlet inside this PowerDatacenter already finished. If yes, send it to
-	 * the User/Broker
+	 * Verifies if some cloudlet inside this PowerDatacenter already finished.
+	 * If yes, send it to the User/Broker
 	 * 
 	 * @pre $none
 	 * @post $none
@@ -303,19 +312,22 @@ public class NetworkDatacenter extends Datacenter {
 				while (vm.getCloudletScheduler().isFinishedCloudlets()) {
 					Cloudlet cl = vm.getCloudletScheduler().getNextFinishedCloudlet();
 					if (cl != null) {
-//						sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
+						// sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN,
+						// cl);
 						sendNow(cl.getServiceId(), CloudSimTags.CLOUDLET_RETURN, cl);
 					}
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Processes a Cloudlet based on the event type.
 	 * 
-	 * @param ev a Sim_event object
-	 * @param type event type
+	 * @param ev
+	 *            a Sim_event object
+	 * @param type
+	 *            event type
 	 * @pre ev != null
 	 * @pre type > 0
 	 * @post $none
@@ -355,66 +367,75 @@ public class NetworkDatacenter extends Datacenter {
 
 		// begins executing ....
 		switch (type) {
-			case CloudSimTags.CLOUDLET_CANCEL:
-//				processCloudletCancel(cloudletId, userId, vmId);
-				processCloudletCancel(cloudletId, userId, serviceId, vmId);
-				break;
+		case CloudSimTags.CLOUDLET_CANCEL:
+			// processCloudletCancel(cloudletId, userId, vmId);
+			processCloudletCancel(cloudletId, userId, serviceId, vmId);
+			break;
 
-			case CloudSimTags.CLOUDLET_PAUSE:
-//				processCloudletPause(cloudletId, userId, vmId, false);
-				processCloudletPause(cloudletId, userId, serviceId, vmId, false);
-				break;
+		case CloudSimTags.CLOUDLET_PAUSE:
+			// processCloudletPause(cloudletId, userId, vmId, false);
+			processCloudletPause(cloudletId, userId, serviceId, vmId, false);
+			break;
 
-			case CloudSimTags.CLOUDLET_PAUSE_ACK:
-//				processCloudletPause(cloudletId, userId, vmId, true);
-				processCloudletPause(cloudletId, userId, serviceId, vmId, true);
-				break;
+		case CloudSimTags.CLOUDLET_PAUSE_ACK:
+			// processCloudletPause(cloudletId, userId, vmId, true);
+			processCloudletPause(cloudletId, userId, serviceId, vmId, true);
+			break;
 
-			case CloudSimTags.CLOUDLET_RESUME:
-//				processCloudletResume(cloudletId, userId, vmId, false);
-				processCloudletResume(cloudletId, userId, serviceId, vmId, false);
-				break;
+		case CloudSimTags.CLOUDLET_RESUME:
+			// processCloudletResume(cloudletId, userId, vmId, false);
+			processCloudletResume(cloudletId, userId, serviceId, vmId, false);
+			break;
 
-			case CloudSimTags.CLOUDLET_RESUME_ACK:
-//				processCloudletResume(cloudletId, userId, vmId, true);
-				processCloudletResume(cloudletId, userId, serviceId, vmId, true);
-				break;
-			default:
-				break;
+		case CloudSimTags.CLOUDLET_RESUME_ACK:
+			// processCloudletResume(cloudletId, userId, vmId, true);
+			processCloudletResume(cloudletId, userId, serviceId, vmId, true);
+			break;
+		default:
+			break;
 		}
 
 	}
-	
+
 	/**
 	 * Processes a Cloudlet cancel request.
 	 * 
-	 * @param cloudletId resuming cloudlet ID
-	 * @param userId ID of the cloudlet's owner
-	 * @param serviceId ID of the cloudlet's service
-	 * @param vmId the vm id
+	 * @param cloudletId
+	 *            resuming cloudlet ID
+	 * @param userId
+	 *            ID of the cloudlet's owner
+	 * @param serviceId
+	 *            ID of the cloudlet's service
+	 * @param vmId
+	 *            the vm id
 	 * @pre $none
 	 * @post $none
 	 */
 	protected void processCloudletCancel(int cloudletId, int userId, int serviceId, int vmId) {
-		Cloudlet cl = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId,userId)
-				.getCloudletScheduler().cloudletCancel(cloudletId);
+		Cloudlet cl = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId, userId).getCloudletScheduler()
+				.cloudletCancel(cloudletId);
 		sendNow(serviceId, CloudSimTags.CLOUDLET_CANCEL, cl);
 	}
-	
+
 	/**
 	 * Processes a Cloudlet pause request.
 	 * 
-	 * @param cloudletId resuming cloudlet ID
-	 * @param userId ID of the cloudlet's Broker
-	 * @param serviceId ID of the cloudlet's Service
-	 * @param ack $true if an ack is requested after operation
-	 * @param vmId the vm id
+	 * @param cloudletId
+	 *            resuming cloudlet ID
+	 * @param userId
+	 *            ID of the cloudlet's Broker
+	 * @param serviceId
+	 *            ID of the cloudlet's Service
+	 * @param ack
+	 *            $true if an ack is requested after operation
+	 * @param vmId
+	 *            the vm id
 	 * @pre $none
 	 * @post $none
 	 */
 	protected void processCloudletPause(int cloudletId, int userId, int serviceId, int vmId, boolean ack) {
-		boolean status = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId,userId)
-				.getCloudletScheduler().cloudletPause(cloudletId);
+		boolean status = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId, userId).getCloudletScheduler()
+				.cloudletPause(cloudletId);
 
 		if (ack) {
 			int[] data = new int[3];
@@ -428,22 +449,26 @@ public class NetworkDatacenter extends Datacenter {
 			sendNow(serviceId, CloudSimTags.CLOUDLET_PAUSE_ACK, data);
 		}
 	}
-	
-	
+
 	/**
 	 * Processes a Cloudlet resume request.
 	 * 
-	 * @param cloudletId resuming cloudlet ID
-	 * @param userId ID of the cloudlet's owner
-	 * @param serviceId ID of the cloudlet's owner
-	 * @param ack $true if an ack is requested after operation
-	 * @param vmId the vm id
+	 * @param cloudletId
+	 *            resuming cloudlet ID
+	 * @param userId
+	 *            ID of the cloudlet's owner
+	 * @param serviceId
+	 *            ID of the cloudlet's owner
+	 * @param ack
+	 *            $true if an ack is requested after operation
+	 * @param vmId
+	 *            the vm id
 	 * @pre $none
 	 * @post $none
 	 */
 	protected void processCloudletResume(int cloudletId, int userId, int serviceId, int vmId, boolean ack) {
-		double eventTime = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId,userId)
-				.getCloudletScheduler().cloudletResume(cloudletId);
+		double eventTime = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId, userId).getCloudletScheduler()
+				.cloudletResume(cloudletId);
 
 		boolean status = false;
 		if (eventTime > 0.0) { // if this cloudlet is in the exec queue
@@ -465,9 +490,24 @@ public class NetworkDatacenter extends Datacenter {
 			sendNow(serviceId, CloudSimTags.CLOUDLET_RESUME_ACK, data);
 		}
 	}
-	
+
 	@Override
-    public String toString() {
-        return String.format("DC(%s,%d)", Objects.toString(getName(), "N/A"), getId());
-    }
+	public String toString() {
+		return String.format("DC(%s,%d)", Objects.toString(getName(), "N/A"), getId());
+	}
+
+	/**
+	 * @return the userDC
+	 */
+	public boolean isUserDC() {
+		return userDC;
+	}
+
+	/**
+	 * @param userDC
+	 *            the userDC to set
+	 */
+	public void setUserDC(boolean userDC) {
+		this.userDC = userDC;
+	}
 }

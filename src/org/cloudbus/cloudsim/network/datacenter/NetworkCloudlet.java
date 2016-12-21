@@ -292,4 +292,15 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "NetworkCloudlet [id=" + getCloudletId() + ", vmType=" + vmType + ", numStage=" + numStage
+				+ ", currStagenum=" + currStagenum + ", vmId=" + vmId + "]";
+	}
+
 }

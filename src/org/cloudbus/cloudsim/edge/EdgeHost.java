@@ -20,21 +20,27 @@ import org.cloudbus.cloudsim.provisioners.BwProvisioner;
 import org.cloudbus.cloudsim.provisioners.RamProvisioner;
 
 public class EdgeHost extends NetworkHost {
-	
 
 	public EdgeHost(int id, RamProvisioner ramProvisioner, BwProvisioner bwProvisioner, long storage,
 			List<? extends Pe> peList, VmScheduler vmScheduler) {
 		super(Id.pollId(EdgeHost.class), ramProvisioner, bwProvisioner, storage, peList, vmScheduler);
-		// TODO Auto-generated constructor stub
 	}
-	
+
+	public EdgeHost(RamProvisioner ramProvisioner, BwProvisioner bwProvisioner, long storage, List<? extends Pe> peList,
+			VmScheduler vmScheduler) {
+		this(Id.pollId(EdgeHost.class), ramProvisioner, bwProvisioner, storage, peList, vmScheduler);
+	}
+
 	/**
-	 * Requests updating of processing of cloudlets in the VMs running in this host.
+	 * Requests updating of processing of cloudlets in the VMs running in this
+	 * host.
 	 * 
-	 * @param currentTime the current time
+	 * @param currentTime
+	 *            the current time
 	 * 
-	 * @return expected time of completion of the next cloudlet in all VMs in this host.
-	 *         Double.MAX_VALUE if there is no future events expected in th is host
+	 * @return expected time of completion of the next cloudlet in all VMs in
+	 *         this host. Double.MAX_VALUE if there is no future events expected
+	 *         in th is host
 	 * 
 	 * @pre currentTime >= 0.0
 	 * @post $none
@@ -45,8 +51,7 @@ public class EdgeHost extends NetworkHost {
 		// insert in each vm packet recieved
 		recvpackets();
 		for (Vm vm : super.getVmList()) {
-			double time = ((VmEdge) vm).updateVmProcessing(currentTime, getVmScheduler()
-					.getAllocatedMipsForVm(vm));
+			double time = ((VmEdge) vm).updateVmProcessing(currentTime, getVmScheduler().getAllocatedMipsForVm(vm));
 			if (time > 0.0 && time < smallerTime) {
 				smallerTime = time;
 			}
@@ -57,14 +62,17 @@ public class EdgeHost extends NetworkHost {
 		return smallerTime;
 
 	}
-	
+
 	/**
-	 * Send packet check whether a packet belongs to a local VM or to a VM hosted on other machine.
+	 * Send packet check whether a packet belongs to a local VM or to a VM
+	 * hosted on other machine.
 	 * 
 	 * 
 	 */
 	@Override
 	protected void sendpackets() {
+
+//		System.out.println(CloudSim.clock() + "[DEBUG]: calling sendpackets() from EdgeHost");
 
 		for (Vm vm : super.getVmList()) {
 			for (Entry<Integer, List<HostPacket>> es : ((EdgeCloudletSpaceSharedScheduler) vm
@@ -91,15 +99,14 @@ public class EdgeHost extends NetworkHost {
 			flag = true;
 			hs.setStime(hs.getRtime());
 			hs.getPkt().setRecievetime(CloudSim.clock());
-			// insertthe packet in recievedlist
+			// insert the packet in recievedlist
 			Vm vm = VmList.getById(getVmList(), hs.getPkt().getReciever());
 
 			List<HostPacket> pktlist = ((EdgeCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv
 					.get(hs.getPkt().getSender());
 			if (pktlist == null) {
 				pktlist = new ArrayList<HostPacket>();
-				((EdgeCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv.put(
-						hs.getPkt().getSender(),
+				((EdgeCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv.put(hs.getPkt().getSender(),
 						pktlist);
 			}
 			pktlist.add(hs.getPkt());
@@ -110,7 +117,8 @@ public class EdgeHost extends NetworkHost {
 			}
 		}
 
-		// Sending packet to other VMs therefore packet is forwarded to a Edge switch
+		// Sending packet to other VMs therefore packet is forwarded to a Edge
+		// switch
 		packetTosendLocal.clear();
 		double avband = bandwidth / packetTosendGlobal.size();
 		for (NetworkPacket hs : packetTosendGlobal) {
@@ -118,13 +126,17 @@ public class EdgeHost extends NetworkHost {
 			NetworkConstants.totaldatatransfer += hs.getPkt().getData();
 
 			CloudSim.send(getDatacenter().getId(), sw.getId(), delay, CloudSimTags.Network_Event_UP, hs);
+			System.out.println(CloudSim.clock() + " [DEBUG]:sendPackets: EdgeHost #" + getId()
+					+ " sends packet from VM #" + hs.getSendervmid() + " in DC #" + getDatacenter().getId() + " to VM #"
+					+ hs.getRecievervmid() + " on EdgeHost #" + hs.getRecieverhostid() + " over Switch #" + sw.getId() + " with delay " + delay);
 			// send to switch with delay
 		}
 		packetTosendGlobal.clear();
 	}
-	
+
 	/**
-	 * Receives packet and forward it to the corresponding VM for processing host.
+	 * Receives packet and forward it to the corresponding VM for processing
+	 * host.
 	 * 
 	 * 
 	 */
@@ -134,15 +146,14 @@ public class EdgeHost extends NetworkHost {
 		for (NetworkPacket hs : packetrecieved) {
 			hs.getPkt().setRecievetime(CloudSim.clock());
 
-			// insertthe packet in recievedlist of VM
+			// insert the packet in recievedlist of VM
 			Vm vm = VmList.getById(getVmList(), hs.getPkt().getReciever());
 			List<HostPacket> pktlist = ((EdgeCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv
 					.get(hs.getPkt().getSender());
 
 			if (pktlist == null) {
 				pktlist = new ArrayList<HostPacket>();
-				((EdgeCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv.put(
-						hs.getPkt().getSender(),
+				((EdgeCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv.put(hs.getPkt().getSender(),
 						pktlist);
 
 			}
@@ -152,4 +163,21 @@ public class EdgeHost extends NetworkHost {
 		packetrecieved.clear();
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		String vms = "";
+		for (Vm vm : getVmList()) {
+			vms += ((VmEdge)vm).toString() +",";
+		}
+		return "EdgeHost [id=" + getId() +
+				", vms=[" +
+				vms +
+				"]]";
+	}
+
+	
+	
 }

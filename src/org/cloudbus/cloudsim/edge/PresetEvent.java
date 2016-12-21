@@ -37,4 +37,14 @@ public class PresetEvent {
 	public double getDelay() {
 		return delay;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "PresetEvent [id=" + id + ", tag=" + tag + ", data=" + data.toString() + ", delay=" + delay + "]";
+	}
+	
+	
 }

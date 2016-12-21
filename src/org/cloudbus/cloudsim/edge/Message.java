@@ -9,6 +9,11 @@ package org.cloudbus.cloudsim.edge;
  *
  */
 public enum Message {
+	
+	/**
+	 * 0 mips.
+	 */
+	ZERO(0),
 
 	/**
 	 * 1 mips.

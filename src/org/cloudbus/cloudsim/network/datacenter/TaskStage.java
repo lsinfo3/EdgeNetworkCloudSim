@@ -89,4 +89,14 @@ public class TaskStage {
 
 	private int peer;// from whom data needed to be recieved or send (VM)
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "TaskStage [Cl=" + vpeer + ", type=" + type + ", data=" + data + ", time=" + time + ", stageid="
+				+ stageid + ", memory=" + memory + ", vm=" + peer + "]";
+	}
+
+	
 }

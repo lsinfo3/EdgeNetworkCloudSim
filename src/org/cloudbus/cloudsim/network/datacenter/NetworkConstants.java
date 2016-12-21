@@ -50,7 +50,7 @@ public class NetworkConstants {
 
 	public static double EdgeSwitchPort = 4;// number of host
 
-	public static double AggSwitchPort = 1;// number of Edge
+	public static double AggSwitchPort = 2;// number of Edge
 
 	public static double RootSwitchPort = 1;// number of Agg
 
@@ -62,4 +62,6 @@ public class NetworkConstants {
 	public static int nexttime = 1000;
 
 	public static int totaldatatransfer = 0;
+	
+	public static int changetonextstagecall = 0;
 }

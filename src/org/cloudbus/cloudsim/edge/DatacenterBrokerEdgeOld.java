@@ -357,13 +357,13 @@ public class DatacenterBrokerEdgeOld extends SimEntity {
 
 		switch (ev.getTag()) {
 		case CloudSimTagsExt.SERVICE_CLOUDLET_DONE:
-			System.out.println(CloudSim.clock() + ": " + getName() + ": Service #" + ev.getSource()
+			System.out.println(CloudSim.clock() + "[DEBUG]: " + getName() + ": Service #" + ev.getSource()
 					+ ": all Cloudlets processed!");
 			// d();
 			// finishExecution();
 			break;
 		case CloudSimTagsExt.SERVICE_CLOUDLET_DONE_VM:
-			System.out.println(CloudSim.clock() + ": " + getName() + ": Service #" + ev.getSource()
+			System.out.println(CloudSim.clock() + "[DEBUG]: " + getName() + ": Service #" + ev.getSource()
 					+ ": almost all Cloudlets processed, but some are still waiting for their VMs to be created!");
 
 			// clearDatacenters();
@@ -374,10 +374,10 @@ public class DatacenterBrokerEdgeOld extends SimEntity {
 		case CloudSimTags.VM_DESTROY_ACK:
 			processVMDestroy(ev);
 			break;
-		case CloudSimTagsExt.BROKER_DESTROY_VMS_NOW:
+		case CloudSimTagsExt.SERVICE_DESTROY_VMS_NOW:
 			destroyVMList((List<Vm>) ev.getData());
 			break;
-		case CloudSimTagsExt.BROKER_SUBMIT_VMS_NOW:
+		case CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW:
 			submitVmList((List<Vm>) ev.getData());
 			// TODO Is the following valid when multiple data centres are
 			// handled with a single broker?
@@ -787,9 +787,9 @@ public class DatacenterBrokerEdgeOld extends SimEntity {
 	 */
 	public void createVmsAfter(List<? extends Vm> vms, double delay) {
 		if (started) {
-			send(getId(), delay, CloudSimTagsExt.BROKER_SUBMIT_VMS_NOW, vms);
+			send(getId(), delay, CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW, vms);
 		} else {
-			presetEvent(getId(), CloudSimTagsExt.BROKER_SUBMIT_VMS_NOW, vms, delay);
+			presetEvent(getId(), CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW, vms, delay);
 		}
 	}
 
@@ -804,9 +804,9 @@ public class DatacenterBrokerEdgeOld extends SimEntity {
 	 */
 	public void destroyVMsAfter(final List<? extends Vm> vms, double delay) {
 		if (started) {
-			send(getId(), delay, CloudSimTagsExt.BROKER_DESTROY_VMS_NOW, vms);
+			send(getId(), delay, CloudSimTagsExt.SERVICE_DESTROY_VMS_NOW, vms);
 		} else {
-			presetEvent(getId(), CloudSimTagsExt.BROKER_DESTROY_VMS_NOW, vms, delay);
+			presetEvent(getId(), CloudSimTagsExt.SERVICE_DESTROY_VMS_NOW, vms, delay);
 		}
 	}
 

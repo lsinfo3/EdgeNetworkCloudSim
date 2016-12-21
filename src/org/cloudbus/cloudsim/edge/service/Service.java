@@ -28,6 +28,7 @@ import org.cloudbus.cloudsim.edge.vm.VmEdge;
 import org.cloudbus.cloudsim.lists.CloudletList;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
+import org.cloudbus.cloudsim.network.datacenter.NetworkDatacenter;
 
 /**
  * @author Brice Kamneng Kwam
@@ -75,8 +76,6 @@ public abstract class Service extends SimEntity {
 	/** The vms to datacenters map. */
 	protected Map<Integer, Integer> vmsToDatacentersMap;
 
-	// ==============================BROKER========================================
-
 	/** The vm list. */
 	protected List<? extends Vm> vmList;
 
@@ -107,7 +106,23 @@ public abstract class Service extends SimEntity {
 	/** Number of VM destructions acknowledged. */
 	private int vmDestructsAcks = 0;
 
-	// ==============================BROKER========================================
+	/**
+	 * The first Cloudlet of this Service. The one that communicates with the
+	 * Broker
+	 */
+	private NetworkCloudlet firstCloudlet = null;
+	/**
+	 * The Vm assigned to the first Cloudlet of this Service.
+	 */
+	private int firstVmId = -1;
+	/**
+	 * The cloudlet of the Broker.
+	 */
+	private int brokerCloudletId = -1;
+	/**
+	 * The Vm of the Broker.
+	 */
+	private int brokerVmId = -1;
 
 	/**
 	 * Constr.
@@ -129,10 +144,8 @@ public abstract class Service extends SimEntity {
 		setCloudletReceivedList(new ArrayList<Cloudlet>());
 		setVmsToDatacentersMap(new HashMap<Integer, Integer>());
 		cloudletsSubmitted = 0;
-		// generateCloudlets();
 		cloudletGenerated = false;
 
-		// ==============================EXT========================================
 		setVmList(new ArrayList<Vm>());
 		setVmsCreatedList(new ArrayList<Vm>());
 
@@ -176,7 +189,10 @@ public abstract class Service extends SimEntity {
 		if (getDatacenterCharacteristicsList().size() == getDatacenterIdsList().size()) {
 			setDatacenterRequestedIdsList(new ArrayList<Integer>());
 			submitVmList();
-			createVmsInDatacenter(getNextDcIdWithShortestDelay());
+			System.out.println(CloudSim.clock() + ": [DEBUG] :processResourceCharacteristics: " + getName()
+					+ " Vms have been submitted/created");
+			System.out.println(Double.MAX_VALUE - 102084703991558655000000000000000000000000000000000000000000.0);
+			// createVmsInDatacenter(getNextDcIdWithShortestDelay());
 		}
 	}
 
@@ -223,15 +239,17 @@ public abstract class Service extends SimEntity {
 					+ datacenterId + ", Host #" + VmList.getById(getVmsCreatedList(), vmId).getHost().getId()
 					+ " owned by user #" + getId());
 		} else {
-			Log.printLine(CloudSim.clock() + ": " + getName() + ": Creation of VM #" + vmId + " failed in Datacenter #"
-					+ datacenterId);
+			Log.printLine(CloudSim.clock() + "[ERROR]: " + getName() + ": Creation of VM #" + vmId
+					+ " failed in Datacenter #" + datacenterId);
 		}
 
 		incrementVmsAcks();
 
 		// all the requested VMs have been created
 		if (getVmsCreatedList().size() == getVmList().size() - getVmsDestroyed()) {
-			submitCloudlets();
+			System.out.println(
+					CloudSim.clock() + ": [DEBUG]: " + getName() + " all the requested VMs have been created ");
+			// submitCloudlets();
 		} else {
 			// all the acks received, but some VMs were not created
 			if (getVmsRequested() == getVmsAcks()) {
@@ -243,7 +261,8 @@ public abstract class Service extends SimEntity {
 
 				// all datacenters already queried
 				if (getVmsCreatedList().size() > 0) { // if some vm were created
-					submitCloudlets();
+					System.out.println(CloudSim.clock() + ": [DEBUG]: " + getName() + " some vm were created");
+					// submitCloudlets();
 				} else { // no vms created. abort
 					Log.printLine(CloudSim.clock() + ": " + getName()
 							+ ": none of the required VMs could be created. Aborting");
@@ -539,9 +558,9 @@ public abstract class Service extends SimEntity {
 	 */
 	public void createVmsAfter(List<? extends Vm> vms, double delay) {
 		if (started) {
-			send(getId(), delay, CloudSimTagsExt.BROKER_SUBMIT_VMS_NOW, vms);
+			send(getId(), delay, CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW, vms);
 		} else {
-			presetEvent(getId(), CloudSimTagsExt.BROKER_SUBMIT_VMS_NOW, vms, delay);
+			presetEvent(getId(), CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW, vms, delay);
 		}
 	}
 
@@ -556,9 +575,9 @@ public abstract class Service extends SimEntity {
 	 */
 	public void destroyVMsAfter(final List<? extends Vm> vms, double delay) {
 		if (started) {
-			send(getId(), delay, CloudSimTagsExt.BROKER_DESTROY_VMS_NOW, vms);
+			send(getId(), delay, CloudSimTagsExt.SERVICE_DESTROY_VMS_NOW, vms);
 		} else {
-			presetEvent(getId(), CloudSimTagsExt.BROKER_DESTROY_VMS_NOW, vms, delay);
+			presetEvent(getId(), CloudSimTagsExt.SERVICE_DESTROY_VMS_NOW, vms, delay);
 		}
 	}
 
@@ -654,8 +673,12 @@ public abstract class Service extends SimEntity {
 		int datacenterId = -1;
 		double delay = Double.MAX_VALUE;
 		for (Integer dcId : datacenterIdsList) {
-			if (NetworkTopology.getDelay(getId(), dcId) < delay && !(getDatacenterRequestedIdsList().contains(dcId))) {
-				datacenterId = dcId;
+			if (!((NetworkDatacenter) CloudSim.getEntity(dcId)).isUserDC()) {
+				if (NetworkTopology.getDelay(getId(), dcId) < delay
+						&& !(getDatacenterRequestedIdsList().contains(dcId))) {
+					datacenterId = dcId;
+//					delay = NetworkTopology.getDelay(getId(), dcId);
+				}
 			}
 		}
 		return datacenterId;
@@ -708,19 +731,8 @@ public abstract class Service extends SimEntity {
 	 */
 	@Override
 	public void startEntity() {
-		Log.printLine(CloudSim.clock() + ": " + getName() + " is starting...");
-		schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST);
-	}
+		Log.printLine(CloudSim.clock() + ": " + getName() + " #" + getId() + " is starting...");
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.cloudbus.cloudsim.core.SimEntity#processEvent(org.cloudbus.cloudsim
-	 * .core.SimEvent)
-	 */
-	@Override
-	public void processEvent(SimEvent ev) {
 		if (!started) {
 			started = true;
 
@@ -738,6 +750,20 @@ public abstract class Service extends SimEntity {
 				send(getId(), getLifeLength(), CloudSimTagsExt.SERVICE_DESTROY_ITSELF_NOW, null);
 			}
 		}
+
+		schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.cloudbus.cloudsim.core.SimEntity#processEvent(org.cloudbus.cloudsim
+	 * .core.SimEvent)
+	 */
+	@Override
+	public void processEvent(SimEvent ev) {
+
 		switch (ev.getTag()) {
 		// Resource characteristics request
 		case CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST:
@@ -751,16 +777,26 @@ public abstract class Service extends SimEntity {
 		case CloudSimTags.VM_CREATE_ACK:
 			int[] data = (int[]) ev.getData();
 			int vmId = data[1];
+			int result = data[2];
 
 			Vm vm = VmList.getById(getVmList(), vmId);
-			if (vm.isBeingInstantiated()) {
+			if (vm.isBeingInstantiated() && result == CloudSimTags.TRUE) {
+//			if (vm.isBeingInstantiated()) {
 				vm.setBeingInstantiated(false);
 			}
 			processVmCreate(ev);
 			break;
 		// start submitting Cloudlets
 		case CloudSimTagsExt.CLOUDLET_SERVICE_SUBMIT:
+			System.out.println(CloudSim.clock() + ": [DEBUG]: " + getName()
+					+ " received CLOUDLET_SERVICE_SUBMIT flag from #" + ev.getSource());
 			submitCloudlets();
+			break;
+		// A finished cloudlet returned
+		case CloudSimTagsExt.SERVICE_START_ACK:
+			// TODO start the Service without submitting Cloudlet, create
+			// Cloudlet and return the id of the first Cloudlet
+			processServiceStart(ev);
 			break;
 		// A finished cloudlet returned
 		case CloudSimTags.CLOUDLET_RETURN:
@@ -789,6 +825,29 @@ public abstract class Service extends SimEntity {
 		}
 	}
 
+	public void processServiceStart(SimEvent ev) {
+		if (getVmsCreatedList().size() == getVmList().size() - getVmsDestroyed()) {
+			int[] data = (int[]) ev.getData();
+			setBrokerCloudletId(data[0]);
+			setBrokerVmId(data[1]);
+
+			if (getFirstCloudlet() != null && getFirstVmId() != -1) {
+				int[] dat = { getFirstCloudlet().getCloudletId(), getFirstVmId() };
+				sendNow(getUserId(), CloudSimTagsExt.SERVICE_START_ACK, dat);
+			} else {
+				generateCloudlets();
+				assignVmToCloudlets();
+				int[] dat = { getFirstCloudlet().getCloudletId(), getFirstVmId() };
+				sendNow(getUserId(), CloudSimTagsExt.SERVICE_START_ACK, dat);
+			}
+
+		} else {
+			System.out.println(CloudSim.clock() + ": [DEBUG]: " + getName()
+					+ " all Vms not created yet, postponning Service start to 1.0 ");
+			send(getId(), 1.0, CloudSimTagsExt.SERVICE_START_ACK, ev.getData());
+		}
+	}
+
 	/**
 	 * Overrides this method when making a new and different type of Broker.
 	 * This method is called by {@link #body()} for incoming unknown tags.
@@ -808,16 +867,11 @@ public abstract class Service extends SimEntity {
 		case CloudSimTags.VM_DESTROY_ACK:
 			processVMDestroy(ev);
 			break;
-		case CloudSimTagsExt.BROKER_DESTROY_VMS_NOW:
+		case CloudSimTagsExt.SERVICE_DESTROY_VMS_NOW:
 			destroyVMList((List<Vm>) ev.getData());
 			break;
-		case CloudSimTagsExt.BROKER_SUBMIT_VMS_NOW:
-			submitVmList((List<Vm>) ev.getData());
-			// TODO Is the following valid when multiple data centres are
-			// handled with a single broker?
-			for (int nextDatacenterId : getDatacenterIdsList()) {
-				createVmsInDatacenter(nextDatacenterId);
-			}
+		case CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW:
+			createVmsInDatacenter(getNextDcIdWithShortestDelay());
 			break;
 		case CloudSimTagsExt.SERVICE_CLOUDLET_DONE_VM:
 			System.out.println(CloudSim.clock() + ": " + getName() + ": Service #" + ev.getSource()
@@ -843,11 +897,15 @@ public abstract class Service extends SimEntity {
 	 *            a SimEvent object
 	 */
 	protected void processBrokerMessage(SimEvent ev) {
-		setCloudletList(getCloudletReceivedList());
-		setCloudletSubmittedList(new ArrayList<Cloudlet>());
-		setCloudletReceivedList(new ArrayList<Cloudlet>());
-		System.out
-				.println(CloudSim.clock() + ": Service #" + getId() + ": Message received from Broker #" + getUserId());
+		if (!cloudletGenerated) {
+			generateCloudlets();
+		} else {
+			setCloudletList(getCloudletReceivedList().size() > 0 ? getCloudletReceivedList() : getCloudletList());
+			setCloudletSubmittedList(new ArrayList<Cloudlet>());
+			setCloudletReceivedList(new ArrayList<Cloudlet>());
+		}
+		System.out.println(
+				CloudSim.clock() + "[DEBUG]: Service #" + getId() + ": Message received from Broker #" + getUserId());
 		// generateCloudlets();
 		for (int i = 0; i < getCloudletList().size(); i++) {
 			((NetworkCloudlet) getCloudletList().get(i)).reset();
@@ -886,13 +944,10 @@ public abstract class Service extends SimEntity {
 	 */
 	@Override
 	public void shutdownEntity() {
-		System.out.println(cloudletsSubmitted);
-		if ((getCloudletList().size() > 0 && cloudletsSubmitted > 0)) {
-			System.out.println(CloudSim.clock() + ": [DEBUG]: " + cloudletsSubmitted + " Cloudlet submitted und "
-					+ getCloudletReceivedList().size() + " Cloudlet received");
-			// send(getId(), 100.0, CloudSimTags.END_OF_SIMULATION);
+		// if ((getCloudletList().size() > 0 && cloudletsSubmitted > 0)) {
+		// send(getId(), 100.0, CloudSimTags.END_OF_SIMULATION);
 
-		}
+		// }
 
 		for (Vm vm : getVmList()) {
 			finilizeVM(vm);
@@ -1121,8 +1176,10 @@ public abstract class Service extends SimEntity {
 						+ cloudlet.getCloudletId() + ": bount VM #" + cloudlet.getVmId() + " not available");
 				continue;
 			}
-			Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending cloudlet " + cloudlet.getCloudletId()
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending cloudlet #" + cloudlet.getCloudletId()
 					+ " to VM #" + vmId);
+			Log.printLine(CloudSim.clock() + ": " + getName() + "[DEBUG]: cloudlet #" + cloudlet.getCloudletId()
+					+ " has " + ((NetworkCloudlet) cloudlet).getNumStage() + " stages");
 			sendNow(getVmsToDatacentersMap().get(vmId), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
 			cloudletsSubmitted++;
 			getCloudletSubmittedList().add(cloudlet);
@@ -1130,6 +1187,10 @@ public abstract class Service extends SimEntity {
 			toRemove.add(cloudlet);
 		}
 		getCloudletList().removeAll(toRemove);
+		if (getCloudletList().size() == 0) {
+			Log.printLine(CloudSim.clock() + ": " + getName() + ": sending  SERVICE_ALL_CLOUDLETS_SENT to broker");
+			sendNow(getUserId(), CloudSimTagsExt.SERVICE_ALL_CLOUDLETS_SENT);
+		}
 
 		// remove submitted cloudlets from waiting list
 		// moved up in the loop to make sure that only the submitted cloudlets
@@ -1160,7 +1221,7 @@ public abstract class Service extends SimEntity {
 			}
 		}
 
-		Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending cloudlet " + cloudlet.getCloudletId()
+		Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending cloudlet #" + cloudlet.getCloudletId()
 				+ " to VM #" + vm.getId());
 		cloudlet.setVmId(vm.getId());
 		sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
@@ -1197,8 +1258,70 @@ public abstract class Service extends SimEntity {
 		}
 	}
 
+	/**
+	 * @return the firstCloudlet
+	 */
+	public NetworkCloudlet getFirstCloudlet() {
+		return firstCloudlet;
+	}
+
+	/**
+	 * @param firstCloudlet
+	 *            the firstCloudlet to set
+	 */
+	public void setFirstCloudlet(NetworkCloudlet firstCloudlet) {
+		this.firstCloudlet = firstCloudlet;
+	}
+
+	/**
+	 * @return the brokerCloudletId
+	 */
+	public int getBrokerCloudletId() {
+		return brokerCloudletId;
+	}
+
+	/**
+	 * @param brokerCloudletId
+	 *            the brokerCloudletId to set
+	 */
+	public void setBrokerCloudletId(int brokerCloudletId) {
+		this.brokerCloudletId = brokerCloudletId;
+	}
+
+	/**
+	 * @return the firstVmId
+	 */
+	public int getFirstVmId() {
+		return firstVmId;
+	}
+
+	/**
+	 * @param firstVmId
+	 *            the firstVmId to set
+	 */
+	public void setFirstVmId(int firstVmId) {
+		this.firstVmId = firstVmId;
+	}
+
+	/**
+	 * @return the brokerVmId
+	 */
+	public int getBrokerVmId() {
+		return brokerVmId;
+	}
+
+	/**
+	 * @param brokerVmId
+	 *            the brokerVmId to set
+	 */
+	public void setBrokerVmId(int brokerVmId) {
+		this.brokerVmId = brokerVmId;
+	}
+
 	protected abstract void generateCloudlets();
 
 	protected abstract void createStages();
+
+	public abstract void assignVmToCloudlets();
 
 }

@@ -31,31 +31,33 @@ public class EdgeWebService extends EdgeService {
 	@Override
 
 	protected void generateCloudlets() {
-		// TODO Auto-generated method stub
-		List<Cloudlet> cList = new ArrayList<Cloudlet>();
-		UtilizationModel utilizationModel = new UtilizationModelFull();
+		if (!isCloudletGenerated()) {
+			List<Cloudlet> cList = new ArrayList<Cloudlet>();
+			UtilizationModel utilizationModel = new UtilizationModelFull();
 
-		NetworkCloudlet ncl = new NetworkCloudlet(400000, 2, 300, 300, 256, utilizationModel, utilizationModel,
-				utilizationModel, getUserId(), getId());
-		ncl.setVmType(VmType.T2SMALL);
-		cList.add(ncl);
+			NetworkCloudlet ncl = new NetworkCloudlet(400000, 2, 300, 300, 256, utilizationModel, utilizationModel,
+					utilizationModel, getUserId(), getId());
+			ncl.setVmType(VmType.T2SMALL);
+			cList.add(ncl);
+			setFirstCloudlet(ncl);
 
-		ncl = new NetworkCloudlet(400000, 1, 300, 300, 256, utilizationModel, utilizationModel, utilizationModel,
-				getUserId(), getId());
-		ncl.setVmType(VmType.T2NANO);
-		cList.add(ncl);
+			ncl = new NetworkCloudlet(400000, 1, 300, 300, 256, utilizationModel, utilizationModel, utilizationModel,
+					getUserId(), getId());
+			ncl.setVmType(VmType.T2NANO);
+			cList.add(ncl);
 
-		ncl = new NetworkCloudlet(400000, 4, 300, 300, 256, utilizationModel, utilizationModel, utilizationModel,
-				getUserId(), getId());
-		ncl.setVmType(VmType.T2Large);
-		cList.add(ncl);
+			ncl = new NetworkCloudlet(400000, 4, 300, 300, 256, utilizationModel, utilizationModel, utilizationModel,
+					getUserId(), getId());
+			ncl.setVmType(VmType.T2Large);
+			cList.add(ncl);
 
-		setCloudletList(cList);
-		createStages();
-		setCloudletGenerated(true);
+			setCloudletList(cList);
+			createStages();
+			setCloudletGenerated(true);
 
+		}
 	}
-	
+
 	/**
 	 * This method is used to send to the broker the list with virtual machines
 	 * that must be created.
@@ -78,33 +80,47 @@ public class EdgeWebService extends EdgeService {
 		for (int i = 0; i < cList.size(); i++) {
 			NetworkCloudlet cl = (NetworkCloudlet) cList.get(i);
 			if (i == 0) {
-				cl.setNumStage(2);
+				cl.setNumStage(5);
 				cl.setSubmittime(CloudSim.clock());
 				cl.setCurrStagenum(-1);
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 1000, 0, 2, cl.getMemory(), getFirstVmId(),
+						getFirstCloudlet().getCloudletId()));
+
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 1000 * 0.8, 0, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
 				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 1000, 0, 1, cl.getMemory(),
-						cList.get(2).getVmId(), cList.get(2).getCloudletId()));
+						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 1000, 0, 2, cl.getMemory(),
+						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
+
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 1000, 0, 2, cl.getMemory(), getFirstVmId(),
+						getFirstCloudlet().getCloudletId()));
 			}
 			if (i == 1) {
-				cl.setNumStage(2);
+				cl.setNumStage(5);
 				cl.setSubmittime(CloudSim.clock());
 				cl.setCurrStagenum(-1);
-				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 1000 * 0.8, 0, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 1000, 0, 0, cl.getMemory(),
+						cList.get(0).getVmId(), cList.get(0).getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 1000 * 0.8, 1, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 1000, 0, 1, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 1000, 0, 2, cl.getMemory(),
 						cList.get(2).getVmId(), cList.get(2).getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 1000, 0, 3, cl.getMemory(),
+						cList.get(2).getVmId(), cList.get(2).getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 1000, 0, 4, cl.getMemory(),
+						cList.get(0).getVmId(), cList.get(0).getCloudletId()));
 			}
 			if (i == 2) {
 				cl.setNumStage(3);
 				cl.setSubmittime(CloudSim.clock());
 				cl.setCurrStagenum(-1);
 				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 1000, 0, 0, cl.getMemory(),
-						cList.get(0).getVmId(), cList.get(0).getCloudletId()));
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 1000, 0, 1, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 1000 * 0.8, 1, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 1000, 0, 2, cl.getMemory(),
+						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
 			}
 
 		}

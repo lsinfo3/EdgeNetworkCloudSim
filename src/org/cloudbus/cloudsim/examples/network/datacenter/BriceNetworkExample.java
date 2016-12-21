@@ -244,7 +244,7 @@ public class BriceNetworkExample {
 		AggregateSwitch aggswitch[] = new AggregateSwitch[1];
 		aggswitch[0] = new AggregateSwitch("Agg", NetworkConstants.Agg_LEVEL, dc);
 
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 1; i++) {
 			edgeswitch[i] = new EdgeSwitch("Edge" + i, NetworkConstants.EDGE_LEVEL, dc);
 			edgeswitch[i].uplinkswitches.add(aggswitch[0]);
 			dc.Switchlist.put(edgeswitch[i].getId(), edgeswitch[i]);
@@ -254,10 +254,9 @@ public class BriceNetworkExample {
 		for (Host hs : dc.getHostList()) {
 			NetworkHost hs1 = (NetworkHost) hs;
 			hs1.bandwidth = NetworkConstants.BandWidthEdgeHost;
-			int switchnum = (int) (hs.getId() / NetworkConstants.EdgeSwitchPort);
-			edgeswitch[switchnum].hostlist.put(hs.getId(), hs1);
-			dc.HostToSwitchid.put(hs.getId(), edgeswitch[switchnum].getId());
-			hs1.sw = edgeswitch[switchnum];
+			edgeswitch[0].hostlist.put(hs.getId(), hs1);
+			dc.HostToSwitchid.put(hs.getId(), edgeswitch[0].getId());
+			hs1.sw = edgeswitch[0];
 			List<NetworkHost> hslist = hs1.sw.fintimelistHost.get(0D);
 			if (hslist == null) {
 				hslist = new ArrayList<NetworkHost>();

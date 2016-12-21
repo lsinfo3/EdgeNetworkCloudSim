@@ -11,6 +11,7 @@ package org.cloudbus.cloudsim.network.datacenter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
@@ -18,27 +19,33 @@ import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 
 /**
- * This class allows to simulate aggregate switch for Datacenter network. It interacts with other
- * switches in order to exchange packets.
+ * This class allows to simulate aggregate switch for Datacenter network. It
+ * interacts with other switches in order to exchange packets.
  * 
  * Please refer to following publication for more details:
  * 
- * Saurabh Kumar Garg and Rajkumar Buyya, NetworkCloudSim: Modelling Parallel Applications in Cloud
- * Simulations, Proceedings of the 4th IEEE/ACM International Conference on Utility and Cloud
- * Computing (UCC 2011, IEEE CS Press, USA), Melbourne, Australia, December 5-7, 2011.
+ * Saurabh Kumar Garg and Rajkumar Buyya, NetworkCloudSim: Modelling Parallel
+ * Applications in Cloud Simulations, Proceedings of the 4th IEEE/ACM
+ * International Conference on Utility and Cloud Computing (UCC 2011, IEEE CS
+ * Press, USA), Melbourne, Australia, December 5-7, 2011.
  * 
  * @author Saurabh Kumar Garg
  * @since CloudSim Toolkit 1.0
  */
 public class AggregateSwitch extends Switch {
 
+	private List<NetworkDatacenter> connectedDatacenters;
+
 	/**
-	 * Constructor for Aggregate Switch We have to specify switches that are connected to its
-	 * downlink and uplink ports, and corresponding bandwidths
+	 * Constructor for Aggregate Switch We have to specify switches that are
+	 * connected to its downlink and uplink ports, and corresponding bandwidths
 	 * 
-	 * @param name Name of the switch
-	 * @param level At which level switch is with respect to hosts.
-	 * @param dc Pointer to Datacenter
+	 * @param name
+	 *            Name of the switch
+	 * @param level
+	 *            At which level switch is with respect to hosts.
+	 * @param dc
+	 *            Pointer to Datacenter
 	 */
 	public AggregateSwitch(String name, int level, NetworkDatacenter dc) {
 		super(name, level, dc);
@@ -50,12 +57,14 @@ public class AggregateSwitch extends Switch {
 		numport = NetworkConstants.AggSwitchPort;
 		uplinkswitches = new ArrayList<Switch>();
 		downlinkswitches = new ArrayList<Switch>();
+		this.connectedDatacenters = new ArrayList<NetworkDatacenter>();
 	}
 
 	/**
 	 * Send Packet to switch connected through a downlink port
 	 * 
-	 * @param ev Event/packet to process
+	 * @param ev
+	 *            Event/packet to process
 	 */
 
 	@Override
@@ -73,7 +82,8 @@ public class AggregateSwitch extends Switch {
 		if (level == NetworkConstants.Agg_LEVEL) {
 			// packet is coming from root so need to be sent to edgelevel swich
 			// find the id for edgelevel switch
-			int switchid = dc.VmToSwitchid.get(recvVMid);
+			// int switchid = dc.VmToSwitchid.get(recvVMid);
+			int switchid = getVmToSwitchid().get(recvVMid);
 			List<NetworkPacket> pktlist = downlinkswitchpktlist.get(switchid);
 			if (pktlist == null) {
 				pktlist = new ArrayList<NetworkPacket>();
@@ -88,7 +98,8 @@ public class AggregateSwitch extends Switch {
 	/**
 	 * Send Packet to switch connected through a uplink port
 	 * 
-	 * @param ev Event/packet to process
+	 * @param ev
+	 *            Event/packet to process
 	 */
 	@Override
 	protected void processpacket_up(SimEvent ev) {
@@ -107,7 +118,8 @@ public class AggregateSwitch extends Switch {
 			// packet is coming from edge level router so need to be sent to
 			// either root or another edge level swich
 			// find the id for edgelevel switch
-			int switchid = dc.VmToSwitchid.get(recvVMid);
+			// int switchid = dc.VmToSwitchid.get(recvVMid);
+			int switchid = getVmToSwitchid().get(recvVMid);
 			boolean flagtoswtich = false;
 			for (Switch sw : downlinkswitches) {
 				if (switchid == sw.getId()) {
@@ -123,7 +135,9 @@ public class AggregateSwitch extends Switch {
 				pktlist.add(hspkt);
 			} else// send to up
 			{
-				Switch sw = uplinkswitches.get(0);
+				int senderVMid = hspkt.pkt.getSender();
+				Switch sw = uplinkswitches.get(0).getId() != getVmToSwitchid().get(senderVMid) ? uplinkswitches.get(0)
+						: uplinkswitches.get(1);
 				List<NetworkPacket> pktlist = uplinkswitchpktlist.get(sw.getId());
 				if (pktlist == null) {
 					pktlist = new ArrayList<NetworkPacket>();
@@ -132,6 +146,40 @@ public class AggregateSwitch extends Switch {
 				pktlist.add(hspkt);
 			}
 		}
+	}
+
+	/**
+	 * @param dc
+	 * @return
+	 */
+	public boolean connectDatacenter(NetworkDatacenter dc) {
+		return getConnectedDatacenters().add(dc);
+	}
+
+	/**
+	 * @return the connectedDatacenters
+	 */
+	public List<NetworkDatacenter> getConnectedDatacenters() {
+		return connectedDatacenters;
+	}
+
+	/**
+	 * @param connectedDatacenters
+	 *            the connectedDatacenters to set
+	 */
+	public void setConnectedDatacenters(List<NetworkDatacenter> connectedDatacenters) {
+		this.connectedDatacenters = connectedDatacenters;
+	}
+
+	/**
+	 * @return
+	 */
+	public Map<Integer, Integer> getVmToSwitchid() {
+		Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+		for (NetworkDatacenter dc : getConnectedDatacenters()) {
+			result.putAll(dc.VmToSwitchid);
+		}
+		return result;
 	}
 
 }

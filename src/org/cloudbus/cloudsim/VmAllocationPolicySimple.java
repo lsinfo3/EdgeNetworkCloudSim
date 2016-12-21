@@ -16,9 +16,9 @@ import java.util.Map;
 import org.cloudbus.cloudsim.core.CloudSim;
 
 /**
- * VmAllocationPolicySimple is an VmAllocationPolicy that chooses, as the host for a VM, the host
- * with less PEs in use. It is therefore a Worst Fit policy, allocating VMs into the 
- * host with most available PE.
+ * VmAllocationPolicySimple is an VmAllocationPolicy that chooses, as the host
+ * for a VM, the host with less PEs in use. It is therefore a Worst Fit policy,
+ * allocating VMs into the host with most available PE.
  * 
  * @author Rodrigo N. Calheiros
  * @author Anton Beloglazov
@@ -26,12 +26,16 @@ import org.cloudbus.cloudsim.core.CloudSim;
  */
 public class VmAllocationPolicySimple extends VmAllocationPolicy {
 
-	/** The map between each VM and its allocated host.
-         * The map key is a VM UID and the value is the allocated host for that VM. */
+	/**
+	 * The map between each VM and its allocated host. The map key is a VM UID
+	 * and the value is the allocated host for that VM.
+	 */
 	private Map<String, Host> vmTable;
 
-	/** The map between each VM and the number of Pes used. 
-         * The map key is a VM UID and the value is the number of used Pes for that VM. */
+	/**
+	 * The map between each VM and the number of Pes used. The map key is a VM
+	 * UID and the value is the number of used Pes for that VM.
+	 */
 	private Map<String, Integer> usedPes;
 
 	/** The number of free Pes for each host from {@link #getHostList() }. */
@@ -40,7 +44,8 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	/**
 	 * Creates a new VmAllocationPolicySimple object.
 	 * 
-	 * @param list the list of hosts
+	 * @param list
+	 *            the list of hosts
 	 * @pre $none
 	 * @post $none
 	 */
@@ -60,7 +65,8 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	/**
 	 * Allocates the host with less PEs in use for a given VM.
 	 * 
-	 * @param vm {@inheritDoc}
+	 * @param vm
+	 *            {@inheritDoc}
 	 * @return {@inheritDoc}
 	 * @pre $none
 	 * @post $none
@@ -75,8 +81,10 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 			freePesTmp.add(freePes);
 		}
 
-		if (!getVmTable().containsKey(vm.getUid())) { // if this vm was not created
-			do {// we still trying until we find a host or until we try all of them
+		if (!getVmTable().containsKey(vm.getUid())) { // if this vm was not
+														// created
+			do {// we still trying until we find a host or until we try all of
+				// them
 				int moreFree = Integer.MIN_VALUE;
 				int idx = -1;
 
@@ -89,8 +97,11 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 				}
 
 				Host host = getHostList().get(idx);
-				result = host.vmCreate(vm);
 
+				System.out.println(CloudSim.clock() + ": [ERROR]: Host #" + host.getId() + " has "
+						+ host.getNumberOfPes() + " CPUs and " + getFreePes().get(idx) + " of them are free");
+
+				result = host.vmCreate(vm);
 				if (result) { // if vm were succesfully created in the host
 					getVmTable().put(vm.getUid(), host);
 					getUsedPes().put(vm.getUid(), requiredPes);
@@ -141,7 +152,8 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	/**
 	 * Sets the vm table.
 	 * 
-	 * @param vmTable the vm table
+	 * @param vmTable
+	 *            the vm table
 	 */
 	protected void setVmTable(Map<String, Host> vmTable) {
 		this.vmTable = vmTable;
@@ -159,7 +171,8 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	/**
 	 * Sets the used pes.
 	 * 
-	 * @param usedPes the used pes
+	 * @param usedPes
+	 *            the used pes
 	 */
 	protected void setUsedPes(Map<String, Integer> usedPes) {
 		this.usedPes = usedPes;
@@ -177,7 +190,8 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 	/**
 	 * Sets the free pes.
 	 * 
-	 * @param freePes the new free pes
+	 * @param freePes
+	 *            the new free pes
 	 */
 	protected void setFreePes(List<Integer> freePes) {
 		this.freePes = freePes;
@@ -191,7 +205,8 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 
 	@Override
 	public boolean allocateHostForVm(Vm vm, Host host) {
-		if (host.vmCreate(vm)) { // if vm has been succesfully created in the host
+		if (host.vmCreate(vm)) { // if vm has been succesfully created in the
+									// host
 			getVmTable().put(vm.getUid(), host);
 
 			int requiredPes = vm.getNumberOfPes();
@@ -199,8 +214,7 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 			getUsedPes().put(vm.getUid(), requiredPes);
 			getFreePes().set(idx, getFreePes().get(idx) - requiredPes);
 
-			Log.formatLine(
-					"%.2f: VM #" + vm.getId() + " has been allocated to the host #" + host.getId(),
+			Log.formatLine("%.2f: VM #" + vm.getId() + " has been allocated to the host #" + host.getId(),
 					CloudSim.clock());
 			return true;
 		}

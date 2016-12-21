@@ -69,6 +69,8 @@ public abstract class EdgeService extends Service {
 				cl.setVmId(vm.getId());
 			}
 		}
+		
+		setFirstVmId(getFirstCloudlet().getVmId());
 	}
 	
 	/**
