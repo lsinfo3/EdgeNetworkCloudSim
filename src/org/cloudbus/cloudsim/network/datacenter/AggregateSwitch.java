@@ -139,14 +139,21 @@ public class AggregateSwitch extends Switch {
 				pktlist.add(hspkt);
 			} else// send to up
 			{
-//				int senderVMid = hspkt.pkt.getSender();
-				Switch sw = uplinkswitches.get(0).getId() != ev.getSource() ? uplinkswitches.get(0) : uplinkswitches.get(1);;
-//				if (map.containsKey(senderVMid)) {
-//					sw = uplinkswitches.get(0).getId() != map.get(senderVMid) ? uplinkswitches.get(0)
-//							: uplinkswitches.get(1);
-//				} else {
-//					sw = uplinkswitches.get(0);
-//				}
+				// int senderVMid = hspkt.pkt.getSender();
+				Switch sw = null;
+				if (uplinkswitches.size() > 1) {
+					sw = uplinkswitches.get(0).getId() != ev.getSource() ? uplinkswitches.get(0)
+							: uplinkswitches.get(1);
+				} else {
+					sw = uplinkswitches.get(0);
+				}
+				// if (map.containsKey(senderVMid)) {
+				// sw = uplinkswitches.get(0).getId() != map.get(senderVMid) ?
+				// uplinkswitches.get(0)
+				// : uplinkswitches.get(1);
+				// } else {
+				// sw = uplinkswitches.get(0);
+				// }
 				List<NetworkPacket> pktlist = uplinkswitchpktlist.get(sw.getId());
 				if (pktlist == null) {
 					pktlist = new ArrayList<NetworkPacket>();

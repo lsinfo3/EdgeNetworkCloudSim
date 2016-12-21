@@ -425,7 +425,7 @@ public class BaseDatacenter {
 		// Add Services
 		broker.addService(new EdgeDbService("EDS_broker1"));
 		broker.addService(new EdgeDbService("EDS_broker2"));
-		broker.addService(new EdgeDbService("EDS_broker3"));
+		broker.addService(new EdgeWebService("EWS_broker3"));
 
 		// Simulate the Broker sending deferred messages to the Services
 		// (e.g. new requests)
