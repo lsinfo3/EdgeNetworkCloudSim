@@ -147,13 +147,6 @@ public class AggregateSwitch extends Switch {
 				} else {
 					sw = uplinkswitches.get(0);
 				}
-				// if (map.containsKey(senderVMid)) {
-				// sw = uplinkswitches.get(0).getId() != map.get(senderVMid) ?
-				// uplinkswitches.get(0)
-				// : uplinkswitches.get(1);
-				// } else {
-				// sw = uplinkswitches.get(0);
-				// }
 				List<NetworkPacket> pktlist = uplinkswitchpktlist.get(sw.getId());
 				if (pktlist == null) {
 					pktlist = new ArrayList<NetworkPacket>();

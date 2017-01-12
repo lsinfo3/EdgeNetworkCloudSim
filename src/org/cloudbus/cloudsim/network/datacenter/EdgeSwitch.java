@@ -14,10 +14,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.cloudbus.cloudsim.NetworkTopology;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
+import org.cloudbus.cloudsim.edge.util.CustomLog;
+import org.cloudbus.cloudsim.edge.util.TextUtil;
 
 /**
  * This class allows to simulate Edge switch for Datacenter network. It interacts with other
@@ -127,12 +130,15 @@ public class EdgeSwitch extends Switch {
 				List<NetworkPacket> hspktlist = es.getValue();
 				if (!hspktlist.isEmpty()) {
 					// sharing bandwidth between packets
-					double avband = uplinkbandwidth / hspktlist.size();
+					double bw = NetworkTopology.isNetworkEnabled() ? NetworkTopology.getBw(getId(), tosend) : uplinkbandwidth;
+					double avband = bw / hspktlist.size();
+//					double avband = uplinkbandwidth / hspktlist.size();
 					Iterator<NetworkPacket> it = hspktlist.iterator();
 					while (it.hasNext()) {
 						NetworkPacket hspkt = it.next();
 						double delay = 1000 * hspkt.pkt.data / avband;
 
+						CustomLog.printf("%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "#" + getId(), "Network_Event_UP to #" + tosend + " with delay " + TextUtil.toString(delay));
 						this.send(tosend, delay, CloudSimTags.Network_Event_UP, hspkt);
 					}
 					hspktlist.clear();
@@ -155,9 +161,6 @@ public class EdgeSwitch extends Switch {
 				}
 			}
 		}
-
-		// or to switch at next level.
-		// clear the list
 
 	}
 

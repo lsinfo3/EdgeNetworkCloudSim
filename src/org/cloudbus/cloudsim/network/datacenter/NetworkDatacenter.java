@@ -26,6 +26,7 @@ import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.edge.util.TextUtil;
 
 /**
  * NetworkDatacenter class is a Datacenter whose hostList are virtualized and
@@ -138,7 +139,7 @@ public class NetworkDatacenter extends Datacenter {
 		if (result) {
 			VmToSwitchid.put(vm.getId(), ((NetworkHost) vm.getHost()).sw.getId());
 			VmtoHostlist.put(vm.getId(), vm.getHost().getId());
-			System.out.println(CloudSim.clock() + ": [WARN]: Datacenter #" + getId() + " - VM Id: " + vm.getUid() + " is created on Host Id "
+			System.out.println(TextUtil.toString(CloudSim.clock()) + ": [WARN]: Datacenter #" + getId() + " - VM Id: " + vm.getUid() + " is created on Host Id "
 					+ vm.getHost().getId() + " owned by: " + vm.getUserId());
 
 			getVmList().add(vm);
@@ -184,7 +185,7 @@ public class NetworkDatacenter extends Datacenter {
 		if (result) {
 			VmToSwitchid.put(vm.getId(), ((NetworkHost) vm.getHost()).sw.getId());
 			VmtoHostlist.put(vm.getId(), vm.getHost().getId());
-			System.out.println(CloudSim.clock() + ": [WARN]: Datacenter #" + getId() + " - VM Id: " + vm.getUid() + " is created on Host Id "
+			System.out.println(TextUtil.toString(CloudSim.clock()) + ": [WARN]: Datacenter #" + getId() + " - VM Id: " + vm.getUid() + " is created on Host Id "
 					+ vm.getHost().getId() + " owned by service: " + vm.getUserId());
 
 			getVmList().add(vm);
@@ -211,7 +212,7 @@ public class NetworkDatacenter extends Datacenter {
 	 */
 	@Override
 	protected void processCloudletSubmit(SimEvent ev, boolean ack) {
-		System.out.println(CloudSim.clock() + " [DEBUG]: " + getName() + " calls processCloudletSubmit()");
+		System.out.println(TextUtil.toString(CloudSim.clock()) + " [DEBUG]: " + getName() + " calls processCloudletSubmit()");
 		updateCloudletProcessing();
 
 		try {

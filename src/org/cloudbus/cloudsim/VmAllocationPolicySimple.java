@@ -98,8 +98,6 @@ public class VmAllocationPolicySimple extends VmAllocationPolicy {
 
 				Host host = getHostList().get(idx);
 
-				System.out.println(CloudSim.clock() + ": [ERROR]: Host #" + host.getId() + " has "
-						+ host.getNumberOfPes() + " CPUs and " + getFreePes().get(idx) + " of them are free");
 
 				result = host.vmCreate(vm);
 				if (result) { // if vm were succesfully created in the host

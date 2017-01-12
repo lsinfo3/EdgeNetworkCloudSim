@@ -17,12 +17,15 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.NetworkTopology;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
+import org.cloudbus.cloudsim.edge.util.CustomLog;
+import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.lists.VmList;
 
 public class Switch extends SimEntity {
@@ -80,12 +83,11 @@ public class Switch extends SimEntity {
 
 	@Override
 	public void startEntity() {
-		Log.printLine(getName() + " #" + getId() + " is starting...");
+		Log.printLine(CloudSim.clock() + ": " + getName() + " #" + getId() + " is starting...");
 	}
 
 	@Override
 	public void processEvent(SimEvent ev) {
-//		 Log.printLine(CloudSim.clock()+" [DEBUG]:[Switch]: event received:"+ev.getTag());
 		switch (ev.getTag()) {
 		// Resource characteristics request
 			case CloudSimTags.Network_Event_UP:
@@ -290,6 +292,7 @@ public class Switch extends SimEntity {
 						NetworkPacket hspkt = it.next();
 						double delay = 1000 * hspkt.pkt.data / avband;
 
+						CustomLog.printf("%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "#" + getId(), "Network_Event_DOWN to #" + tosend + " with delay " + TextUtil.toString(delay));
 						this.send(tosend, delay, CloudSimTags.Network_Event_DOWN, hspkt);
 					}
 					hspktlist.clear();
@@ -301,12 +304,15 @@ public class Switch extends SimEntity {
 				int tosend = es.getKey();
 				List<NetworkPacket> hspktlist = es.getValue();
 				if (!hspktlist.isEmpty()) {
-					double avband = uplinkbandwidth / hspktlist.size();
+//					sharing bandwidth between packets
+					double bw = NetworkTopology.isNetworkEnabled() ? NetworkTopology.getBw(getId(), tosend) : uplinkbandwidth;
+//					double avband = uplinkbandwidth / hspktlist.size();
+					double avband = bw / hspktlist.size();
 					Iterator<NetworkPacket> it = hspktlist.iterator();
 					while (it.hasNext()) {
 						NetworkPacket hspkt = it.next();
 						double delay = 1000 * hspkt.pkt.data / avband;
-
+						CustomLog.printf("%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "#" + getId(), "Network_Event_UP to #" + tosend + " with delay " + TextUtil.toString(delay));
 						this.send(tosend, delay, CloudSimTags.Network_Event_UP, hspkt);
 					}
 					hspktlist.clear();
