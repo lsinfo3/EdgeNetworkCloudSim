@@ -4,7 +4,7 @@ import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.edge.EdgeCloudletSpaceSharedScheduler;
 
 /**
- * Amazon t2.nano instance. 1 vCPU, 0.5 GB RAM
+ * Amazon t2.nano instance. 1 vCPU, 512 MB RAM
  * Intel 5570 -> 11.72K/core 
  * @author Brice Kamneng Kwam
  *
@@ -17,7 +17,8 @@ public class T2Nano extends VmEdge {
 	}
 
 	public T2Nano() {
-		this("t2.nano", -1, 1270, 1, 512, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
+//		this("t2.nano", -1, 1270, 1, 512, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
+		this("t2.nano", -1, 1270 * 2, 1, 512, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
 		setType(VmType.T2NANO);
 	}
 

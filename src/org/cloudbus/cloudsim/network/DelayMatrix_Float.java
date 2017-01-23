@@ -12,6 +12,7 @@ import java.util.Iterator;
 
 /**
  * This class represents an delay-topology storing every distance between connected nodes
+ * and the next hop matrix.
  * 
  * @author Thomas Hohnstein
  * @since CloudSim Toolkit 1.0
@@ -27,6 +28,9 @@ public class DelayMatrix_Float {
 	 * number of nodes in the distance-aware-topology
 	 */
 	protected int mTotalNodeNum = 0;
+	
+	
+	protected int[][] nextHopMatrix = null;
 
 	/**
 	 * private constructor to ensure that only an correct initialized delay-matrix could be created
@@ -110,6 +114,7 @@ public class DelayMatrix_Float {
 
 		floyd.initialize(mTotalNodeNum);
 		mDelayMatrix = floyd.allPairsShortestPaths(mDelayMatrix);
+		makeNextHopMatrix(floyd.getPK());
 	}
 
 	/**
@@ -140,5 +145,32 @@ public class DelayMatrix_Float {
 		}
 
 		return buffer.toString();
+	}
+	
+	/**
+	 * transpose the predecessor matrix to get the next hop matrix.
+	 * @param predecessorMatrix the predecessor matrix
+	 */
+	public void makeNextHopMatrix(int[][] predecessorMatrix){
+		nextHopMatrix = new int[predecessorMatrix.length][predecessorMatrix[0].length];
+		for (int i = 0; i < predecessorMatrix.length; i++) {
+			for (int j = 0; j < predecessorMatrix[i].length; j++) {
+				nextHopMatrix[j][i] = predecessorMatrix[i][j];
+			}
+		}
+	}
+	
+	/**
+	 * @param srcID the id of the source-node
+	 * @param destID the id of the destination-node
+	 * @return the next hop between the given two nodes
+	 */
+	public int getNextHop(int srcID, int destID){
+		// check the nodeIDs against internal array-boundarys
+		if (srcID > mTotalNodeNum || destID > mTotalNodeNum) {
+			throw new ArrayIndexOutOfBoundsException("srcID or destID is higher than highest stored node-ID!");
+		}
+
+		return nextHopMatrix[srcID][destID];
 	}
 }

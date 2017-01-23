@@ -8,6 +8,7 @@
 
 package org.cloudbus.cloudsim;
 
+import org.cloudbus.cloudsim.edge.util.Id;
 import org.cloudbus.cloudsim.provisioners.PeProvisioner;
 
 /**
@@ -58,6 +59,17 @@ public class Pe {
 
 		// when created it should be set to FREE, i.e. available for use.
 		status = FREE;
+	}
+	
+	/**
+	 * Allocates a new Pe object.
+	 * 
+	 * @param peProvisioner the pe provisioner
+	 * @pre peProvisioner != null
+	 * @post $none
+	 */
+	public Pe(PeProvisioner peProvisioner) {
+		this(Id.pollId(Pe.class), peProvisioner);
 	}
 
 	/**

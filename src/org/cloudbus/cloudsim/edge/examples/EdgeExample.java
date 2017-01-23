@@ -23,11 +23,11 @@ public class EdgeExample {
 			Properties props = new Properties();
 			props.setProperty("FilePath", "C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\results.txt");
 			props.setProperty("LogRealTimeClock", "true");
-//			props.setProperty("LogCloudSimClock", "true");
+			props.setProperty("LogFormat", "getMessage");
 			
 			CustomLog.configLogger(props);
 			
-			CustomLog.printf("%s\t%s\t%s", "Time", "Entity", "Message");
+			CustomLog.printf("\t%s\t\t%s\t\t\t%s\t\t%s", "Time", "Entity", "Transmission Time", "Data");
 			
 			// before creating any entities.
 			int num_user = 1; // number of cloud users
@@ -39,6 +39,8 @@ public class EdgeExample {
 
 			// load the network topology file
 			NetworkTopology
+//			.buildNetworkTopology("C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\topology_double_delay.brite");
+//			.buildNetworkTopology("C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\topology_double_bw.brite");
 			.buildNetworkTopology("C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\topology.brite");
 			
 			

@@ -4,7 +4,7 @@ import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.edge.EdgeCloudletSpaceSharedScheduler;
 
 /**
- * Amazon t2.small instance. 1 vCPU, 2 GB RAM.
+ * Amazon t2.small instance. 2 vCPU, 2 GB RAM.
  * Intel 5570 -> 11.72K/core
  * @author Brice Kamneng Kwam
  *
@@ -18,7 +18,8 @@ public class T2Small extends VmEdge {
 
 	
 	public T2Small() {
-		this("t2.small", -1, 11720, 2, 2048, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
+//		this("t2.small", -1, 11720, 2, 2048, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
+		this("t2.small", -1, 11720 * 2, 2, 2048, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
 		setType(VmType.T2SMALL);
 	}
 

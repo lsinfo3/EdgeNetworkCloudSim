@@ -12,10 +12,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.edge.util.CustomLog;
-import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.network.DelayMatrix_Float;
 import org.cloudbus.cloudsim.network.GraphReaderBrite;
 import org.cloudbus.cloudsim.network.TopologicalGraph;
@@ -269,8 +267,6 @@ public class NetworkTopology {
 			try {
 				// add the network latency
 				double delay = delayMatrix.getDelay(map.get(srcID), map.get(destID));
-				CustomLog.printf("%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "Delay #" + srcID + "->#" + destID,
-						TextUtil.toString(delay));
 
 				return delay;
 			} catch (Exception e) {
@@ -278,6 +274,33 @@ public class NetworkTopology {
 			}
 		}
 		return 0.0;
+	}
+	
+	/**
+	 * Calculates the delay between two nodes
+	 * 
+	 * @param srcID
+	 *            ID of the source node
+	 * @param destID
+	 *            ID of the destination node
+	 * @return communication delay between the two nodes
+	 * @pre srcID >= 0
+	 * @pre destID >= 0
+	 * @post $none
+	 */
+	public static int getNextHop(int srcID, int destID) {
+		if (networkEnabled) {
+			try {
+				// add the network latency
+				int nextHop = delayMatrix.getNextHop(map.get(srcID), map.get(destID));
+				int EntityId = getEntitIdFromNetworkId(nextHop);
+//				CustomLog.printf("%s\t%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "src #" + srcID + "->#" + destID, "next hop", "#" + EntityId);
+				return EntityId;
+			} catch (Exception e) {
+				// in case of error, just keep running and return 0.0
+			}
+		}
+		return -1;
 	}
 
 	/**
@@ -292,6 +315,22 @@ public class NetworkTopology {
 	 */
 	public static boolean isNetworkEnabled() {
 		return networkEnabled;
+	}
+	
+	
+	/**
+	 * @param netId The network (Brite) Id
+	 * @return CloudSim Entity Id from the network (Brite) Id 
+	 */
+	public static int getEntitIdFromNetworkId(int netId){
+		int key= -1;
+        for(Entry<Integer, Integer> entry: map.entrySet()){
+            if(netId == entry.getValue()){
+                key = entry.getKey();
+                break; //breaking because its one to one map
+            }
+        }
+        return key;
 	}
 
 }

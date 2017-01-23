@@ -9,10 +9,8 @@ package org.cloudbus.cloudsim;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.edge.util.CustomLog;
 import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.lists.PeList;
 import org.cloudbus.cloudsim.provisioners.BwProvisioner;
@@ -214,30 +212,31 @@ public class Host {
 	 */
 	public boolean vmCreate(Vm vm) {
 		if (getStorage() < vm.getSize()) {
-			Log.printLine(CloudSim.clock() + "[FATAL]: Host #" + getId() + ": [VmScheduler.vmCreate] Allocation of VM #"
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + ":  Allocation of VM #"
 					+ vm.getId() + " failed by storage");
 			return false;
 		}
 
 		if (!getRamProvisioner().allocateRamForVm(vm, vm.getCurrentRequestedRam())) {
-			Log.printLine(CloudSim.clock() + "[FATAL]: Host #" + getId() + ": [VmScheduler.vmCreate] Allocation of VM #"
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + ":  Allocation of VM #"
 					+ vm.getId() + " failed by RAM");
 			return false;
 		}
 
 		if (!getBwProvisioner().allocateBwForVm(vm, vm.getCurrentRequestedBw())) {
-			Log.printLine(CloudSim.clock() + "[FATAL]: Host #" + getId() + ": [VmScheduler.vmCreate] Allocation of VM #"
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + ":  Allocation of VM #"
 					+ vm.getId() + " failed by BW");
 			getRamProvisioner().deallocateRamForVm(vm);
 			return false;
 		}
 
 		if (!getVmScheduler().allocatePesForVm(vm, vm.getCurrentRequestedMips())) {
-			Log.printLine(CloudSim.clock() + "[FATAL]: Host #" + getId() + ": [VmScheduler.vmCreate] Allocation of VM #"
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + ":  Allocation of VM #"
 					+ vm.getId() + " failed by MIPS");
 
-			CustomLog.printf(Level.WARNING, "%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "Host #" + getId(),
-					"Allocation of VM #" + vm.getId() + " failed by MIPS");
+			// CustomLog.printf(Level.WARNING, "%s\t%s\t%s",
+			// TextUtil.toString(CloudSim.clock()), "Host #" + getId(),
+			// "Allocation of VM #" + vm.getId() + " failed by MIPS");
 			getRamProvisioner().deallocateRamForVm(vm);
 			getBwProvisioner().deallocateBwForVm(vm);
 			return false;

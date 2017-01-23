@@ -4,7 +4,7 @@ import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.edge.EdgeCloudletSpaceSharedScheduler;
 
 /**
- * Amazon m4.large instance. 4 vCPU, 16 GB RAM
+ * Amazon m4.large instance. 8 vCPU, 16 GB RAM
  * Intel 7675 -> 18.87K/core
  * @author Brice Kamneng Kwam
  *
@@ -17,7 +17,7 @@ public class M4XLarge extends VmEdge {
 	}
 
 	public M4XLarge() {
-		this("m4.xlarge", -1, 1000, 4, 16384, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
+		this("m4.xlarge", -1, 1000, 8, 16384, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
 		setType(VmType.M4XLARGE);
 	}
 }

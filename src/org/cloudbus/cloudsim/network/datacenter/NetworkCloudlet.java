@@ -36,6 +36,11 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	private long memory;
 
 	private VmType vmType;
+	
+	/**
+	 * helps to compute the service time.
+	 */
+	private double serviceTime = 0.0;
 
 	public NetworkCloudlet(int cloudletId, long cloudletLength, int pesNumber, long cloudletFileSize,
 			long cloudletOutputSize, long memory, UtilizationModel utilizationModelCpu,
@@ -302,5 +307,21 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 		return "NetworkCloudlet [id=" + getCloudletId() + ", vmType=" + vmType + ", numStage=" + numStage
 				+ ", currStagenum=" + currStagenum + ", vmId=" + vmId + "]";
 	}
+
+	/**
+	 * @return the serviceTime
+	 */
+	public double getServiceTime() {
+		return serviceTime;
+	}
+
+	/**
+	 * @param serviceTime the serviceTime to set
+	 */
+	public void setServiceTime(double serviceTime) {
+		this.serviceTime = serviceTime;
+	}
+	
+	
 
 }

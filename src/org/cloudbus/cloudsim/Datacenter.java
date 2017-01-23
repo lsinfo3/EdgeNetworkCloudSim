@@ -17,7 +17,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
+import org.cloudbus.cloudsim.edge.util.TextUtil;
 
 /**
  * Datacenter class is a CloudResource whose hostList are virtualized. It deals
@@ -99,7 +99,7 @@ public class Datacenter extends SimEntity {
 		// If this resource doesn't have any PEs then no useful at all
 		if (getCharacteristics().getNumberOfPes() == 0) {
 			throw new Exception(
-					super.getName() + " : Error - this entity has no PEs. Therefore, can't process any Cloudlets.");
+					"DC #" + getId() + " : Error - this entity has no PEs. Therefore, can't process any Cloudlets.");
 		}
 
 		// stores id of this class
@@ -158,9 +158,6 @@ public class Datacenter extends SimEntity {
 
 		// New Cloudlet arrives
 		case CloudSimTags.CLOUDLET_SUBMIT:
-			System.out.println(CloudSim.clock() + " [DEBUG]: " + getName()
-					+ " processEvent CloudSimTags.CLOUDLET_SUBMIT with cloudlet #"
-					+ ((NetworkCloudlet) ev.getData()).getCloudletId());
 			processCloudletSubmit(ev, false);
 			break;
 
@@ -402,12 +399,12 @@ public class Datacenter extends SimEntity {
 				status = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId, userId).getCloudletScheduler()
 						.getCloudletStatus(cloudletId);
 			} catch (Exception e) {
-				Log.printLine(getName() + ": Error in processing CloudSimTags.CLOUDLET_STATUS");
+				Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: DC #" + getId() + ": Error in processing CloudSimTags.CLOUDLET_STATUS");
 				Log.printLine(e.getMessage());
 				return;
 			}
 		} catch (Exception e) {
-			Log.printLine(getName() + ": Error in processing CloudSimTags.CLOUDLET_STATUS");
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: DC #" + getId() + ": Error in processing CloudSimTags.CLOUDLET_STATUS");
 			Log.printLine(e.getMessage());
 			return;
 		}
@@ -432,7 +429,7 @@ public class Datacenter extends SimEntity {
 	 */
 	protected void processOtherEvent(SimEvent ev) {
 		if (ev == null) {
-			Log.printLine(getName() + ".processOtherEvent(): Error - an event is null.");
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: DC #" + getId() + ".processOtherEvent(): Error - an event is null.");
 		}
 	}
 
@@ -585,13 +582,13 @@ public class Datacenter extends SimEntity {
 				userId = cl.getUserId();
 				vmId = cl.getVmId();
 			} catch (Exception e) {
-				Log.printLine(super.getName() + ": Error in processing Cloudlet");
-				Log.printLine(e.getMessage());
+				Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: DC #" + super.getId() + ": Error in processing Cloudlet");
+				Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: DC #" + super.getId() + "error msg: "  + e.getMessage());
 				return;
 			}
 		} catch (Exception e) {
-			Log.printLine(super.getName() + ": Error in processing a Cloudlet.");
-			Log.printLine(e.getMessage());
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: DC #" + super.getId() + ": Error in processing Cloudlet");
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: DC #" + super.getId() + "error msg: "  + e.getMessage());
 			return;
 		}
 
@@ -707,7 +704,6 @@ public class Datacenter extends SimEntity {
 	 * @post $none
 	 */
 	protected void processCloudletSubmit(SimEvent ev, boolean ack) {
-		System.out.println(CloudSim.clock() + "[DEBUG]: " + getName() + " calls processCloudletSubmit() ");
 		updateCloudletProcessing();
 
 		try {
@@ -716,10 +712,8 @@ public class Datacenter extends SimEntity {
 
 			// checks whether this Cloudlet has finished or not
 			if (cl.isFinished()) {
-				String name = CloudSim.getEntityName(cl.getUserId());
-				Log.printLine(getName() + ": Warning - Cloudlet #" + cl.getCloudletId() + " owned by " + name
-						+ " is already completed/finished.");
-				Log.printLine("Therefore, it is not being executed again");
+				Log.printLine(TextUtil.toString(CloudSim.clock()) + "[WARN]: DC #" + getId() + ": Warning - Cloudlet #" + cl.getCloudletId() + " is already completed/finished.");
+				Log.printLine(TextUtil.toString(CloudSim.clock()) + "[WARN]: DC #" + getId() + ": Therefore, it is not being executed again");
 				Log.printLine();
 
 				// NOTE: If a Cloudlet has finished, then it won't be processed.
@@ -775,10 +769,10 @@ public class Datacenter extends SimEntity {
 				sendNow(cl.getUserId(), tag, data);
 			}
 		} catch (ClassCastException c) {
-			Log.printLine(getName() + ".processCloudletSubmit(): " + "ClassCastException error.");
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: DC #" + getId() + ".processCloudletSubmit(): " + "ClassCastException error.");
 			c.printStackTrace();
 		} catch (Exception e) {
-			Log.printLine(getName() + ".processCloudletSubmit(): " + "Exception error.");
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: DC #" + getId() + ".processCloudletSubmit(): " + "Exception error.");
 			e.printStackTrace();
 		}
 
@@ -913,6 +907,8 @@ public class Datacenter extends SimEntity {
 		// initial
 		// simulation step is skipped and schedulers are not properly
 		// initialized
+
+
 		if (CloudSim.clock() < 0.111 || CloudSim.clock() > getLastProcessTime() + CloudSim.getMinTimeBetweenEvents()) {
 			List<? extends Host> list = getVmAllocationPolicy().getHostList();
 			double smallerTime = Double.MAX_VALUE;
@@ -1073,7 +1069,7 @@ public class Datacenter extends SimEntity {
 	 */
 	@Override
 	public void shutdownEntity() {
-		Log.printLine(CloudSim.clock() + ": " + getName() + " is shutting down...");
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Datacenter #" + getId() + " is shutting down...");
 	}
 
 	/*
@@ -1083,7 +1079,7 @@ public class Datacenter extends SimEntity {
 	 */
 	@Override
 	public void startEntity() {
-		Log.printLine(CloudSim.clock() + ": " + getName() + " #" + getId() + " is starting...");
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Datacenter #" + getId() + " is starting...");
 		// this resource should register to regional GIS.
 		// However, if not specified, then register to system GIS (the
 		// default CloudInformationService) entity.

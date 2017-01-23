@@ -9,7 +9,9 @@
 package org.cloudbus.cloudsim.network.datacenter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,7 +26,7 @@ import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
-import org.cloudbus.cloudsim.edge.util.CustomLog;
+import org.cloudbus.cloudsim.edge.EdgeHost;
 import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.lists.VmList;
 
@@ -75,52 +77,62 @@ public class Switch extends SimEntity {
 
 	public Map<Integer, NetworkVm> Vmlist;
 
+	/** The datacenter ids list. */
+	protected List<Integer> datacenterIdsList;
+
 	public Switch(String name, int level, NetworkDatacenter dc) {
 		super(name);
 		this.level = level;
 		this.dc = dc;
+		setDatacenterIdsList(new LinkedList<Integer>());
 	}
 
 	@Override
 	public void startEntity() {
-		Log.printLine(CloudSim.clock() + ": " + getName() + " #" + getId() + " is starting...");
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Switch #" + getId() + " is starting...");
+		schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST);
 	}
 
 	@Override
 	public void processEvent(SimEvent ev) {
 		switch (ev.getTag()) {
 		// Resource characteristics request
-			case CloudSimTags.Network_Event_UP:
-				// process the packet from down switch or host
-				processpacket_up(ev);
-				break;
-			case CloudSimTags.Network_Event_DOWN:
-				// process the packet from uplink
-				processpacket_down(ev);
-				break;
-			case CloudSimTags.Network_Event_send:
-				processpacketforward(ev);
-				break;
+		case CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST:
+			processResourceCharacteristicsRequest(ev);
+			break;
+		case CloudSimTags.Network_Event_UP:
+			// process the packet from down switch or host
+			processpacket_up(ev);
+			break;
+		case CloudSimTags.Network_Event_DOWN:
+			// process the packet from uplink
+			processpacket_down(ev);
+			break;
+		case CloudSimTags.Network_Event_send:
+			processpacketforward(ev);
+			break;
 
-			case CloudSimTags.Network_Event_Host:
-				processhostpacket(ev);
-				break;
-			// Resource characteristics answer
-			case CloudSimTags.RESOURCE_Register:
-				registerHost(ev);
-				break;
-			// other unknown tags are processed by this method
-			default:
-				processOtherEvent(ev);
-				break;
+		case CloudSimTags.Network_Event_Host:
+			processhostpacket(ev);
+			break;
+		// Resource characteristics answer
+		case CloudSimTags.RESOURCE_Register:
+			registerHost(ev);
+			break;
+		// other unknown tags are processed by this method
+		default:
+			processOtherEvent(ev);
+			break;
 		}
 	}
 
 	protected void processhostpacket(SimEvent ev) {
 		// Send packet to host
 		NetworkPacket hspkt = (NetworkPacket) ev.getData();
-		NetworkHost hs = hostlist.get(hspkt.recieverhostid);
+		EdgeHost hs = (EdgeHost) hostlist.get(hspkt.recieverhostid);
+
 		hs.packetrecieved.add(hspkt);
+		hs.updateVmsProcessing(CloudSim.clock());
 	}
 
 	protected void processpacket_down(SimEvent ev) {
@@ -275,7 +287,7 @@ public class Switch extends SimEntity {
 	}
 
 	private void processOtherEvent(SimEvent ev) {
-		Log.printLine(CloudSim.clock()+" [DEBUG]:[Switch]: do not know this event #"+ev.getTag());
+		Log.printLine(CloudSim.clock() + " [DEBUG]:[Switch]: do not know this event #" + ev.getTag());
 	}
 
 	protected void processpacketforward(SimEvent ev) {
@@ -290,9 +302,8 @@ public class Switch extends SimEntity {
 					Iterator<NetworkPacket> it = hspktlist.iterator();
 					while (it.hasNext()) {
 						NetworkPacket hspkt = it.next();
-						double delay = 1000 * hspkt.pkt.data / avband;
+						double delay = hspkt.pkt.data / avband;
 
-						CustomLog.printf("%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "#" + getId(), "Network_Event_DOWN to #" + tosend + " with delay " + TextUtil.toString(delay));
 						this.send(tosend, delay, CloudSimTags.Network_Event_DOWN, hspkt);
 					}
 					hspktlist.clear();
@@ -304,15 +315,19 @@ public class Switch extends SimEntity {
 				int tosend = es.getKey();
 				List<NetworkPacket> hspktlist = es.getValue();
 				if (!hspktlist.isEmpty()) {
-//					sharing bandwidth between packets
-					double bw = NetworkTopology.isNetworkEnabled() ? NetworkTopology.getBw(getId(), tosend) : uplinkbandwidth;
-//					double avband = uplinkbandwidth / hspktlist.size();
+					// sharing bandwidth between packets
+					double bw = NetworkTopology.isNetworkEnabled() ? NetworkTopology.getBw(getId(), tosend)
+							: uplinkbandwidth;
+					// double avband = uplinkbandwidth / hspktlist.size();
 					double avband = bw / hspktlist.size();
+					// CustomLog.printf("%s\t\t%s\t\t%s\t\t%s", "BW", bw,
+					// "avband", avband);
 					Iterator<NetworkPacket> it = hspktlist.iterator();
 					while (it.hasNext()) {
 						NetworkPacket hspkt = it.next();
-						double delay = 1000 * hspkt.pkt.data / avband;
-						CustomLog.printf("%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "#" + getId(), "Network_Event_UP to #" + tosend + " with delay " + TextUtil.toString(delay));
+						double delay = hspkt.pkt.data / avband;
+						// CustomLog.printf("%s\t\t%s\t\t%s",
+						// TextUtil.toString(CloudSim.clock()),"delay", delay);
 						this.send(tosend, delay, CloudSimTags.Network_Event_UP, hspkt);
 					}
 					hspktlist.clear();
@@ -385,7 +400,54 @@ public class Switch extends SimEntity {
 
 	@Override
 	public void shutdownEntity() {
-		Log.printLine(getName() + " is shutting down...");
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Switch #" + getId() + " is shutting down...");
+	}
+
+	/**
+	 * Process a request for the characteristics of a PowerDatacenter.
+	 * 
+	 * @param ev
+	 *            a SimEvent object
+	 * @pre ev != $null
+	 * @post $none
+	 */
+	protected void processResourceCharacteristicsRequest(SimEvent ev) {
+		setDatacenterIdsList(CloudSim.getCloudResourceList());
+
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Switch #" + getId()
+				+ ": Cloud Resource List received with " + getDatacenterIdsList().size() + " resource(s)");
+
+	}
+
+	/**
+	 * Sets the datacenter ids list.
+	 * 
+	 * @param datacenterIdsList
+	 *            the new datacenter ids list
+	 */
+	protected void setDatacenterIdsList(List<Integer> datacenterIdsList) {
+		this.datacenterIdsList = datacenterIdsList;
+	}
+
+	/**
+	 * @return the datacenterIdsList
+	 */
+	public List<Integer> getDatacenterIdsList() {
+		return datacenterIdsList;
+	}
+
+	/**
+	 * @return a mapping of the vms available in the simulation to their
+	 *         directly connected switches.
+	 */
+	public Map<Integer, Integer> getVmToSwitchid() {
+		Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+		NetworkDatacenter dc = null;
+		for (int dcId : getDatacenterIdsList()) {
+			dc = (NetworkDatacenter) CloudSim.getEntity(dcId);
+			result.putAll(dc.VmToSwitchid);
+		}
+		return result;
 	}
 
 }

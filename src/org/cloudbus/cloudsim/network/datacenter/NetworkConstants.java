@@ -63,5 +63,4 @@ public class NetworkConstants {
 
 	public static int totaldatatransfer = 0;
 	
-	public static int changetonextstagecall = 0;
 }

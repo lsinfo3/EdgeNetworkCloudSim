@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudbus.cloudsim.NetworkTopology;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
@@ -34,7 +35,6 @@ import org.cloudbus.cloudsim.core.predicates.PredicateType;
  */
 public class AggregateSwitch extends Switch {
 
-	private List<NetworkDatacenter> connectedDatacenters;
 
 	/**
 	 * Constructor for Aggregate Switch We have to specify switches that are
@@ -57,7 +57,6 @@ public class AggregateSwitch extends Switch {
 		numport = NetworkConstants.AggSwitchPort;
 		uplinkswitches = new ArrayList<Switch>();
 		downlinkswitches = new ArrayList<Switch>();
-		this.connectedDatacenters = new ArrayList<NetworkDatacenter>();
 	}
 
 	/**
@@ -137,58 +136,20 @@ public class AggregateSwitch extends Switch {
 					downlinkswitchpktlist.put(switchid, pktlist);
 				}
 				pktlist.add(hspkt);
-			} else// send to up
-			{
-				// int senderVMid = hspkt.pkt.getSender();
-				Switch sw = null;
-				if (uplinkswitches.size() > 1) {
-					sw = uplinkswitches.get(0).getId() != ev.getSource() ? uplinkswitches.get(0)
-							: uplinkswitches.get(1);
-				} else {
-					sw = uplinkswitches.get(0);
-				}
-				List<NetworkPacket> pktlist = uplinkswitchpktlist.get(sw.getId());
+			} else {
+				// send to up
+				// get the next hop for this switchID
+				int nextHopId = NetworkTopology.getNextHop(getId(), switchid);
+				
+				List<NetworkPacket> pktlist = uplinkswitchpktlist.get(nextHopId);
 				if (pktlist == null) {
 					pktlist = new ArrayList<NetworkPacket>();
-					uplinkswitchpktlist.put(sw.getId(), pktlist);
+					uplinkswitchpktlist.put(nextHopId, pktlist);
 				}
 				pktlist.add(hspkt);
 			}
 		}
 	}
 
-	/**
-	 * @param dc
-	 * @return
-	 */
-	public boolean connectDatacenter(NetworkDatacenter dc) {
-		return getConnectedDatacenters().add(dc);
-	}
-
-	/**
-	 * @return the connectedDatacenters
-	 */
-	public List<NetworkDatacenter> getConnectedDatacenters() {
-		return connectedDatacenters;
-	}
-
-	/**
-	 * @param connectedDatacenters
-	 *            the connectedDatacenters to set
-	 */
-	public void setConnectedDatacenters(List<NetworkDatacenter> connectedDatacenters) {
-		this.connectedDatacenters = connectedDatacenters;
-	}
-
-	/**
-	 * @return
-	 */
-	public Map<Integer, Integer> getVmToSwitchid() {
-		Map<Integer, Integer> result = new HashMap<Integer, Integer>();
-		for (NetworkDatacenter dc : getConnectedDatacenters()) {
-			result.putAll(dc.VmToSwitchid);
-		}
-		return result;
-	}
 
 }
