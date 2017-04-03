@@ -19,7 +19,7 @@ import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
  * @author nikolay.grozev
  * 
  */
-public class VmEdge extends Vm {
+public class EdgeVm extends Vm {
 
     private VMStatus status;
     private final VMMetadata metadata;
@@ -63,7 +63,7 @@ public class VmEdge extends Vm {
      * @param vmm
      * @param cloudletScheduler
      */
-    public VmEdge(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
+    public EdgeVm(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
             final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler) {
         this(name, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler, new VMMetadata());
 
@@ -84,7 +84,7 @@ public class VmEdge extends Vm {
      * @param cloudletScheduler
      * @param metadata
      */
-    public VmEdge(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
+    public EdgeVm(final String name, final int userId, final double mips, final int numberOfPes, final int ram,
             final long bw, final long size, final String vmm, final CloudletScheduler cloudletScheduler,
             final VMMetadata metadata) {
         super(Id.pollId(Vm.class), userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
@@ -289,12 +289,12 @@ public class VmEdge extends Vm {
      *            - must not be null. Must be a valid scheduler.
      * @return a deep copy of this VM.
      */
-    public VmEdge clone(final CloudletScheduler scheduler) {
-        if (!getClass().equals(VmEdge.class)) {
+    public EdgeVm clone(final CloudletScheduler scheduler) {
+        if (!getClass().equals(EdgeVm.class)) {
             throw new IllegalStateException("The operation is undefined for subclass: " + getClass().getCanonicalName());
         }
 
-        VmEdge result = new VmEdge(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(),
+        EdgeVm result = new EdgeVm(getName(), getUserId(), getMips(), getNumberOfPes(), getRam(), getBw(), getSize(),
                 getVmm(), scheduler, getMetadata().clone());
         return result;
     }
@@ -344,7 +344,7 @@ public class VmEdge extends Vm {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		VmEdge other = (VmEdge) obj;
+		EdgeVm other = (EdgeVm) obj;
 		if (getId() != other.getId())
 			return false;
 		return true;

@@ -14,7 +14,7 @@ import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
 import org.cloudbus.cloudsim.edge.CloudSimTagsExt;
-import org.cloudbus.cloudsim.edge.DatacenterBrokerEdge;
+import org.cloudbus.cloudsim.edge.EdgeDatacenterBroker;
 import org.cloudbus.cloudsim.edge.EdgeHost;
 import org.cloudbus.cloudsim.edge.Message;
 import org.cloudbus.cloudsim.edge.service.EdgeDbService;
@@ -198,7 +198,7 @@ public class BaseDatacenter {
 		NetworkDatacenter udc = createNetworkDatacenter("UDC", 1);
 		udc.setUserDC(true);
 
-		DatacenterBrokerEdge broker = new DatacenterBrokerEdge("Broker_1");
+		EdgeDatacenterBroker broker = new EdgeDatacenterBroker("Broker_1");
 		broker.setUserDC(udc);
 
 		aggSwitch.get(0).uplinkswitches.add(aggSwitch.get(1));
@@ -267,7 +267,7 @@ public class BaseDatacenter {
 		}
 
 		// Create Brokers
-		DatacenterBrokerEdge broker = new DatacenterBrokerEdge("Broker_1");
+		EdgeDatacenterBroker broker = new EdgeDatacenterBroker("Broker_1");
 		broker.setUserDC(dcs.get(0));
 		dcs.get(0).setUserDC(true);
 

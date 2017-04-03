@@ -20,14 +20,14 @@ import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.edge.CloudSimTagsExt;
-import org.cloudbus.cloudsim.edge.DatacenterBrokerEdge;
+import org.cloudbus.cloudsim.edge.EdgeDatacenterBroker;
 import org.cloudbus.cloudsim.edge.Message;
 import org.cloudbus.cloudsim.edge.PresetEvent;
 import org.cloudbus.cloudsim.edge.util.BaseDatacenter;
 import org.cloudbus.cloudsim.edge.util.CustomLog;
 import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.edge.vm.VMStatus;
-import org.cloudbus.cloudsim.edge.vm.VmEdge;
+import org.cloudbus.cloudsim.edge.vm.EdgeVm;
 import org.cloudbus.cloudsim.lists.CloudletList;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
@@ -235,7 +235,7 @@ public abstract class Service extends SimEntity {
 			getVmsToDatacentersMap().put(vmId, datacenterId);
 			getVmsCreatedList().add(VmList.getById(getVmList(), vmId));
 
-			VmEdge vm = VmList.getById(getVmsCreatedList(), vmId);
+			EdgeVm vm = VmList.getById(getVmsCreatedList(), vmId);
 
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": VM #" + vmId
 					+ " created in Datacenter #" + datacenterId + ", Host #" + vm.getHost().getId());
@@ -326,8 +326,8 @@ public abstract class Service extends SimEntity {
 	}
 
 	private void finilizeVM(final Vm vm) {
-		if (vm instanceof VmEdge) {
-			VmEdge vmEX = ((VmEdge) vm);
+		if (vm instanceof EdgeVm) {
+			EdgeVm vmEX = ((EdgeVm) vm);
 			if (vmEX.getStatus() != VMStatus.TERMINATED) {
 				vmEX.setStatus(VMStatus.TERMINATED);
 			}
@@ -668,7 +668,7 @@ public abstract class Service extends SimEntity {
 		int datacenterId = -1;
 		double delay = Double.MAX_VALUE;
 
-		int userDcId = ((DatacenterBrokerEdge) CloudSim.getEntity(getUserId())).getUserDC().getId();
+		int userDcId = ((EdgeDatacenterBroker) CloudSim.getEntity(getUserId())).getUserDC().getId();
 
 		for (Integer dcId : datacenterIdsList) {
 			if (!((NetworkDatacenter) CloudSim.getEntity(dcId)).isUserDC()

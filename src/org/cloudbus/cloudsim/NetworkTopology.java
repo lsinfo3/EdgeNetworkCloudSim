@@ -188,10 +188,13 @@ public class NetworkTopology {
 		if (networkEnabled) {
 			try {
 				// check the nodeIDs against internal array-boundarys
-				if (srcID > graph.getNumberOfNodes() || destID > graph.getNumberOfNodes()) {
+				int realSrcId = map.get(srcID);
+				int realDestId = map.get(destID);
+				if (realSrcId > graph.getNumberOfNodes() || realDestId > graph.getNumberOfNodes()) {
 					throw new ArrayIndexOutOfBoundsException("srcID or destID is higher than highest stored node-ID!");
 				}
-				return bwMatrix[map.get(srcID)][map.get(destID)];
+//				return bwMatrix[map.get(srcID)][map.get(destID)];
+				return bwMatrix[realSrcId][realDestId];
 			} catch (Exception e) {
 				// in case of error, just keep running and return 0.0
 			}

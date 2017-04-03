@@ -142,8 +142,8 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 
 					// update the time
 					cl.setTimespentInStage(Math.round(CloudSim.clock() - cl.getTimetostartStage()));
-					System.out.println(TextUtil.toString(CloudSim.clock()) + " [EXECUTION]: CL #" + cl.getCloudletId()
-							+ " time spent in Execution Phase " + cl.getTimespentInStage());
+//					System.out.println(TextUtil.toString(CloudSim.clock()) + " [EXECUTION]: CL #" + cl.getCloudletId()
+//							+ " time spent in Execution Phase " + cl.getTimespentInStage());
 					if (cl.getTimespentInStage() >= st.getTime()) {
 						// CustomLog.printf("%s\t\t%s\t\t\t%s\t\t\t%s",
 						// TextUtil.toString(CloudSim.clock()),
@@ -159,8 +159,8 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 					List<HostPacket> pkttoremove = new ArrayList<HostPacket>();
 					if (pktlist != null) {
 						if (pktlist.isEmpty()) {
-							System.out.println(TextUtil.toString(CloudSim.clock()) + " [RECV_WAIT]: CL #"
-									+ cl.getCloudletId() + " waiting packet from CL #" + st.getVpeer());
+//							System.out.println(TextUtil.toString(CloudSim.clock()) + " [RECV_WAIT]: CL #"
+//									+ cl.getCloudletId() + " waiting packet from CL #" + st.getVpeer());
 							changetonextstage(cl, st);
 						}
 						Iterator<HostPacket> it = pktlist.iterator();
@@ -206,8 +206,8 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 						// if(pkt!=null)
 						// else wait for recieving the packet
 					} else {
-						System.out.println(TextUtil.toString(CloudSim.clock()) + " [RECV_WAIT]: CL #"
-								+ cl.getCloudletId() + " waiting packet from CL #" + st.getVpeer());
+//						System.out.println(TextUtil.toString(CloudSim.clock()) + " [RECV_WAIT]: CL #"
+//								+ cl.getCloudletId() + " waiting packet from CL #" + st.getVpeer());
 					}
 				}
 				if (st.getType() == NetworkConstants.WAIT_SEND) {
@@ -934,7 +934,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 			try {
 				vm = VmList.getById(((Service) entity).getVmList(), cl.getVmId());
 			} catch (Exception e) {
-				vm = VmList.getById(((DatacenterBrokerEdge) entity).getVmList(), cl.getVmId());
+				vm = VmList.getById(((EdgeDatacenterBroker) entity).getVmList(), cl.getVmId());
 			}
 			return vm.getHost().getDatacenter();
 		}

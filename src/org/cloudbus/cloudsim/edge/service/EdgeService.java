@@ -7,7 +7,7 @@ import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.edge.vm.VmEdge;
+import org.cloudbus.cloudsim.edge.vm.EdgeVm;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
 
@@ -53,7 +53,7 @@ public abstract class EdgeService extends Service {
 
 			if (cl.getVmId() == -1) {
 				for (Vm vm1 : getVmsCreatedList()) {
-					if(((VmEdge) vm1).getType() == cl.getVmType() && !getAssignedVm().contains(vm1)){
+					if(((EdgeVm) vm1).getType() == cl.getVmType() && !getAssignedVm().contains(vm1)){
 						getAssignedVm().add(vm1);
 						cl.setVmId(vm1.getId());
 						break;

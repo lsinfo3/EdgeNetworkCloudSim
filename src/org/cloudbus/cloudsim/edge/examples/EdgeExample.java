@@ -21,7 +21,10 @@ public class EdgeExample {
 		try {
 			
 			Properties props = new Properties();
-			props.setProperty("FilePath", "C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\results.txt");
+//			props.setProperty("FilePath", "C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\results\\results_baseline.txt");
+//			props.setProperty("FilePath", "C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\results\\results_double_bw.txt");
+			props.setProperty("FilePath", "C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\results\\results_double_delay.txt");
+//			props.setProperty("FilePath", "C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\results\\results_double_data.txt");
 			props.setProperty("LogRealTimeClock", "true");
 			props.setProperty("LogFormat", "getMessage");
 			
@@ -39,9 +42,9 @@ public class EdgeExample {
 
 			// load the network topology file
 			NetworkTopology
-//			.buildNetworkTopology("C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\topology_double_delay.brite");
-//			.buildNetworkTopology("C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\topology_double_bw.brite");
-			.buildNetworkTopology("C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\topology.brite");
+			.buildNetworkTopology("C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\brites\\topology_double_delay.brite");
+//			.buildNetworkTopology("C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\brites\\topology_double_bw.brite");
+//			.buildNetworkTopology("C:\\Users\\kwam8\\Dropbox\\Semester\\WS1516\\network\\test_run\\brites\\topology_baseline.brite");
 			
 			
 			BaseDatacenter.createNetworkWorking();

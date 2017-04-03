@@ -29,7 +29,7 @@ import org.cloudbus.cloudsim.edge.util.CustomLog;
 import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.edge.vm.T2Small;
 import org.cloudbus.cloudsim.edge.vm.VMStatus;
-import org.cloudbus.cloudsim.edge.vm.VmEdge;
+import org.cloudbus.cloudsim.edge.vm.EdgeVm;
 import org.cloudbus.cloudsim.edge.vm.VmType;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
@@ -46,7 +46,7 @@ import org.cloudbus.cloudsim.network.datacenter.TaskStage;
  * @author Brice Kamneng Kwam
  * @since CloudSim Toolkit 1.0
  */
-public class DatacenterBrokerEdge extends SimEntity {
+public class EdgeDatacenterBroker extends SimEntity {
 
 	/** The vm list. */
 	private List<? extends Vm> vmList = new ArrayList<>();
@@ -121,7 +121,7 @@ public class DatacenterBrokerEdge extends SimEntity {
 	 * @pre name != null
 	 * @post $none
 	 */
-	public DatacenterBrokerEdge(String name, final double lifeLength) throws Exception {
+	public EdgeDatacenterBroker(String name, final double lifeLength) throws Exception {
 		super(name);
 
 		setServiceList(new ArrayList<Service>());
@@ -137,7 +137,7 @@ public class DatacenterBrokerEdge extends SimEntity {
 		this.messageToSend = new ArrayList<>();
 	}
 
-	public DatacenterBrokerEdge(String name) throws Exception {
+	public EdgeDatacenterBroker(String name) throws Exception {
 		this(name, -1);
 	}
 
@@ -763,7 +763,8 @@ public class DatacenterBrokerEdge extends SimEntity {
 		;
 		int firstCloudletId = serviceData[0];
 		int firstVmId = serviceData[1];
-		long data = (msg != null) ? msg.getMips() + 10240 : 10240;
+		long data = (msg != null) ? msg.getMips() + 10000000 : 10000000;
+//		long data = (msg != null) ? msg.getMips() + 20000000 : 20000000;
 
 		cloudlet.setCurrStagenum(-1);
 
@@ -846,8 +847,8 @@ public class DatacenterBrokerEdge extends SimEntity {
 	}
 
 	private void finilizeVM(final Vm vm) {
-		if (vm instanceof VmEdge) {
-			VmEdge vmEX = ((VmEdge) vm);
+		if (vm instanceof EdgeVm) {
+			EdgeVm vmEX = ((EdgeVm) vm);
 			if (vmEX.getStatus() != VMStatus.TERMINATED) {
 				vmEX.setStatus(VMStatus.TERMINATED);
 			}

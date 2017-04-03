@@ -9,7 +9,7 @@ import org.cloudbus.cloudsim.edge.EdgeCloudletSpaceSharedScheduler;
  * @author Brice Kamneng Kwam
  *
  */
-public class T2Large extends VmEdge {
+public class T2Large extends EdgeVm {
 
 	private T2Large(String name, int userId, double mips, int numberOfPes, int ram, long bw, long size, String vmm,
 			CloudletScheduler cloudletScheduler) {

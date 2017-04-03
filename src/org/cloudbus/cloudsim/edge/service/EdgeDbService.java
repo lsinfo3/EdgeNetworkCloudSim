@@ -82,20 +82,24 @@ public class EdgeDbService extends EdgeService {
 				cl.setStages(new ArrayList<TaskStage>());
 				cl.setCurrStagenum(-1);
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, generateRandomData(), 0, 0, cl.getMemory(), getBrokerVmId(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10240, 0, 0, cl.getMemory(), getBrokerVmId(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000000, 0, 0, cl.getMemory(), getBrokerVmId(),
+//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000000, 0, 0, cl.getMemory(), getBrokerVmId(),
 						getBrokerCloudletId()));
 
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 10240 * 0.8, 1, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, generateRandomData(), 0, 2, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10240, 0, 2, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000000, 0, 2, cl.getMemory(),
+//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000000, 0, 2, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, generateRandomData(), 0, 3, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10240, 0, 3, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000000, 0, 3, cl.getMemory(),
+//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000000, 0, 3, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
 
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, generateRandomData(), 0, 4, cl.getMemory(), getBrokerVmId(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10240, 0, 4, cl.getMemory(), getBrokerVmId(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000000, 0, 4, cl.getMemory(), getBrokerVmId(),
+//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000000, 0, 4, cl.getMemory(), getBrokerVmId(),
 						getBrokerCloudletId()));
 			}
 			if (i == 1) {
@@ -104,18 +108,22 @@ public class EdgeDbService extends EdgeService {
 				cl.setStages(new ArrayList<TaskStage>());
 				cl.setCurrStagenum(-1);
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, generateRandomData(), 0, 0, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10240, 0, 0, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000000, 0, 0, cl.getMemory(),
+//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000000, 0, 0, cl.getMemory(),
 						cList.get(0).getVmId(), cList.get(0).getCloudletId()));
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 10240 * 0.8, 1, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, generateRandomData(), 0, 2, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10240, 0, 2, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000000, 0, 2, cl.getMemory(),
+//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000000, 0, 2, cl.getMemory(),
 						cList.get(2).getVmId(), cList.get(2).getCloudletId()));
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, generateRandomData(), 0, 3, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10240, 0, 3, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000000, 0, 3, cl.getMemory(),
+//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000000, 0, 3, cl.getMemory(),
 						cList.get(2).getVmId(), cList.get(2).getCloudletId()));
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, generateRandomData(), 0, 4, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10240, 0, 4, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000000, 0, 4, cl.getMemory(),
+//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000000, 0, 4, cl.getMemory(),
 						cList.get(0).getVmId(), cList.get(0).getCloudletId()));
 			}
 			if (i == 2) {
@@ -124,12 +132,14 @@ public class EdgeDbService extends EdgeService {
 				cl.setStages(new ArrayList<TaskStage>());
 				cl.setCurrStagenum(-1);
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, generateRandomData(), 0, 0, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10240, 0, 0, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000000, 0, 0, cl.getMemory(),
+//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000000, 0, 0, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 10240 * 0.8, 1, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, generateRandomData(), 0, 2, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10240, 0, 2, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000000, 0, 2, cl.getMemory(),
+//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000000, 0, 2, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
 			}
 
