@@ -16,7 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.Cloudlet;
-import org.cloudbus.cloudsim.CloudletSchedulerSpaceShared;
+import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterBroker;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
@@ -31,7 +31,6 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.edge.util.Id;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
@@ -86,7 +85,7 @@ public class NetworkExample3 {
 			vmlist2 = new ArrayList<Vm>();
 
 			//VM description
-//			int vmid = 0;
+			int vmid = 0;
 			long size = 10000; //image size (MB)
 			int mips = 250;
 			int ram = 512; //vm memory (MB)
@@ -95,10 +94,10 @@ public class NetworkExample3 {
 			String vmm = "Xen"; //VMM name
 
 			//create two VMs: the first one belongs to user1
-			Vm vm1 = new Vm(Id.pollId(Vm.class), brokerId1, mips, pesNumber, ram, bw, size, vmm, new CloudletSchedulerSpaceShared());
+			Vm vm1 = new Vm(vmid, brokerId1, mips, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
 
 			//the second VM: this one belongs to user2
-			Vm vm2 = new Vm(Id.pollId(Vm.class), brokerId2, mips, pesNumber, ram, bw, size, vmm, new CloudletSchedulerSpaceShared());
+			Vm vm2 = new Vm(vmid, brokerId2, mips, pesNumber, ram, bw, size, vmm, new CloudletSchedulerTimeShared());
 
 			//add the VMs to the vmlists
 			vmlist1.add(vm1);
@@ -113,16 +112,16 @@ public class NetworkExample3 {
 			cloudletList2 = new ArrayList<Cloudlet>();
 
 			//Cloudlet properties
-//			int id = 0;
+			int id = 0;
 			long length = 40000;
 			long fileSize = 300;
 			long outputSize = 300;
 			UtilizationModel utilizationModel = new UtilizationModelFull();
 
-			Cloudlet cloudlet1 = new Cloudlet(Id.pollId(Cloudlet.class), length, pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
+			Cloudlet cloudlet1 = new Cloudlet(id, length, pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
 			cloudlet1.setUserId(brokerId1);
 
-			Cloudlet cloudlet2 = new Cloudlet(Id.pollId(Cloudlet.class), length, pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
+			Cloudlet cloudlet2 = new Cloudlet(id, length, pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
 			cloudlet2.setUserId(brokerId2);
 
 			//add the cloudlets to the lists: each cloudlet belongs to one user
@@ -136,7 +135,7 @@ public class NetworkExample3 {
 
 			//Sixth step: configure network
 			//load the network topology file
-			NetworkTopology.buildNetworkTopology("C:\\Users\\kwam8\\Desktop\\network\\topology.brite");
+			NetworkTopology.buildNetworkTopology("topology.brite");
 
 			//maps CloudSim entities to BRITE entities
 			//Datacenter0 will correspond to BRITE node 0

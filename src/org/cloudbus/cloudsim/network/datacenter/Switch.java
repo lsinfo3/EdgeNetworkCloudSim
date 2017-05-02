@@ -27,6 +27,7 @@ import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 import org.cloudbus.cloudsim.edge.EdgeHost;
+import org.cloudbus.cloudsim.edge.util.CustomLog;
 import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.lists.VmList;
 
@@ -292,6 +293,7 @@ public class Switch extends SimEntity {
 
 	protected void processpacketforward(SimEvent ev) {
 		// search for the host and packets..send to them
+		
 
 		if (downlinkswitchpktlist != null) {
 			for (Entry<Integer, List<NetworkPacket>> es : downlinkswitchpktlist.entrySet()) {
@@ -302,7 +304,13 @@ public class Switch extends SimEntity {
 					Iterator<NetworkPacket> it = hspktlist.iterator();
 					while (it.hasNext()) {
 						NetworkPacket hspkt = it.next();
-						double delay = hspkt.pkt.data / avband;
+						double delay = hspkt.pkt.data / (avband * 1000);
+
+						CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+								"#" + this.getId() + "->#" + tosend,
+								TextUtil.toString(hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
+								delay,
+								TextUtil.toString(hspkt.pkt.data));
 
 						this.send(tosend, delay, CloudSimTags.Network_Event_DOWN, hspkt);
 					}
@@ -318,16 +326,19 @@ public class Switch extends SimEntity {
 					// sharing bandwidth between packets
 					double bw = NetworkTopology.isNetworkEnabled() ? NetworkTopology.getBw(getId(), tosend)
 							: uplinkbandwidth;
-					// double avband = uplinkbandwidth / hspktlist.size();
+					
 					double avband = bw / hspktlist.size();
-					// CustomLog.printf("%s\t\t%s\t\t%s\t\t%s", "BW", bw,
-					// "avband", avband);
 					Iterator<NetworkPacket> it = hspktlist.iterator();
 					while (it.hasNext()) {
 						NetworkPacket hspkt = it.next();
-						double delay = hspkt.pkt.data / avband;
-						// CustomLog.printf("%s\t\t%s\t\t%s",
-						// TextUtil.toString(CloudSim.clock()),"delay", delay);
+						double delay = hspkt.pkt.data / (avband * 1000);
+						
+						CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+								"#" + this.getId() + "->#" + tosend,
+								TextUtil.toString(hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
+								delay,
+								TextUtil.toString(hspkt.pkt.data));
+
 						this.send(tosend, delay, CloudSimTags.Network_Event_UP, hspkt);
 					}
 					hspktlist.clear();
@@ -342,9 +353,15 @@ public class Switch extends SimEntity {
 					Iterator<NetworkPacket> it = hspktlist.iterator();
 					while (it.hasNext()) {
 						NetworkPacket hspkt = it.next();
-						// hspkt.recieverhostid=tosend;
-						// hs.packetrecieved.add(hspkt);
-						this.send(getId(), hspkt.pkt.data / avband, CloudSimTags.Network_Event_Host, hspkt);
+						double delay = hspkt.pkt.data / (avband * 1000);
+
+						CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+								"#" + this.getId() + "->Host#" + es.getKey(),
+								TextUtil.toString(hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
+								delay,
+								TextUtil.toString(hspkt.pkt.data));
+						
+						this.send(getId(), delay, CloudSimTags.Network_Event_Host, hspkt);
 					}
 					hspktlist.clear();
 				}

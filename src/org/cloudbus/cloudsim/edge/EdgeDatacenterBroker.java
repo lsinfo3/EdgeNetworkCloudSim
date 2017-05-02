@@ -232,9 +232,6 @@ public class EdgeDatacenterBroker extends SimEntity {
 				// cloudlet is waiting its VM be created
 
 				System.out.println("Cloudlets waiting for VM creation!");
-				// Notify Broker that our Cloudlet are done! but some bount
-				// cloudlet is waiting its VM be created
-				// sendNow(getId(), CloudSimTagsExt.SERVICE_CLOUDLET_DONE_VM);
 			}
 
 		}
@@ -763,7 +760,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 		;
 		int firstCloudletId = serviceData[0];
 		int firstVmId = serviceData[1];
-		long data = (msg != null) ? msg.getMips() + 10000000 : 10000000;
+		long data = (msg != null) ? msg.getMips() + 10000 : 10000;
 //		long data = (msg != null) ? msg.getMips() + 20000000 : 20000000;
 
 		cloudlet.setCurrStagenum(-1);

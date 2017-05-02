@@ -212,8 +212,8 @@ public class BaseDatacenter {
 
 		// Add Services
 		broker.addService(new EdgeDbService("EDS3"));
-		broker.addService(new EdgeDbService("EDS24"));
 		broker.addService(new EdgeWebService("EWS22"));
+		broker.addService(new EdgeDbService("EDS24"));
 
 		// Simulate the Broker sending deferred messages (e.g. new requests) to
 		// the Services
@@ -326,7 +326,8 @@ public class BaseDatacenter {
 
 		for (Host hs : dc.getHostList()) {
 			EdgeHost hs1 = (EdgeHost) hs;
-			hs1.bandwidth = NetworkConstants.BandWidthEdgeHost;
+//			hs1.bandwidth = NetworkConstants.BandWidthEdgeHost;
+			hs1.bandwidth = edgeswitch.downlinkbandwidth;
 			edgeswitch.hostlist.put(hs.getId(), hs1);
 			dc.HostToSwitchid.put(hs.getId(), edgeswitch.getId());
 			hs1.sw = edgeswitch;

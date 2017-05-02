@@ -9,6 +9,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmScheduler;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
+import org.cloudbus.cloudsim.edge.util.CustomLog;
 import org.cloudbus.cloudsim.edge.util.Id;
 import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.edge.vm.EdgeVm;
@@ -72,10 +73,6 @@ public class EdgeHost extends NetworkHost {
 	 */
 	@Override
 	protected void sendpackets() {
-
-		// System.out.println(CloudSim.clock() + "[DEBUG]: calling sendpackets()
-		// from EdgeHost");
-
 		for (Vm vm : super.getVmList()) {
 			for (Entry<Integer, List<HostPacket>> es : ((EdgeCloudletSpaceSharedScheduler) vm
 					.getCloudletScheduler()).pkttosend.entrySet()) {
@@ -124,8 +121,14 @@ public class EdgeHost extends NetworkHost {
 		packetTosendLocal.clear();
 		double avband = bandwidth / packetTosendGlobal.size();
 		for (NetworkPacket hs : packetTosendGlobal) {
-			double delay = (1000 * hs.getPkt().getData()) / avband;
+			double delay = (hs.getPkt().getData()) / (avband * 1000);
 			NetworkConstants.totaldatatransfer += hs.getPkt().getData();
+			
+			CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+					"Host#" + getId() + "->#" + sw.getId(),
+					TextUtil.toString((hs.getPkt().getData())+ "/(" + avband + "*" + 1000+")"),
+					delay,
+					TextUtil.toString(hs.getPkt().getData()));
 			
 			CloudSim.send(getDatacenter().getId(), sw.getId(), delay, CloudSimTags.Network_Event_UP, hs);
 			// send to switch with delay

@@ -20,6 +20,11 @@ import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.core.CloudSim;
 
 /**
+ * jdhfdjhfdf
+ * 
+ * @author Brice Kamneng Kwam
+ * based on NetworkCloudSim x.x
+ * 
  * VmAllocationPolicySimple is an VmAllocationPolicy that chooses, as the host for a VM, the host
  * with less bw in use.
  * 

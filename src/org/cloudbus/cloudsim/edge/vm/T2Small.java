@@ -18,7 +18,6 @@ public class T2Small extends EdgeVm {
 
 	
 	public T2Small() {
-//		this("t2.small", -1, 11720, 2, 2048, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
 		this("t2.small", -1, 11720 * 2, 2, 2048, 1024, 1024, "Xen", new EdgeCloudletSpaceSharedScheduler());
 		setType(VmType.T2SMALL);
 	}

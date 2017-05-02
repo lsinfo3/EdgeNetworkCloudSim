@@ -14,6 +14,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.edge.util.CustomLog;
+import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.network.DelayMatrix_Float;
 import org.cloudbus.cloudsim.network.GraphReaderBrite;
 import org.cloudbus.cloudsim.network.TopologicalGraph;
@@ -193,7 +196,7 @@ public class NetworkTopology {
 				if (realSrcId > graph.getNumberOfNodes() || realDestId > graph.getNumberOfNodes()) {
 					throw new ArrayIndexOutOfBoundsException("srcID or destID is higher than highest stored node-ID!");
 				}
-//				return bwMatrix[map.get(srcID)][map.get(destID)];
+				// return bwMatrix[map.get(srcID)][map.get(destID)];
 				return bwMatrix[realSrcId][realDestId];
 			} catch (Exception e) {
 				// in case of error, just keep running and return 0.0
@@ -271,6 +274,10 @@ public class NetworkTopology {
 				// add the network latency
 				double delay = delayMatrix.getDelay(map.get(srcID), map.get(destID));
 
+				if (srcID != 13)
+					CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+							"#" + srcID + "->#" + destID, "DELAY", delay);
+
 				return delay;
 			} catch (Exception e) {
 				// in case of error, just keep running and return 0.0
@@ -278,7 +285,7 @@ public class NetworkTopology {
 		}
 		return 0.0;
 	}
-	
+
 	/**
 	 * Calculates the delay between two nodes
 	 * 
@@ -297,7 +304,9 @@ public class NetworkTopology {
 				// add the network latency
 				int nextHop = delayMatrix.getNextHop(map.get(srcID), map.get(destID));
 				int EntityId = getEntitIdFromNetworkId(nextHop);
-//				CustomLog.printf("%s\t%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "src #" + srcID + "->#" + destID, "next hop", "#" + EntityId);
+				// CustomLog.printf("%s\t%s\t%s\t%s",
+				// TextUtil.toString(CloudSim.clock()), "src #" + srcID + "->#"
+				// + destID, "next hop", "#" + EntityId);
 				return EntityId;
 			} catch (Exception e) {
 				// in case of error, just keep running and return 0.0
@@ -319,21 +328,21 @@ public class NetworkTopology {
 	public static boolean isNetworkEnabled() {
 		return networkEnabled;
 	}
-	
-	
+
 	/**
-	 * @param netId The network (Brite) Id
-	 * @return CloudSim Entity Id from the network (Brite) Id 
+	 * @param netId
+	 *            The network (Brite) Id
+	 * @return CloudSim Entity Id from the network (Brite) Id
 	 */
-	public static int getEntitIdFromNetworkId(int netId){
-		int key= -1;
-        for(Entry<Integer, Integer> entry: map.entrySet()){
-            if(netId == entry.getValue()){
-                key = entry.getKey();
-                break; //breaking because its one to one map
-            }
-        }
-        return key;
+	public static int getEntitIdFromNetworkId(int netId) {
+		int key = -1;
+		for (Entry<Integer, Integer> entry : map.entrySet()) {
+			if (netId == entry.getValue()) {
+				key = entry.getKey();
+				break; // breaking because its one to one map
+			}
+		}
+		return key;
 	}
 
 }

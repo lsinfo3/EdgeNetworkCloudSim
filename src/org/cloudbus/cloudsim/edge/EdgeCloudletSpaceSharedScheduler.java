@@ -104,9 +104,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 	 */
 	@Override
 	public double updateVmProcessing(double currentTime, List<Double> mipsShare) {
-		// System.out.println(TextUtil.toString(CloudSim.clock()) + "
-		// [DEBUG]:keep calling:
-		// EdgeCloudletSpaceSharedScheduler.updateVmProcessing");
+
 		setCurrentMipsShare(mipsShare);
 		// update
 		double capacity = 0.0;
@@ -121,18 +119,15 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 		currentCpus = cpus;
 		capacity /= cpus; // average capacity of each cpu
 
-		for (ResCloudlet rcl : getCloudletExecList()) { // each machine in the
-			// exec list has the
-			// same amount of cpu
+		for (ResCloudlet rcl : getCloudletExecList()) {
+			// each machine in the exec list has the same amount of cpu
 
 			NetworkCloudlet cl = (NetworkCloudlet) rcl.getCloudlet();
 
-			// check status
-			// if execution stage
-			// update the cloudlet finishtime
+			// check status if execution stage update the cloudlet finishtime
 			// CHECK WHETHER IT IS WAITING FOR THE PACKET
 			// if packet received change the status of job and update the time.
-			//
+
 			if ((cl.getCurrStagenum() != -1)) {
 				if (cl.getCurrStagenum() == NetworkConstants.FINISH) {
 					break;
@@ -142,16 +137,9 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 
 					// update the time
 					cl.setTimespentInStage(Math.round(CloudSim.clock() - cl.getTimetostartStage()));
-//					System.out.println(TextUtil.toString(CloudSim.clock()) + " [EXECUTION]: CL #" + cl.getCloudletId()
-//							+ " time spent in Execution Phase " + cl.getTimespentInStage());
 					if (cl.getTimespentInStage() >= st.getTime()) {
-						// CustomLog.printf("%s\t\t%s\t\t\t%s\t\t\t%s",
-						// TextUtil.toString(CloudSim.clock()),
-						// "CL #" + cl.getCloudletId(), "Ends",
-						// "EXEC " +
-						// TextUtil.toString(cl.getTimespentInStage()));
-						changetonextstage(cl, st);
 						// change the stage
+						changetonextstage(cl, st);
 					}
 				}
 				if (st.getType() == NetworkConstants.WAIT_RECV) {
@@ -159,24 +147,22 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 					List<HostPacket> pkttoremove = new ArrayList<HostPacket>();
 					if (pktlist != null) {
 						if (pktlist.isEmpty()) {
-//							System.out.println(TextUtil.toString(CloudSim.clock()) + " [RECV_WAIT]: CL #"
-//									+ cl.getCloudletId() + " waiting packet from CL #" + st.getVpeer());
 							changetonextstage(cl, st);
 						}
 						Iterator<HostPacket> it = pktlist.iterator();
 						HostPacket pkt = null;
 						if (it.hasNext()) {
 							pkt = it.next();
-							// Asumption packet will not arrive in the same
-							// cycle
+							// Asumption packet will not arrive in the same cycle
 							if (pkt.getReciever() == cl.getVmId()) {
 								if (pkt.getVirtualrecvid() == cl.getCloudletId()) {
 
 									if (cl.getCloudletId() == 0) {
+
 										CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
-												"Service #",
-												TextUtil.toString(CloudSim.clock() - cl.getServiceTime()),
+												"Service #", TextUtil.toString(CloudSim.clock() - cl.getServiceTime()),
 												TextUtil.toString(st.getData()));
+
 										cl.setServiceTime(CloudSim.clock());
 									}
 
@@ -184,30 +170,21 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 											+ cl.getCloudletId() + " received a packet from CL #"
 											+ pkt.getVirtualsendid() + " with the data: " + pkt.getData());
 
-									// CustomLog.printf("%s\t\t%s\t\t\t%s\t%s",
-									// TextUtil.toString(CloudSim.clock()),
-									// "CL #" + cl.getCloudletId(), "RECV" ,
-									// TextUtil.toString(pkt.getData()));
 
 									pkt.setRecievetime(CloudSim.clock());
 									st.setTime(CloudSim.clock() - pkt.getSendtime());
-									// CustomLog.printf("%s\t\t%s\t%s\t%s",
-									// TextUtil.toString(CloudSim.clock()),
-									// "CL #" + pkt.getVirtualsendid() + "->#" +
-									// cl.getCloudletId(),
-									// TextUtil.toString(st.getTime()),
-									// TextUtil.toString(pkt.getData()));
 									changetonextstage(cl, st);
 									pkttoremove.add(pkt);
 								}
 							}
 						}
 						pktlist.removeAll(pkttoremove);
-						// if(pkt!=null)
 						// else wait for recieving the packet
 					} else {
-//						System.out.println(TextUtil.toString(CloudSim.clock()) + " [RECV_WAIT]: CL #"
-//								+ cl.getCloudletId() + " waiting packet from CL #" + st.getVpeer());
+						// System.out.println(TextUtil.toString(CloudSim.clock())
+						// + " [RECV_WAIT]: CL #"
+						// + cl.getCloudletId() + " waiting packet from CL #" +
+						// st.getVpeer());
 					}
 				}
 				if (st.getType() == NetworkConstants.WAIT_SEND) {
@@ -222,11 +199,6 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 
 					HostPacket pkt = new HostPacket(cl.getVmId(), st.getPeer(), st.getData(), CloudSim.clock(), -1,
 							cl.getCloudletId(), st.getVpeer());
-
-					// CustomLog.printf("%s\t\t%s\t\t\t%s\t%s",
-					// TextUtil.toString(CloudSim.clock()),
-					// "CL #" + cl.getCloudletId(), "SEND",
-					// TextUtil.toString(pkt.getData()));
 
 					List<HostPacket> pktlist = pkttosend.get(cl.getVmId());
 					if (pktlist == null) {
@@ -248,7 +220,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 					dc.schedule(dc.getId(), cl.getStages().get(0).getTime(), CloudSimTags.VM_DATACENTER_EVENT);
 				} else {
 					dc.schedule(dc.getId(), 0.0001, CloudSimTags.VM_DATACENTER_EVENT);
-					// /sendstage///
+					// sendstage
 				}
 			}
 
@@ -340,11 +312,6 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 							+ " in VM #" + cl.getStages().get(i).getPeer() + " with data "
 							+ cl.getStages().get(i).getData());
 
-					// CustomLog.printf("%s\t\t%s\t\t\t%s\t%s",
-					// TextUtil.toString(CloudSim.clock()),
-					// "CL #" + cl.getCloudletId(), "SEND",
-					// TextUtil.toString(pkt.getData()));
-
 					if (pktlist == null) {
 						pktlist = new ArrayList<HostPacket>();
 					}
@@ -353,9 +320,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 
 				} else {
 					if (cl.getStages().get(i).getType() == NetworkConstants.EXECUTION) {
-						// CustomLog.printf("%s\t\t%s\t\t\t%s\t\t\t%s",
-						// TextUtil.toString(CloudSim.clock()),
-						// "CL #" + cl.getCloudletId(), "Starts", "EXEC");
+						// Starts EXEC phase
 					}
 					break;
 				}

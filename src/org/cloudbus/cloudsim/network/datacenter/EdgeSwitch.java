@@ -19,6 +19,8 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
+import org.cloudbus.cloudsim.edge.util.CustomLog;
+import org.cloudbus.cloudsim.edge.util.TextUtil;
 
 /**
  * This class allows to simulate Edge switch for Datacenter network. It
@@ -54,7 +56,9 @@ public class EdgeSwitch extends Switch {
 		uplinkswitchpktlist = new HashMap<Integer, List<NetworkPacket>>();
 		packetTohost = new HashMap<Integer, List<NetworkPacket>>();
 		uplinkbandwidth = NetworkConstants.BandWidthEdgeAgg;
-		downlinkbandwidth = NetworkConstants.BandWidthEdgeHost;
+		uplinkbandwidth = 6250000.0; // as defined in the BRITE file
+//		downlinkbandwidth = NetworkConstants.BandWidthEdgeHost;
+		downlinkbandwidth = 1250000.0; // as defined in the BRITE file
 		switching_delay = NetworkConstants.SwitchingDelayEdge;
 		numport = NetworkConstants.EdgeSwitchPort;
 		uplinkswitches = new ArrayList<Switch>();
@@ -74,6 +78,8 @@ public class EdgeSwitch extends Switch {
 		// add packet in the switch list
 		//
 		// int src=ev.getSource();
+		
+		
 		NetworkPacket hspkt = (NetworkPacket) ev.getData();
 		int recvVMid = hspkt.getPkt().getReciever();
 		CloudSim.cancelAll(getId(), new PredicateType(CloudSimTags.Network_Event_send));
@@ -134,7 +140,7 @@ public class EdgeSwitch extends Switch {
 	@Override
 	protected void processpacketforward(SimEvent ev) {
 		// search for the host and packets..send to them
-
+		
 		if (uplinkswitchpktlist != null) {
 			for (Entry<Integer, List<NetworkPacket>> es : uplinkswitchpktlist.entrySet()) {
 				int tosend = es.getKey();
@@ -144,14 +150,16 @@ public class EdgeSwitch extends Switch {
 					double bw = NetworkTopology.isNetworkEnabled() ? NetworkTopology.getBw(getId(), tosend)
 							: uplinkbandwidth;
 					double avband = bw / hspktlist.size();
-//					CustomLog.printf("%s\t\t%s\t\t%s\t\t%s", "BW", bw, "avband", avband);
-					// double avband = uplinkbandwidth / hspktlist.size();
 					Iterator<NetworkPacket> it = hspktlist.iterator();
 					while (it.hasNext()) {
 						NetworkPacket hspkt = it.next();
-						double delay = hspkt.pkt.data / avband;
+						double delay = hspkt.pkt.data / (avband * 1000);
 
-//						CustomLog.printf("%s\t\t%s\t\t%s", TextUtil.toString(CloudSim.clock()),"delay", delay);
+						CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+								"#" + this.getId() + "->#" + tosend,
+								TextUtil.toString(hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
+								delay,
+								TextUtil.toString(hspkt.pkt.data));
 						
 						this.send(tosend, delay, CloudSimTags.Network_Event_UP, hspkt);
 					}
@@ -167,9 +175,15 @@ public class EdgeSwitch extends Switch {
 					Iterator<NetworkPacket> it = hspktlist.iterator();
 					while (it.hasNext()) {
 						NetworkPacket hspkt = it.next();
+						double delay = hspkt.pkt.data / (avband * 1000); 
 						
+						CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+								"#" + this.getId() + "->Host#" + es.getKey(),
+								TextUtil.toString(hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
+								delay,
+								TextUtil.toString(hspkt.pkt.data));
 						
-						this.send(getId(), hspkt.pkt.data / avband, CloudSimTags.Network_Event_Host, hspkt);
+						this.send(getId(), delay, CloudSimTags.Network_Event_Host, hspkt);
 					}
 					hspktlist.clear();
 				}

@@ -136,8 +136,7 @@ public class NetworkExample2 {
 
 			//Sixth step: configure network
 			//load the network topology file
-//			NetworkTopology.buildNetworkTopology("topology.brite");
-			NetworkTopology.buildNetworkTopology("C:\\Users\\kwam8\\Google Drive\\semester\\WS1516\\Software Praktikum\\Workspace\\Cloud\\src\\org\\cloudbus\\cloudsim\\examples\\network\\topology.brite");
+			NetworkTopology.buildNetworkTopology("topology.brite");
 
 			//maps CloudSim entities to BRITE entities
 			//Datacenter0 will correspond to BRITE node 0

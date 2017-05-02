@@ -239,8 +239,6 @@ public abstract class Service extends SimEntity {
 
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": VM #" + vmId
 					+ " created in Datacenter #" + datacenterId + ", Host #" + vm.getHost().getId());
-//			CustomLog.printf("%s\t\t%s\t\t%s\t\t%s", TextUtil.toString(CloudSim.clock()), "Service #" + getId(),
-//					"VM #" + vmId + " - " + vm.getType(), "DC #" + datacenterId + " Host #" + vm.getHost().getId());
 		} else {
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: Service #" + getId() + ": Creation of VM #" + vmId
 					+ " failed in Datacenter #" + datacenterId);
@@ -674,18 +672,13 @@ public abstract class Service extends SimEntity {
 			if (!((NetworkDatacenter) CloudSim.getEntity(dcId)).isUserDC()
 					&& !getDatacenterRequestedIdsList().contains(dcId)) {
 				double tmpDelay = NetworkTopology.getDelay(userDcId, dcId);
-				// CustomLog.printf("%s\t%s\t%s",
-				// TextUtil.toString(CloudSim.clock()),
-				// "Service #" + getId() + " Delay #" + userDcId + "-#" + dcId,
-				// TextUtil.toString(tmpDelay));
+
 				if (tmpDelay < delay && !(getDatacenterRequestedIdsList().contains(dcId))) {
 					datacenterId = dcId;
 					delay = tmpDelay;
 				}
 			}
 		}
-		// CustomLog.printf("%s\t%s\t%s", TextUtil.toString(CloudSim.clock()),
-		// "Choose", "#" + datacenterId);
 		return datacenterId;
 	}
 
@@ -880,7 +873,6 @@ public abstract class Service extends SimEntity {
 			System.out.println(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Service #" + ev.getSource()
 					+ ": almost all Cloudlets processed, but some are still waiting for their VMs to be created!");
 
-			// clearDatacenters();
 			if (getNextDcIdWithShortestDelay() != -1) {
 				createVmsInDatacenter(getNextDcIdWithShortestDelay());
 			}
@@ -909,7 +901,6 @@ public abstract class Service extends SimEntity {
 		}
 		System.out.println(TextUtil.toString(CloudSim.clock()) + "[DEBUG]: Service #" + getId()
 				+ ": Message received from Broker #" + getUserId());
-		// generateCloudlets();
 		for (int i = 0; i < getCloudletList().size(); i++) {
 			((NetworkCloudlet) getCloudletList().get(i)).reset();
 			getCloudletList().get(i).setCloudletLength(
@@ -932,9 +923,7 @@ public abstract class Service extends SimEntity {
 			cloudlet.setCloudletLength(
 					(cloudlet.getCloudletLength() - cloudlet.getCloudletFinishedSoFar()) + msg.getMips()); // not
 																											// sure
-			// how to
-			// calculate
-			// this yet.
+			// how to calculate this yet.
 			// resume the Cloudlet
 			sendNow(getVmsToDatacentersMap().get(cloudlet.getVmId()), CloudSimTags.CLOUDLET_RESUME, cloudlet);
 		}

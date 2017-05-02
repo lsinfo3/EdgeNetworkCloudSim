@@ -18,6 +18,8 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
+import org.cloudbus.cloudsim.edge.util.CustomLog;
+import org.cloudbus.cloudsim.edge.util.TextUtil;
 
 /**
  * This class allows to simulate aggregate switch for Datacenter network. It
@@ -51,8 +53,10 @@ public class AggregateSwitch extends Switch {
 		super(name, level, dc);
 		downlinkswitchpktlist = new HashMap<Integer, List<NetworkPacket>>();
 		uplinkswitchpktlist = new HashMap<Integer, List<NetworkPacket>>();
-		uplinkbandwidth = NetworkConstants.BandWidthAggRoot;
-		downlinkbandwidth = NetworkConstants.BandWidthEdgeAgg;
+//		uplinkbandwidth = NetworkConstants.BandWidthAggRoot;
+		uplinkbandwidth = 12500000.0; // as defined in the BRITE file
+//		downlinkbandwidth = NetworkConstants.BandWidthEdgeAgg;
+		downlinkbandwidth = 6250000.0; // as defined in the BRITE file
 		latency = NetworkConstants.SwitchingDelayAgg;
 		numport = NetworkConstants.AggSwitchPort;
 		uplinkswitches = new ArrayList<Switch>();
@@ -73,6 +77,8 @@ public class AggregateSwitch extends Switch {
 		// check which switch to forward to
 		// add packet in the switch list
 		// add packet in the host list
+		
+		
 		NetworkPacket hspkt = (NetworkPacket) ev.getData();
 		int recvVMid = hspkt.pkt.getReciever();
 		CloudSim.cancelAll(getId(), new PredicateType(CloudSimTags.Network_Event_send));
@@ -108,6 +114,8 @@ public class AggregateSwitch extends Switch {
 		// add packet in the switch list
 		//
 		// int src=ev.getSource();
+		
+		
 		NetworkPacket hspkt = (NetworkPacket) ev.getData();
 		int recvVMid = hspkt.pkt.getReciever();
 		CloudSim.cancelAll(getId(), new PredicateType(CloudSimTags.Network_Event_send));

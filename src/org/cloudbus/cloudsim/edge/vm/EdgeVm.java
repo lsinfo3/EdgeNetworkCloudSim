@@ -242,7 +242,7 @@ public class EdgeVm extends Vm {
      * Returns the name of the VM.
      * 
      * @return the name of the VM.
-     */
+     */	
     public String getName() {
         return name;
     }
