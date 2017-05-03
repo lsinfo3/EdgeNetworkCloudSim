@@ -14,6 +14,12 @@ import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.VmAllocationPolicySimple;
 
 /**
+ * * VmAllocationPolicyCpu is an VmAllocationPolicy that chooses, as the host for a VM, the host
+ * with less PEs in use.
+ * 
+ * @author Brice Kamneng Kwam
+ * based on CloudSim 3.0.3
+ * 
  * VmAllocationPolicySimple is an VmAllocationPolicy that chooses, as the host for a VM, the host
  * with less PEs in use.
  * 

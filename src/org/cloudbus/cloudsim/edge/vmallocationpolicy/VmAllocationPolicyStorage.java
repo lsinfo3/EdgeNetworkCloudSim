@@ -20,6 +20,12 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 
 /**
+ * VmAllocationPolicyStorage is an VmAllocationPolicy that chooses, as the host for a VM, the host
+ * with less bw in use.
+ * 
+ * @author Brice Kamneng Kwam
+ * based on CloudSim 3.0.3
+ * 
  * VmAllocationPolicySimple is an VmAllocationPolicy that chooses, as the host for a VM, the host
  * with less Storage in use.
  * 

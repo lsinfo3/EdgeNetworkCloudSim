@@ -20,6 +20,13 @@ import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.core.CloudSim;
 
 /**
+ * 
+ * VmAllocationPolicyRam is an VmAllocationPolicy that chooses, as the host for a VM, the host
+ * with less RAM in use.
+ * 
+ * @author Brice Kamneng Kwam
+ * based on CloudSim 3.0.3
+ * 
  * VmAllocationPolicySimple is an VmAllocationPolicy that chooses, as the host for a VM, the host
  * with less RAM in use.
  * 
