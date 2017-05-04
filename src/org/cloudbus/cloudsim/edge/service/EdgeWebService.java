@@ -46,7 +46,7 @@ public class EdgeWebService extends EdgeService {
 			ncl.setVmType(VmType.T2NANO);
 			cList.add(ncl);
 
-			ncl = new NetworkCloudlet(40000, 4, 1000, 1000, 256, utilizationModel, utilizationModel, utilizationModel,
+			ncl = new NetworkCloudlet(40000, 1, 1000, 1000, 256, utilizationModel, utilizationModel, utilizationModel,
 					getUserId(), getId());
 			ncl.setVmType(VmType.T2Large);
 			cList.add(ncl);
@@ -54,7 +54,7 @@ public class EdgeWebService extends EdgeService {
 			setCloudletList(cList);
 			createStages();
 			setCloudletGenerated(true);
-
+			System.out.println("Number of cloudlets: "+cList.size());
 		}
 	}
 
@@ -83,20 +83,20 @@ public class EdgeWebService extends EdgeService {
 				cl.setNumStage(5);
 				cl.setSubmittime(CloudSim.clock());
 				cl.setCurrStagenum(-1);
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000, 0, 2, cl.getMemory(), getBrokerVmId(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000, 0, 0, cl.getMemory(), getBrokerVmId(),
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000, 0, 2, cl.getMemory(), getBrokerVmId(),
 						getBrokerCloudletId()));
 
-				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 10240 * 0.8, 0, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 10240 * 0.8, 1, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000, 0, 1, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000, 0, 2, cl.getMemory(),
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000, 0, 1, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000, 0, 2, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000, 0, 3, cl.getMemory(),
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000, 0, 2, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
 
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000, 0, 2, cl.getMemory(), getBrokerVmId(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000, 0, 4, cl.getMemory(), getBrokerVmId(),
 //				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000, 0, 2, cl.getMemory(), getBrokerVmId(),
 						getBrokerCloudletId()));
 			}

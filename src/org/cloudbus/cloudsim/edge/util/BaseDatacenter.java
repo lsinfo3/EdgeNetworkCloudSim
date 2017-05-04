@@ -13,10 +13,12 @@ import org.cloudbus.cloudsim.NetworkTopology;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
+import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.edge.CloudSimTagsExt;
 import org.cloudbus.cloudsim.edge.EdgeDatacenterBroker;
 import org.cloudbus.cloudsim.edge.EdgeHost;
 import org.cloudbus.cloudsim.edge.Message;
+import org.cloudbus.cloudsim.edge.random.ExponentialRNS;
 import org.cloudbus.cloudsim.edge.service.EdgeDbService;
 import org.cloudbus.cloudsim.edge.service.EdgeWebService;
 import org.cloudbus.cloudsim.edge.service.Service;
@@ -208,11 +210,27 @@ public class BaseDatacenter {
 
 		aggSwitch.get(2).uplinkswitches.add(aggSwitch.get(1));
 
-		// Create Brokers
+		// Distributions
+		double t[]  ={5};
+		ExponentialRNS interRequestDist = new ExponentialRNS(1, 1);
+		interRequestDist.setMoments(t);
+		ExponentialRNS interServiceStartDist = new ExponentialRNS(1, 1);
+//		interServiceStartDist.setMoments(t);
+		double serviceStart = interServiceStartDist.next();
+		System.out.println(TextUtil.toString(CloudSim.clock()) + ": [DEBUG]: BaseDatacenter "
+		+ " next Service Start: " + serviceStart);
+
+		ExponentialRNS serviceLengthDist = new ExponentialRNS(1, 1);
+		serviceLengthDist.setMoments(t);
+		double serviceLength = serviceLengthDist.next();
 
 		// Add Services
+//		broker.addService(new EdgeDbService("EDS3", serviceLength));
 		broker.addService(new EdgeDbService("EDS3"));
-		broker.addService(new EdgeWebService("EWS22"));
+		broker.addService(new EdgeDbService("EDS5"));
+//		broker.addService(new EdgeWebService("EWS22", serviceLength));
+		//broker.addService(new EdgeWebService("EWS22"));
+//		broker.addService(new EdgeDbService("EDS24", serviceLength));
 		broker.addService(new EdgeDbService("EDS24"));
 
 		// Simulate the Broker sending deferred messages (e.g. new requests) to
@@ -221,7 +239,14 @@ public class BaseDatacenter {
 		for (Service service : broker.getServiceList()) {
 			data[0] = service.getId();
 			data[1] = Message.ZERO;
-			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 6000);
+			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 3000);
+//			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, serviceStart);
+		}
+		
+		for (Service service : broker.getServiceList()) {
+			data[0] = service.getId();
+			data[1] = Message.ONE;
+			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 80000);
 		}
 
 		// maps CloudSim entities to BRITE entities

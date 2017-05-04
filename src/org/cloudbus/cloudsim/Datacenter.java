@@ -913,9 +913,9 @@ public class Datacenter extends SimEntity {
 			List<? extends Host> list = getVmAllocationPolicy().getHostList();
 			double smallerTime = Double.MAX_VALUE;
 			// for each host...
+			// System.out.println("Datacenter updateCloudletProcessing " +
+			// i);
 			for (int i = 0; i < list.size(); i++) {
-				// System.out.println("Datacenter updateCloudletProcessing " +
-				// i);
 				Host host = list.get(i);
 				// inform VMs to update processing
 				double time = host.updateVmsProcessing(CloudSim.clock());
@@ -931,8 +931,12 @@ public class Datacenter extends SimEntity {
 			if (smallerTime != Double.MAX_VALUE) {
 				// System.out.println("CloudSim.clock()" + CloudSim.clock() + "
 				// : Dc updateCloudletProcessing smallerTime " + smallerTime);
-				// System.out.println(smallerTime - CloudSim.clock());
+//				 System.out.println("Schedule "+(smallerTime - CloudSim.clock()));
+				
 				schedule(getId(), (smallerTime - CloudSim.clock()), CloudSimTags.VM_DATACENTER_EVENT);
+			}else{
+				System.out.println("Boxing "+(smallerTime - CloudSim.clock()));
+				System.out.println("Boxing "+(Double.MAX_VALUE));
 			}
 			setLastProcessTime(CloudSim.clock());
 		}

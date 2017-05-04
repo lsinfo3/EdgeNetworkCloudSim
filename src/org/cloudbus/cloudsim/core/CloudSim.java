@@ -65,6 +65,8 @@ public class CloudSim {
 	/** The minimal time between events. Events within shorter periods after the last event are discarded. */
 	private static double minTimeBetweenEvents = 0.1;
 	
+	private static int chainsize = 0;
+	
 	/**
 	 * Initialises all the common attributes.
 	 * 
@@ -518,6 +520,15 @@ public class CloudSim {
 				ent.run();
 			}
 		}
+		/**if (future.size() != chainsize) {
+			chainsize = future.size();
+			System.out.println("Cloudsim event chain: "+future.size());
+			Iterator<SimEvent> it = future.iterator();
+			while (it.hasNext()) {
+				System.out.println(it.next()+"\t");
+			}
+			System.out.println("---");
+		}*/
 				
 		// If there are more future events then deal with them
 		if (future.size() > 0) {
