@@ -51,14 +51,13 @@ public class EdgeSwitch extends Switch {
 	 *            Pointer to Datacenter
 	 */
 	public EdgeSwitch(String name, int level, NetworkDatacenter dc) {
+		//TODO load down-/uplink bandwidth from BRITE file
 		super(name, level, dc);
 		hostlist = new HashMap<Integer, NetworkHost>();
 		uplinkswitchpktlist = new HashMap<Integer, List<NetworkPacket>>();
 		packetTohost = new HashMap<Integer, List<NetworkPacket>>();
-		uplinkbandwidth = NetworkConstants.BandWidthEdgeAgg;
-		uplinkbandwidth = 6250000.0; // as defined in the BRITE file
-//		downlinkbandwidth = NetworkConstants.BandWidthEdgeHost;
-		downlinkbandwidth = 1250000.0; // as defined in the BRITE file
+		uplinkbandwidth = NetworkConstants.BandWidthEdgeAgg; // as defined in the BRITE file
+		downlinkbandwidth = NetworkConstants.BandWidthEdgeHost; // as defined in the BRITE file
 		switching_delay = NetworkConstants.SwitchingDelayEdge;
 		numport = NetworkConstants.EdgeSwitchPort;
 		uplinkswitches = new ArrayList<Switch>();
@@ -179,7 +178,7 @@ public class EdgeSwitch extends Switch {
 						
 						CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
 								"#" + this.getId() + "->Host#" + es.getKey(),
-								TextUtil.toString(hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
+								TextUtil.toString(downlinkbandwidth + " | " + hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
 								delay,
 								TextUtil.toString(hspkt.pkt.data));
 						

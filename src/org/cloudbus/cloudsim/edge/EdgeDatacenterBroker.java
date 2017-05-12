@@ -760,7 +760,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 		;
 		int firstCloudletId = serviceData[0];
 		int firstVmId = serviceData[1];
-		long data = (msg != null) ? msg.getMips() + 10000 : 10000;
+		long data = (msg != null) ? msg.getMips() + CloudSimTagsExt.DATA_SIZE : CloudSimTagsExt.DATA_SIZE;
 //		long data = (msg != null) ? msg.getMips() + 20000000 : 20000000;
 
 		cloudlet.setCurrStagenum(-1);

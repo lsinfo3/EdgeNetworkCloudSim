@@ -50,13 +50,12 @@ public class AggregateSwitch extends Switch {
 	 *            Pointer to Datacenter
 	 */
 	public AggregateSwitch(String name, int level, NetworkDatacenter dc) {
+		//TODO load down-/uplink bandwidth from BRITE file
 		super(name, level, dc);
 		downlinkswitchpktlist = new HashMap<Integer, List<NetworkPacket>>();
 		uplinkswitchpktlist = new HashMap<Integer, List<NetworkPacket>>();
-//		uplinkbandwidth = NetworkConstants.BandWidthAggRoot;
-		uplinkbandwidth = 12500000.0; // as defined in the BRITE file
-//		downlinkbandwidth = NetworkConstants.BandWidthEdgeAgg;
-		downlinkbandwidth = 6250000.0; // as defined in the BRITE file
+		uplinkbandwidth = NetworkConstants.BandWidthAggRoot; // as defined in the BRITE file
+		downlinkbandwidth = NetworkConstants.BandWidthEdgeAgg; // as defined in the BRITE file
 		latency = NetworkConstants.SwitchingDelayAgg;
 		numport = NetworkConstants.AggSwitchPort;
 		uplinkswitches = new ArrayList<Switch>();

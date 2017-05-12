@@ -357,7 +357,7 @@ public class Switch extends SimEntity {
 
 						CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
 								"#" + this.getId() + "->Host#" + es.getKey(),
-								TextUtil.toString(hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
+								TextUtil.toString(downlinkbandwidth + " | " + hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
 								delay,
 								TextUtil.toString(hspkt.pkt.data));
 						

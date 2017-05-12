@@ -40,9 +40,12 @@ public class NetworkConstants {
 
 	public static boolean BASE = true;
 
-	public static long BandWidthEdgeAgg = 100 * 1024 * 1024;// 100 Megabits
-	public static long BandWidthEdgeHost = 100 * 1024 * 1024;//
-	public static long BandWidthAggRoot = 20 * 1024 * 1024 * 2;// 40gb
+//	public static long BandWidthEdgeAgg = (long) 12500000.0; // double BW
+	public static long BandWidthEdgeAgg = (long) 6250000.0;
+//	public static long BandWidthEdgeHost = (long) 2500000.0; // double BW
+	public static long BandWidthEdgeHost = (long) 1250000.0;
+//	public static long BandWidthAggRoot = (long) 25000000.0; // double BW
+	public static long BandWidthAggRoot = (long) 12500000.0;
 
 	public static double SwitchingDelayRoot = .00285;
 	public static double SwitchingDelayAgg = .00245;// .00245

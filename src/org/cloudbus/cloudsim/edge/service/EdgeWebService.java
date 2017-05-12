@@ -8,6 +8,7 @@ import org.cloudbus.cloudsim.UtilizationModel;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.edge.CloudSimTagsExt;
 import org.cloudbus.cloudsim.edge.vm.T2Large;
 import org.cloudbus.cloudsim.edge.vm.T2Nano;
 import org.cloudbus.cloudsim.edge.vm.T2Small;
@@ -83,63 +84,43 @@ public class EdgeWebService extends EdgeService {
 				cl.setNumStage(5);
 				cl.setSubmittime(CloudSim.clock());
 				cl.setCurrStagenum(-1);
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, generateRandomData(), 0, 2, cl.getMemory(), getBrokerVmId(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000, 0, 2, cl.getMemory(), getBrokerVmId(),
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000, 0, 2, cl.getMemory(), getBrokerVmId(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 2, cl.getMemory(), getBrokerVmId(),
 						getBrokerCloudletId()));
 
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 10240 * 0.8, 0, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, generateRandomData(), 0, 1, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000, 0, 1, cl.getMemory(),
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000, 0, 1, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 1, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, generateRandomData(), 0, 2, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000, 0, 2, cl.getMemory(),
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000, 0, 2, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 2, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
 
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, generateRandomData(), 0, 2, cl.getMemory(), getBrokerVmId(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000, 0, 2, cl.getMemory(), getBrokerVmId(),
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000, 0, 2, cl.getMemory(), getBrokerVmId(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 2, cl.getMemory(), getBrokerVmId(),
 						getBrokerCloudletId()));
 			}
 			if (i == 1) {
 				cl.setNumStage(5);
 				cl.setSubmittime(CloudSim.clock());
 				cl.setCurrStagenum(-1);
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, generateRandomData(), 0, 0, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000, 0, 0, cl.getMemory(),
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000, 0, 0, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 0, cl.getMemory(),
 						cList.get(0).getVmId(), cList.get(0).getCloudletId()));
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 10240 * 0.8, 1, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, generateRandomData(), 0, 2, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000, 0, 2, cl.getMemory(),
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000, 0, 2, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 2, cl.getMemory(),
 						cList.get(2).getVmId(), cList.get(2).getCloudletId()));
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, generateRandomData(), 0, 3, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000, 0, 3, cl.getMemory(),
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000, 0, 3, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 3, cl.getMemory(),
 						cList.get(2).getVmId(), cList.get(2).getCloudletId()));
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, generateRandomData(), 0, 4, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000, 0, 4, cl.getMemory(),
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000, 0, 4, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 4, cl.getMemory(),
 						cList.get(0).getVmId(), cList.get(0).getCloudletId()));
 			}
 			if (i == 2) {
 				cl.setNumStage(3);
 				cl.setSubmittime(CloudSim.clock());
 				cl.setCurrStagenum(-1);
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, generateRandomData(), 0, 0, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 10000, 0, 0, cl.getMemory(),
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, 20000, 0, 0, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 0, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 10240 * 0.8, 1, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, generateRandomData(), 0, 2, cl.getMemory(),
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 10000, 0, 2, cl.getMemory(),
-//				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, 20000, 0, 2, cl.getMemory(),
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 2, cl.getMemory(),
 						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
 			}
 
