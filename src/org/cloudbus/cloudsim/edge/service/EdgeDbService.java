@@ -44,11 +44,13 @@ public class EdgeDbService extends EdgeService {
 					getUserId(), getId());
 			ncl.setVmType(VmType.T2NANO);
 			cList.add(ncl);
+			setSecondCloudlet(ncl);
 
 			ncl = new NetworkCloudlet(40000, 2, 1000, 1000, 256, utilizationModel, utilizationModel, utilizationModel,
 					getUserId(), getId());
 			ncl.setVmType(VmType.T2SMALL);
 			cList.add(ncl);
+			setThirdCloudlet(ncl);
 
 			setCloudletList(cList);
 			createStages();
@@ -82,46 +84,46 @@ public class EdgeDbService extends EdgeService {
 				cl.setSubmittime(CloudSim.clock());
 				cl.setStages(new ArrayList<TaskStage>());
 				cl.setCurrStagenum(-1);
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 0, cl.getMemory(), getBrokerVmId(),
-						getBrokerCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 0,
+						cl.getMemory(), getBrokerVmId(), getBrokerCloudletId()));
 
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 10240 * 0.8, 1, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 2, cl.getMemory(),
-						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 3, cl.getMemory(),
-						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 2,
+						cl.getMemory(), getSecondCloudlet().getVmId(), getSecondCloudlet().getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 3,
+						cl.getMemory(), getSecondCloudlet().getVmId(), getSecondCloudlet().getCloudletId()));
 
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 4, cl.getMemory(), getBrokerVmId(),
-						getBrokerCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 4,
+						cl.getMemory(), getBrokerVmId(), getBrokerCloudletId()));
 			}
 			if (i == 1) {
 				cl.setNumStage(5);
 				cl.setSubmittime(CloudSim.clock());
 				cl.setStages(new ArrayList<TaskStage>());
 				cl.setCurrStagenum(-1);
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 0, cl.getMemory(),
-						cList.get(0).getVmId(), cList.get(0).getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 0,
+						cl.getMemory(), getFirstCloudlet().getVmId(), getFirstCloudlet().getCloudletId()));
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 10240 * 0.8, 1, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 2, cl.getMemory(),
-						cList.get(2).getVmId(), cList.get(2).getCloudletId()));
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 3, cl.getMemory(),
-						cList.get(2).getVmId(), cList.get(2).getCloudletId()));
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 4, cl.getMemory(),
-						cList.get(0).getVmId(), cList.get(0).getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 2,
+						cl.getMemory(), getThirdCloudlet().getVmId(), getThirdCloudlet().getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 3,
+						cl.getMemory(), getThirdCloudlet().getVmId(), getThirdCloudlet().getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 4,
+						cl.getMemory(), getFirstCloudlet().getVmId(), getFirstCloudlet().getCloudletId()));
 			}
 			if (i == 2) {
 				cl.setNumStage(3);
 				cl.setSubmittime(CloudSim.clock());
 				cl.setStages(new ArrayList<TaskStage>());
 				cl.setCurrStagenum(-1);
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 0, cl.getMemory(),
-						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 0,
+						cl.getMemory(), getSecondCloudlet().getVmId(), getSecondCloudlet().getCloudletId()));
 				cl.getStages().add(new TaskStage(NetworkConstants.EXECUTION, 0, 10240 * 0.8, 1, cl.getMemory(),
 						cl.getVmId(), cl.getCloudletId()));
-				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 2, cl.getMemory(),
-						cList.get(1).getVmId(), cList.get(1).getCloudletId()));
+				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_SEND, CloudSimTagsExt.DATA_SIZE, 0, 2,
+						cl.getMemory(), getSecondCloudlet().getVmId(), getSecondCloudlet().getCloudletId()));
 			}
 
 		}

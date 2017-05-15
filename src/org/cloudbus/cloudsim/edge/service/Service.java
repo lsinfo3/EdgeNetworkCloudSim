@@ -115,6 +115,16 @@ public abstract class Service extends SimEntity {
 	 */
 	private NetworkCloudlet firstCloudlet = null;
 	/**
+	 * The second Cloudlet of this Service. The one that communicates with the
+	 * Broker
+	 */
+	private NetworkCloudlet secondCloudlet = null;
+	/**
+	 * The third Cloudlet of this Service. The one that communicates with the
+	 * Broker
+	 */
+	private NetworkCloudlet thirdCloudlet = null;
+	/**
 	 * The Vm assigned to the first Cloudlet of this Service.
 	 */
 	private int firstVmId = -1;
@@ -1158,6 +1168,10 @@ public abstract class Service extends SimEntity {
 	 * @post $none
 	 */
 	protected void submitCloudlets() {
+		
+		Log.printLine(
+				TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": called submitCloudlets() ");
+		
 		if (!cloudletGenerated) {
 			generateCloudlets();
 		}
@@ -1266,6 +1280,24 @@ public abstract class Service extends SimEntity {
 	 */
 	public void setFirstCloudlet(NetworkCloudlet firstCloudlet) {
 		this.firstCloudlet = firstCloudlet;
+	}
+	
+	
+
+	public NetworkCloudlet getSecondCloudlet() {
+		return secondCloudlet;
+	}
+
+	public void setSecondCloudlet(NetworkCloudlet secondCloudlet) {
+		this.secondCloudlet = secondCloudlet;
+	}
+
+	public NetworkCloudlet getThirdCloudlet() {
+		return thirdCloudlet;
+	}
+
+	public void setThirdCloudlet(NetworkCloudlet thirdCloudlet) {
+		this.thirdCloudlet = thirdCloudlet;
 	}
 
 	/**

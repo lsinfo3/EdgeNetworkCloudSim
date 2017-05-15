@@ -195,7 +195,7 @@ public class BaseDatacenter {
 		for (int i = 0; i < 3; i++) {
 			aggSwitch.add(new AggregateSwitch("Agg" + i, NetworkConstants.Agg_LEVEL, dcs.get(0)));
 		}
-		NetworkDatacenter udc = createNetworkDatacenter("UDC", 1);
+		NetworkDatacenter udc = createNetworkDatacenter("UDC", 2);
 		udc.setUserDC(true);
 
 		EdgeDatacenterBroker broker = new EdgeDatacenterBroker("Broker_1");
@@ -223,6 +223,12 @@ public class BaseDatacenter {
 			data[1] = Message.ZERO;
 			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 6000);
 		}
+		
+//		for (Service service : broker.getServiceList()) {
+//			data[0] = service.getId();
+//			data[1] = Message.ONE;
+//			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 60000);
+//		}
 
 		// maps CloudSim entities to BRITE entities
 		NetworkTopology.mapNode(udc.getId(), 0);

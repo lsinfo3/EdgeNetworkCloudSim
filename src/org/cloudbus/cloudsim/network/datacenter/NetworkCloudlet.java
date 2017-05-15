@@ -294,6 +294,7 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 		setCostPerBw(0.0);
 		setStages(new ArrayList<TaskStage>());
 		setCurrStagenum(-1);
+		setNumStage(0);
 
 	}
 
