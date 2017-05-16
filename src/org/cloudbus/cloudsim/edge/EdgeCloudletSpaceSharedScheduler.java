@@ -156,6 +156,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 					if (pktlist != null) {
 						if (pktlist.isEmpty()) {
 //							changetonextstage(cl, st);
+							continue;
 						}
 						Iterator<HostPacket> it = pktlist.iterator();
 						HostPacket pkt = null;

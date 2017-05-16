@@ -92,6 +92,7 @@ public class EdgeWebService extends EdgeService {
 			if (cl.getCloudletId() == getFirstCloudlet().getCloudletId()) {
 				cl.setNumStage(5);
 				cl.setSubmittime(CloudSim.clock());
+				cl.setStages(new ArrayList<TaskStage>());
 				cl.setCurrStagenum(-1);
 				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 0,
 						cl.getMemory(), getBrokerVmId(), getBrokerCloudletId()));
@@ -109,6 +110,7 @@ public class EdgeWebService extends EdgeService {
 			if (cl.getCloudletId() == getSecondCloudlet().getCloudletId()) {
 				cl.setNumStage(5);
 				cl.setSubmittime(CloudSim.clock());
+				cl.setStages(new ArrayList<TaskStage>());
 				cl.setCurrStagenum(-1);
 				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 0,
 						cl.getMemory(), getFirstCloudlet().getVmId(), getFirstCloudlet().getCloudletId()));
@@ -124,6 +126,7 @@ public class EdgeWebService extends EdgeService {
 			if (cl.getCloudletId() == getThirdCloudlet().getCloudletId()) {
 				cl.setNumStage(3);
 				cl.setSubmittime(CloudSim.clock());
+				cl.setStages(new ArrayList<TaskStage>());
 				cl.setCurrStagenum(-1);
 				cl.getStages().add(new TaskStage(NetworkConstants.WAIT_RECV, CloudSimTagsExt.DATA_SIZE, 0, 0,
 						cl.getMemory(), getSecondCloudlet().getVmId(), getSecondCloudlet().getCloudletId()));

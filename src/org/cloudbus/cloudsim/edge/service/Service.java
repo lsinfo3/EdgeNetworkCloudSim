@@ -137,7 +137,7 @@ public abstract class Service extends SimEntity {
 	 * The Vm of the Broker.
 	 */
 	private int brokerVmId = -1;
-	
+
 	/**
 	 * Whether or not a request is being processed
 	 */
@@ -256,8 +256,8 @@ public abstract class Service extends SimEntity {
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": VM #" + vmId
 					+ " created in Datacenter #" + datacenterId + ", Host #" + vm.getHost().getId());
 		} else {
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: Service #" + getId() + ": Creation of VM #" + vmId
-					+ " failed in Datacenter #" + datacenterId);
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: Service #" + getId() + ": Creation of VM #"
+					+ vmId + " failed in Datacenter #" + datacenterId);
 		}
 
 		incrementVmsAcks();
@@ -275,8 +275,8 @@ public abstract class Service extends SimEntity {
 
 				// all datacenters already queried
 				if (getVmsCreatedList().size() > 0) { // if some vm were created
-					System.out.println(
-							TextUtil.toString(CloudSim.clock()) + ": [DEBUG]: Service #" + getId() + " some VMs were created");
+					System.out.println(TextUtil.toString(CloudSim.clock()) + ": [DEBUG]: Service #" + getId()
+							+ " some VMs were created");
 				} else { // no vms created. abort
 					Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId()
 							+ ": none of the required VMs could be created. Aborting");
@@ -322,7 +322,8 @@ public abstract class Service extends SimEntity {
 	 */
 	protected void clearDatacenters() {
 		for (Vm vm : getVmsCreatedList()) {
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Destroying VM #" + vm.getId());
+			Log.printLine(
+					TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Destroying VM #" + vm.getId());
 			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.VM_DESTROY, vm);
 		}
 
@@ -872,7 +873,8 @@ public abstract class Service extends SimEntity {
 	@SuppressWarnings("unchecked")
 	protected void processOtherEvent(SimEvent ev) {
 		if (ev == null) {
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Service #" +getId() + ".processOtherEvent(): " + "Error - an event is null.");
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Service #" + getId()
+					+ ".processOtherEvent(): " + "Error - an event is null.");
 			return;
 		}
 		switch (ev.getTag()) {
@@ -886,7 +888,8 @@ public abstract class Service extends SimEntity {
 			createVmsInDatacenter(getNextDcIdWithShortestDelay());
 			break;
 		case CloudSimTagsExt.SERVICE_CLOUDLET_DONE_VM:
-			System.out.println(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Service #" + ev.getSource()
+			System.out.println(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Service #"
+					+ ev.getSource()
 					+ ": almost all Cloudlets processed, but some are still waiting for their VMs to be created!");
 
 			if (getNextDcIdWithShortestDelay() != -1) {
@@ -894,8 +897,8 @@ public abstract class Service extends SimEntity {
 			}
 			break;
 		default:
-			Log.printLine( TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Service #" +
-					getId() + ".processOtherEvent(): " + "Error - event unknown by this Service: " + ev.getTag());
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Service #" + getId()
+					+ ".processOtherEvent(): " + "Error - event unknown by this Service: " + ev.getTag());
 			break;
 		}
 
@@ -911,16 +914,10 @@ public abstract class Service extends SimEntity {
 		if (!cloudletGenerated) {
 			generateCloudlets();
 			setCloudletGenerated(true);
-		} 
-//		else {
-//			setCloudletList(getCloudletReceivedList().size() > 0 ? getCloudletReceivedList() : getCloudletList());
-//			setCloudletSubmittedList(new ArrayList<Cloudlet>());
-//			setCloudletReceivedList(new ArrayList<Cloudlet>());
-//		}
+		}
 		System.out.println(TextUtil.toString(CloudSim.clock()) + "[DEBUG]: Service #" + getId()
-				+ ": Message received from Broker #" + getUserId());
+				+ ": Message "+ ((Message) ev.getData()).name() + " received from Broker #" + getUserId());
 		for (int i = 0; i < getCloudletList().size(); i++) {
-//			((NetworkCloudlet) getCloudletList().get(i)).reset();
 			getCloudletList().get(i).setCloudletLength(
 					getCloudletList().get(i).getCloudletLength() + ((Message) ev.getData()).getMips());
 		}
@@ -1139,18 +1136,20 @@ public abstract class Service extends SimEntity {
 		Cloudlet cloudlet = (Cloudlet) ev.getData();
 		// int clId = cloudlet.getCloudletId();
 		getCloudletReceivedList().add(cloudlet);
-		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Cloudlet #" + cloudlet.getCloudletId()
-				+ " received");
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Cloudlet #"
+				+ cloudlet.getCloudletId() + " received");
 		cloudletsSubmitted--;
 		if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) { // all
 																		// cloudlets
 																		// executed
-			Log.printLine(
-					TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": All Cloudlets executed. Finishing...");
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId()
+					+ ": All Cloudlets executed. Finishing...");
 			// print cloudlets results
 			String indent = "    ";
-			System.out.println(indent + indent + indent + indent + indent +"=============> Broker " + getUserId() + indent);
-			System.out.println(indent + indent + indent + indent + indent +"=============> Service #" + getId() + indent);
+			System.out.println(
+					indent + indent + indent + indent + indent + "=============> Broker " + getUserId() + indent);
+			System.out.println(
+					indent + indent + indent + indent + indent + "=============> Service #" + getId() + indent);
 			BaseDatacenter.printCloudletList(getCloudletReceivedList());
 			// Notify Broker that our Cloudlet are done!
 			sendNow(getUserId(), CloudSimTagsExt.SERVICE_CLOUDLET_DONE);
@@ -1177,10 +1176,9 @@ public abstract class Service extends SimEntity {
 	 * @post $none
 	 */
 	protected void submitCloudlets() {
-		
-		Log.printLine(
-				TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": called submitCloudlets() ");
-		
+
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": called submitCloudlets() ");
+
 		if (!cloudletGenerated) {
 			generateCloudlets();
 		}
@@ -1191,9 +1189,9 @@ public abstract class Service extends SimEntity {
 			int vmId = cloudlet.getVmId();
 
 			if (VmList.getById(getVmsCreatedList(), cloudlet.getVmId()) == null) {
-				Log.printLine(
-						TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Postponing execution of cloudlet "
-								+ cloudlet.getCloudletId() + ": bount VM #" + cloudlet.getVmId() + " not available");
+				Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId()
+						+ ": Postponing execution of cloudlet " + cloudlet.getCloudletId() + ": bount VM #"
+						+ cloudlet.getVmId() + " not available");
 				continue;
 			}
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Sending cloudlet #"
@@ -1235,9 +1233,9 @@ public abstract class Service extends SimEntity {
 		} else { // submit to the specific vm
 			vm = VmList.getById(getVmsCreatedList(), cloudlet.getVmId());
 			if (vm == null) { // vm was not created
-				Log.printLine(
-						TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Postponing execution of cloudlet "
-								+ cloudlet.getCloudletId() + ": bount VM #" + cloudlet.getVmId() + " not available");
+				Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId()
+						+ ": Postponing execution of cloudlet " + cloudlet.getCloudletId() + ": bount VM #"
+						+ cloudlet.getVmId() + " not available");
 			}
 		}
 
@@ -1292,8 +1290,6 @@ public abstract class Service extends SimEntity {
 	public void setFirstCloudlet(NetworkCloudlet firstCloudlet) {
 		this.firstCloudlet = firstCloudlet;
 	}
-	
-	
 
 	public NetworkCloudlet getSecondCloudlet() {
 		return secondCloudlet;
@@ -1365,7 +1361,6 @@ public abstract class Service extends SimEntity {
 		Random r = new Random();
 		return 1000.0 + r.nextDouble() * 10000.0;
 	}
-	
 
 	public int getCloudletsSubmitted() {
 		return cloudletsSubmitted;
@@ -1384,13 +1379,11 @@ public abstract class Service extends SimEntity {
 		setCloudletReceivedList(new ArrayList<Cloudlet>());
 		setCloudletsSubmitted(0);
 		for (Cloudlet networkCloudlet : getCloudletList()) {
-			((NetworkCloudlet)networkCloudlet).reset();
-			((NetworkCloudlet)networkCloudlet).setStages(new ArrayList<TaskStage>());
+			((NetworkCloudlet) networkCloudlet).reset();
+			((NetworkCloudlet) networkCloudlet).setStages(new ArrayList<TaskStage>());
 		}
 	}
-	
-	
-	
+
 	public boolean isProcessingRequest() {
 		return processingRequest;
 	}

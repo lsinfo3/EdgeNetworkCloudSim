@@ -25,6 +25,7 @@ import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.edge.service.Service;
 import org.cloudbus.cloudsim.edge.util.BaseDatacenter;
+import org.cloudbus.cloudsim.edge.util.Request;
 import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.edge.vm.T2Small;
 import org.cloudbus.cloudsim.edge.vm.VMStatus;
@@ -121,7 +122,10 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 * Which Cloudlet is responsible for which service.
 	 */
 	private Map<Integer, Integer> servicesToBrokerCloudletsMap;
+	
+	private Map<Integer, Boolean> servicesProcessingRequestMap;
 
+	private List<Request> requestList;
 	/**
 	 * Created a new DatacenterBroker object.
 	 * 
@@ -149,6 +153,8 @@ public class EdgeDatacenterBroker extends SimEntity {
 		setMessageToSend(new ArrayList<>());
 		setProcessingRequest(false);
 		this.lifeLength = lifeLength;
+		this.requestList = new ArrayList<>();
+		this.servicesProcessingRequestMap = new HashMap<>();
 	}
 
 	public EdgeDatacenterBroker(String name) throws Exception {
@@ -290,9 +296,9 @@ public class EdgeDatacenterBroker extends SimEntity {
 		int serviceId = (int) dat[0];
 		Message msg = (Message) dat[1];
 
-		if (!isProcessingRequest() && getCloudletsSubmitted() == 0 && getCloudletList().size() > 0
+		if (!isProcessingRequest() && !getServicesProcessingRequestMap().get(serviceId) && getCloudletsSubmitted() == 0 && getCloudletList().size() > 0
 				&& getServicesToServiceCloudletsMap().size() == getServiceList().size()) {
-			
+			getServicesProcessingRequestMap().put(serviceId, true);
 			createStages(serviceId, msg);
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[REQUEST]: Broker #" + getId()
 					+ " process Request... sending to Service #" + serviceId);
@@ -357,6 +363,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 			ncl.setVmId(eVm.getId());
 			getCloudletList().add(ncl);
 			getServiceToBrokerCloudletsMap().put(serv.getId(), ncl.getCloudletId());
+			getServicesProcessingRequestMap().put(serv.getId(), false);
 			getVmList().add(eVm);
 		}
 		for (Vm vm : getVmList()) {
@@ -511,10 +518,22 @@ public class EdgeDatacenterBroker extends SimEntity {
 		for (PresetEvent pe : presetEvents) {
 			if(pe.getDelay() == del){
 				del++;
+//				break;
 			}
 		}
 		
 		presetEvents.add(new PresetEvent(id, tag, daten, del));
+	}
+	public void presetEvent(final int id, final int tag, final Request data, final double delay) {
+		double del = delay;
+		for (PresetEvent pe : presetEvents) {
+			if(pe.getDelay() == del){
+				del++;
+				break;
+			}
+		}
+		
+		presetEvents.add(new PresetEvent(id, tag, data, del));
 	}
 
 	/**
@@ -873,9 +892,9 @@ public class EdgeDatacenterBroker extends SimEntity {
 
 		getCloudletList().removeAll(toRemove);
 		setProcessingRequest(true);
-		for (SimEvent ev : getMessageToSend()) {
-			processBrokerMessage(ev);
-		}
+//		for (SimEvent ev : getMessageToSend()) {
+//			processBrokerMessage(ev);
+//		}
 
 	}
 
@@ -959,10 +978,30 @@ public class EdgeDatacenterBroker extends SimEntity {
 		setCloudletReceivedList(new ArrayList<Cloudlet>());
 		setCloudletsSubmitted(0);
 		setServiceAllCloudletsSent(0);
+		for (Service service : getServiceList()) {
+			getServicesProcessingRequestMap().put(service.getId(), false);
+		}
+		
 		for (NetworkCloudlet networkCloudlet : getCloudletList()) {
 			networkCloudlet.reset();
 			networkCloudlet.setStages(new ArrayList<TaskStage>());
 		}
+	}
+
+	public Map<Integer, Integer> getServicesToBrokerCloudletsMap() {
+		return servicesToBrokerCloudletsMap;
+	}
+
+	public void setServicesToBrokerCloudletsMap(Map<Integer, Integer> servicesToBrokerCloudletsMap) {
+		this.servicesToBrokerCloudletsMap = servicesToBrokerCloudletsMap;
+	}
+
+	public Map<Integer, Boolean> getServicesProcessingRequestMap() {
+		return servicesProcessingRequestMap;
+	}
+
+	public void setServicesProcessingRequestMap(Map<Integer, Boolean> servicesProcessingRequestMap) {
+		this.servicesProcessingRequestMap = servicesProcessingRequestMap;
 	}
 
 }
