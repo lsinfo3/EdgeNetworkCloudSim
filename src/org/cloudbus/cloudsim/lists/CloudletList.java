@@ -87,5 +87,31 @@ public class CloudletList {
 			}
 		});
 	}
+	
+	public static <T extends Cloudlet> void sortById(List<T> cloudletList) {
+		Collections.sort(cloudletList, new Comparator<T>() {
+
+			/**
+			 * Compares two objects.
+			 * 
+			 * @param a the first Object to be compared
+			 * @param b the second Object to be compared
+			 * @return the value 0 if both Objects are numerically equal; a value less than 0 if the
+			 *         first Object is numerically less than the second Object; and a value greater
+			 *         than 0 if the first Object is numerically greater than the second Object.
+			 * @throws ClassCastException <tt>a</tt> and <tt>b</tt> are expected to be of type
+			 *             <tt>Cloudlet</tt>
+			 * @pre a != null
+			 * @pre b != null
+			 * @post $none
+			 */
+			@Override
+			public int compare(T a, T b) throws ClassCastException {
+				Integer cla = Integer.valueOf(a.getCloudletId());
+				Integer clb = Integer.valueOf(b.getCloudletId());
+				return cla.compareTo(clb);
+			}
+		});
+	}
 
 }

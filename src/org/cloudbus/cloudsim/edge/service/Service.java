@@ -32,6 +32,7 @@ import org.cloudbus.cloudsim.lists.CloudletList;
 import org.cloudbus.cloudsim.lists.VmList;
 import org.cloudbus.cloudsim.network.datacenter.NetworkCloudlet;
 import org.cloudbus.cloudsim.network.datacenter.NetworkDatacenter;
+import org.cloudbus.cloudsim.network.datacenter.TaskStage;
 
 /**
  * @author Brice Kamneng Kwam
@@ -136,6 +137,11 @@ public abstract class Service extends SimEntity {
 	 * The Vm of the Broker.
 	 */
 	private int brokerVmId = -1;
+	
+	/**
+	 * Whether or not a request is being processed
+	 */
+	private boolean processingRequest;
 
 	/**
 	 * Constr.
@@ -904,20 +910,21 @@ public abstract class Service extends SimEntity {
 	protected void processBrokerMessage(SimEvent ev) {
 		if (!cloudletGenerated) {
 			generateCloudlets();
-		} else {
-			setCloudletList(getCloudletReceivedList().size() > 0 ? getCloudletReceivedList() : getCloudletList());
-			setCloudletSubmittedList(new ArrayList<Cloudlet>());
-			setCloudletReceivedList(new ArrayList<Cloudlet>());
-		}
+			setCloudletGenerated(true);
+		} 
+//		else {
+//			setCloudletList(getCloudletReceivedList().size() > 0 ? getCloudletReceivedList() : getCloudletList());
+//			setCloudletSubmittedList(new ArrayList<Cloudlet>());
+//			setCloudletReceivedList(new ArrayList<Cloudlet>());
+//		}
 		System.out.println(TextUtil.toString(CloudSim.clock()) + "[DEBUG]: Service #" + getId()
 				+ ": Message received from Broker #" + getUserId());
 		for (int i = 0; i < getCloudletList().size(); i++) {
-			((NetworkCloudlet) getCloudletList().get(i)).reset();
+//			((NetworkCloudlet) getCloudletList().get(i)).reset();
 			getCloudletList().get(i).setCloudletLength(
 					getCloudletList().get(i).getCloudletLength() + ((Message) ev.getData()).getMips());
 		}
 		createStages();
-		setCloudletGenerated(true);
 		submitCloudlets();
 	}
 
@@ -1147,6 +1154,8 @@ public abstract class Service extends SimEntity {
 			BaseDatacenter.printCloudletList(getCloudletReceivedList());
 			// Notify Broker that our Cloudlet are done!
 			sendNow(getUserId(), CloudSimTagsExt.SERVICE_CLOUDLET_DONE);
+			setProcessingRequest(false);
+			resetCloudlets();
 		} else { // some cloudlets haven't finished yet
 			if (getCloudletList().size() > 0 && cloudletsSubmitted == 0) {
 				// all the cloudlets sent finished. It means that some bount
@@ -1176,6 +1185,7 @@ public abstract class Service extends SimEntity {
 			generateCloudlets();
 		}
 		ArrayList<Cloudlet> toRemove = new ArrayList<>();
+		CloudletList.sortById(getCloudletList());
 		for (int i = 0; i < getCloudletList().size(); i++) {
 			Cloudlet cloudlet = getCloudletList().get(i);
 			int vmId = cloudlet.getVmId();
@@ -1196,6 +1206,7 @@ public abstract class Service extends SimEntity {
 			toRemove.add(cloudlet);
 		}
 		getCloudletList().removeAll(toRemove);
+		setProcessingRequest(true);
 		if (getCloudletList().size() == 0) {
 			sendNow(getUserId(), CloudSimTagsExt.SERVICE_ALL_CLOUDLETS_SENT);
 		}
@@ -1353,6 +1364,39 @@ public abstract class Service extends SimEntity {
 	public double generateRandomData() {
 		Random r = new Random();
 		return 1000.0 + r.nextDouble() * 10000.0;
+	}
+	
+
+	public int getCloudletsSubmitted() {
+		return cloudletsSubmitted;
+	}
+
+	public void setCloudletsSubmitted(int cloudletsSubmitted) {
+		this.cloudletsSubmitted = cloudletsSubmitted;
+	}
+
+	/**
+	 * Reset the Broker Cloudlets, to process the next request.
+	 */
+	public void resetCloudlets() {
+		setCloudletList(getCloudletReceivedList().size() > 0 ? getCloudletReceivedList() : getCloudletList());
+		setCloudletSubmittedList(new ArrayList<Cloudlet>());
+		setCloudletReceivedList(new ArrayList<Cloudlet>());
+		setCloudletsSubmitted(0);
+		for (Cloudlet networkCloudlet : getCloudletList()) {
+			((NetworkCloudlet)networkCloudlet).reset();
+			((NetworkCloudlet)networkCloudlet).setStages(new ArrayList<TaskStage>());
+		}
+	}
+	
+	
+	
+	public boolean isProcessingRequest() {
+		return processingRequest;
+	}
+
+	public void setProcessingRequest(boolean processingRequest) {
+		this.processingRequest = processingRequest;
 	}
 
 	protected abstract void generateCloudlets();

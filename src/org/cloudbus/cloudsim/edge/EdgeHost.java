@@ -153,9 +153,9 @@ public class EdgeHost extends NetworkHost {
 			List<HostPacket> pktlist = ((EdgeCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv
 					.get(hs.getPkt().getSender());
 
+			System.out.println(String.format("%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "EdgeHost #" + getId(),
+					"RECVD PKT from Host #" + hs.getSenderhostid()));
 			if (pktlist == null) {
-				System.out.println(String.format("%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "EdgeHost #" + getId(),
-						"RECVD PKT from Host #" + hs.getSenderhostid()));
 				pktlist = new ArrayList<HostPacket>();
 				((EdgeCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv.put(hs.getPkt().getSender(),
 						pktlist);

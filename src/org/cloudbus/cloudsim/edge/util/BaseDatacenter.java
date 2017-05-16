@@ -212,7 +212,8 @@ public class BaseDatacenter {
 
 		// Add Services
 		broker.addService(new EdgeDbService("EDS3"));
-		broker.addService(new EdgeWebService("EWS22"));
+		broker.addService(new EdgeDbService("EDS3"));
+//		broker.addService(new EdgeWebService("EWS22"));
 		broker.addService(new EdgeDbService("EDS24"));
 
 		// Simulate the Broker sending deferred messages (e.g. new requests) to
@@ -224,11 +225,11 @@ public class BaseDatacenter {
 			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 6000);
 		}
 		
-//		for (Service service : broker.getServiceList()) {
-//			data[0] = service.getId();
-//			data[1] = Message.ONE;
-//			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 60000);
-//		}
+		for (Service service : broker.getServiceList()) {
+			data[0] = service.getId();
+			data[1] = Message.ONE;
+			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 6000);
+		}
 
 		// maps CloudSim entities to BRITE entities
 		NetworkTopology.mapNode(udc.getId(), 0);

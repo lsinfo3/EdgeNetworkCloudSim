@@ -127,12 +127,20 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 			// check status if execution stage update the cloudlet finishtime
 			// CHECK WHETHER IT IS WAITING FOR THE PACKET
 			// if packet received change the status of job and update the time.
+			
+			
 
 			if ((cl.getCurrStagenum() != -1)) {
+				TaskStage st = cl.getStages().get(cl.getCurrStagenum());
+				if (st.getType() != NetworkConstants.EXECUTION) {
+//					System.out.println(TextUtil.toString(CloudSim.clock()) 
+//							+ " [DEBUG]: CL #" + cl.getCloudletId() 
+//							+ " Current stageNum " + cl.getCurrStagenum());
+				}
+				
 				if (cl.getCurrStagenum() == NetworkConstants.FINISH) {
 					break;
 				}
-				TaskStage st = cl.getStages().get(cl.getCurrStagenum());
 				if (st.getType() == NetworkConstants.EXECUTION) {
 
 					// update the time
@@ -147,7 +155,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 					List<HostPacket> pkttoremove = new ArrayList<HostPacket>();
 					if (pktlist != null) {
 						if (pktlist.isEmpty()) {
-							changetonextstage(cl, st);
+//							changetonextstage(cl, st);
 						}
 						Iterator<HostPacket> it = pktlist.iterator();
 						HostPacket pkt = null;
