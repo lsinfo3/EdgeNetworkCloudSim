@@ -300,7 +300,9 @@ public class Switch extends SimEntity {
 				int tosend = es.getKey();
 				List<NetworkPacket> hspktlist = es.getValue();
 				if (!hspktlist.isEmpty()) {
-					double avband = downlinkbandwidth / hspktlist.size();
+					double bw = NetworkTopology.isNetworkEnabled() ? NetworkTopology.getBw(getId(), tosend)
+							: downlinkbandwidth;
+					double avband = bw / hspktlist.size();
 					Iterator<NetworkPacket> it = hspktlist.iterator();
 					while (it.hasNext()) {
 						NetworkPacket hspkt = it.next();

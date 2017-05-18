@@ -275,8 +275,8 @@ public class NetworkTopology {
 				double delay = delayMatrix.getDelay(map.get(srcID), map.get(destID));
 
 				if (srcID != 13)
-					CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
-							"#" + srcID + "->#" + destID, "DELAY", delay);
+//					CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+//							"#" + srcID + "->#" + destID, "DELAY", delay);
 
 				return delay;
 			} catch (Exception e) {

@@ -166,7 +166,24 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 							if (pkt.getReciever() == cl.getVmId()) {
 								if (pkt.getVirtualrecvid() == cl.getCloudletId()) {
 
+									
 									if (cl.getCloudletId() == 0) {
+										
+										CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+												"Service #", TextUtil.toString(CloudSim.clock() - cl.getServiceTime()),
+												TextUtil.toString(st.getData()));
+										
+										cl.setServiceTime(CloudSim.clock());
+									}
+									if (cl.getCloudletId() == 1) {
+										
+										CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+												"Service #", TextUtil.toString(CloudSim.clock() - cl.getServiceTime()),
+												TextUtil.toString(st.getData()));
+										
+										cl.setServiceTime(CloudSim.clock());
+									}
+									if (cl.getCloudletId() == 2) {
 
 										CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
 												"Service #", TextUtil.toString(CloudSim.clock() - cl.getServiceTime()),
@@ -174,7 +191,8 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 
 										cl.setServiceTime(CloudSim.clock());
 									}
-
+									
+									
 									System.out.println(TextUtil.toString(CloudSim.clock()) + " [RECV]: CL #"
 											+ cl.getCloudletId() + " received a packet from CL #"
 											+ pkt.getVirtualsendid() + " with the data: " + pkt.getData());
@@ -199,6 +217,12 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 				if (st.getType() == NetworkConstants.WAIT_SEND) {
 
 					if (cl.getCloudletId() == 0) {
+						cl.setServiceTime(CloudSim.clock());
+					}
+					if (cl.getCloudletId() == 1) {
+						cl.setServiceTime(CloudSim.clock());
+					}
+					if (cl.getCloudletId() == 2) {
 						cl.setServiceTime(CloudSim.clock());
 					}
 
@@ -308,6 +332,12 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 				if (cl.getStages().get(i).getType() == NetworkConstants.WAIT_SEND) {
 
 					if (cl.getCloudletId() == 0) {
+						cl.setServiceTime(CloudSim.clock());
+					}
+					if (cl.getCloudletId() == 1) {
+						cl.setServiceTime(CloudSim.clock());
+					}
+					if (cl.getCloudletId() == 2) {
 						cl.setServiceTime(CloudSim.clock());
 					}
 

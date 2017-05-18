@@ -224,32 +224,6 @@ public class BaseDatacenter {
 			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 6000);
 		}
 		
-		for (Service service : broker.getServiceList()) {
-			data[0] = service.getId();
-			data[1] = Message.ONE;
-			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 6001);
-		}
-		for (Service service : broker.getServiceList()) {
-			data[0] = service.getId();
-			data[1] = Message.TEN;
-			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 6003);
-		}
-		
-//		Request request = new Request();
-//		for (Service service : broker.getServiceList()) {
-//			data[0] = service.getId();
-//			data[1] = Message.ZERO;
-//			request.addServiceMessage(service.getId(), Message.ONE);
-//		}
-//		broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, request, 6000);
-//		
-//		for (Service service : broker.getServiceList()) {
-//			data[0] = service.getId();
-//			data[1] = Message.ONE;
-//			request.addServiceMessage(service.getId(), Message.ONE);
-//		}
-//		broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, request, 6000);
-
 		// maps CloudSim entities to BRITE entities
 		NetworkTopology.mapNode(udc.getId(), 0);
 		NetworkTopology.mapNode(getDcFirstEdgeSwitch(udc), 1);
