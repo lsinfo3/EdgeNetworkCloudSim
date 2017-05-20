@@ -239,12 +239,10 @@ public class NetworkDatacenter extends Datacenter {
 
 					// unique tag = operation tag
 					int tag = CloudSimTags.CLOUDLET_SUBMIT_ACK;
-					// sendNow(cl.getUserId(), tag, data);
-					sendNow(cl.getServiceId(), tag, data);
+					 sendNow(cl.getUserId(), tag, data);
 				}
 
-				// sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
-				sendNow(cl.getServiceId(), CloudSimTags.CLOUDLET_RETURN, cl);
+				 sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
 
 				return;
 			}
@@ -253,15 +251,14 @@ public class NetworkDatacenter extends Datacenter {
 			cl.setResourceParameter(getId(), getCharacteristics().getCostPerSecond(),
 					getCharacteristics().getCostPerBw());
 
-			// int userId = cl.getUserId();
-			int serviceId = cl.getServiceId();
+			 int userId = cl.getUserId();
 			int vmId = cl.getVmId();
 
 			// time to transfer the files
 			double fileTransferTime = predictFileTransferTime(cl.getRequiredFiles());
 
-			Host host = getVmAllocationPolicy().getHost(vmId, serviceId);
-			Vm vm = host.getVm(vmId, serviceId);
+			Host host = getVmAllocationPolicy().getHost(vmId, userId);
+			Vm vm = host.getVm(vmId, userId);
 			CloudletScheduler scheduler = vm.getCloudletScheduler();
 			double estimatedFinishTime = scheduler.cloudletSubmit(cl, fileTransferTime);
 
@@ -282,8 +279,7 @@ public class NetworkDatacenter extends Datacenter {
 
 				// unique tag = operation tag
 				int tag = CloudSimTags.CLOUDLET_SUBMIT_ACK;
-				// sendNow(cl.getUserId(), tag, data);
-				sendNow(cl.getServiceId(), tag, data);
+				 sendNow(cl.getUserId(), tag, data);
 			}
 		} catch (ClassCastException c) {
 			Log.printLine(getName() + ".processCloudletSubmit(): " + "ClassCastException error.");
@@ -312,9 +308,7 @@ public class NetworkDatacenter extends Datacenter {
 				while (vm.getCloudletScheduler().isFinishedCloudlets()) {
 					Cloudlet cl = vm.getCloudletScheduler().getNextFinishedCloudlet();
 					if (cl != null) {
-						// sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN,
-						// cl);
-						sendNow(cl.getServiceId(), CloudSimTags.CLOUDLET_RETURN, cl);
+						 sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
 					}
 				}
 			}
@@ -336,7 +330,6 @@ public class NetworkDatacenter extends Datacenter {
 	protected void processCloudlet(SimEvent ev, int type) {
 		int cloudletId = 0;
 		int userId = 0;
-		int serviceId = 0;
 		int vmId = 0;
 
 		try { // if the sender using cloudletXXX() methods
@@ -352,7 +345,6 @@ public class NetworkDatacenter extends Datacenter {
 				Cloudlet cl = (Cloudlet) ev.getData();
 				cloudletId = cl.getCloudletId();
 				userId = cl.getUserId();
-				serviceId = cl.getServiceId();
 				vmId = cl.getVmId();
 			} catch (Exception e) {
 				Log.printLine(super.getName() + ": Error in processing Cloudlet");
@@ -368,28 +360,23 @@ public class NetworkDatacenter extends Datacenter {
 		// begins executing ....
 		switch (type) {
 		case CloudSimTags.CLOUDLET_CANCEL:
-			// processCloudletCancel(cloudletId, userId, vmId);
-			processCloudletCancel(cloudletId, userId, serviceId, vmId);
+			 processCloudletCancel(cloudletId, userId, vmId);
 			break;
 
 		case CloudSimTags.CLOUDLET_PAUSE:
-			// processCloudletPause(cloudletId, userId, vmId, false);
-			processCloudletPause(cloudletId, userId, serviceId, vmId, false);
+			 processCloudletPause(cloudletId, userId, vmId, false);
 			break;
 
 		case CloudSimTags.CLOUDLET_PAUSE_ACK:
-			// processCloudletPause(cloudletId, userId, vmId, true);
-			processCloudletPause(cloudletId, userId, serviceId, vmId, true);
+			 processCloudletPause(cloudletId, userId, vmId, true);
 			break;
 
 		case CloudSimTags.CLOUDLET_RESUME:
-			// processCloudletResume(cloudletId, userId, vmId, false);
-			processCloudletResume(cloudletId, userId, serviceId, vmId, false);
+			 processCloudletResume(cloudletId, userId, vmId, false);
 			break;
 
 		case CloudSimTags.CLOUDLET_RESUME_ACK:
-			// processCloudletResume(cloudletId, userId, vmId, true);
-			processCloudletResume(cloudletId, userId, serviceId, vmId, true);
+			 processCloudletResume(cloudletId, userId, vmId, true);
 			break;
 		default:
 			break;
@@ -397,99 +384,7 @@ public class NetworkDatacenter extends Datacenter {
 
 	}
 
-	/**
-	 * Processes a Cloudlet cancel request.
-	 * 
-	 * @param cloudletId
-	 *            resuming cloudlet ID
-	 * @param userId
-	 *            ID of the cloudlet's owner
-	 * @param serviceId
-	 *            ID of the cloudlet's service
-	 * @param vmId
-	 *            the vm id
-	 * @pre $none
-	 * @post $none
-	 */
-	protected void processCloudletCancel(int cloudletId, int userId, int serviceId, int vmId) {
-		Cloudlet cl = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId, userId).getCloudletScheduler()
-				.cloudletCancel(cloudletId);
-		sendNow(serviceId, CloudSimTags.CLOUDLET_CANCEL, cl);
-	}
 
-	/**
-	 * Processes a Cloudlet pause request.
-	 * 
-	 * @param cloudletId
-	 *            resuming cloudlet ID
-	 * @param userId
-	 *            ID of the cloudlet's Broker
-	 * @param serviceId
-	 *            ID of the cloudlet's Service
-	 * @param ack
-	 *            $true if an ack is requested after operation
-	 * @param vmId
-	 *            the vm id
-	 * @pre $none
-	 * @post $none
-	 */
-	protected void processCloudletPause(int cloudletId, int userId, int serviceId, int vmId, boolean ack) {
-		boolean status = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId, userId).getCloudletScheduler()
-				.cloudletPause(cloudletId);
-
-		if (ack) {
-			int[] data = new int[3];
-			data[0] = getId();
-			data[1] = cloudletId;
-			if (status) {
-				data[2] = CloudSimTags.TRUE;
-			} else {
-				data[2] = CloudSimTags.FALSE;
-			}
-			sendNow(serviceId, CloudSimTags.CLOUDLET_PAUSE_ACK, data);
-		}
-	}
-
-	/**
-	 * Processes a Cloudlet resume request.
-	 * 
-	 * @param cloudletId
-	 *            resuming cloudlet ID
-	 * @param userId
-	 *            ID of the cloudlet's owner
-	 * @param serviceId
-	 *            ID of the cloudlet's owner
-	 * @param ack
-	 *            $true if an ack is requested after operation
-	 * @param vmId
-	 *            the vm id
-	 * @pre $none
-	 * @post $none
-	 */
-	protected void processCloudletResume(int cloudletId, int userId, int serviceId, int vmId, boolean ack) {
-		double eventTime = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId, userId).getCloudletScheduler()
-				.cloudletResume(cloudletId);
-
-		boolean status = false;
-		if (eventTime > 0.0) { // if this cloudlet is in the exec queue
-			status = true;
-			if (eventTime > CloudSim.clock()) {
-				schedule(getId(), eventTime, CloudSimTags.VM_DATACENTER_EVENT);
-			}
-		}
-
-		if (ack) {
-			int[] data = new int[3];
-			data[0] = getId();
-			data[1] = cloudletId;
-			if (status) {
-				data[2] = CloudSimTags.TRUE;
-			} else {
-				data[2] = CloudSimTags.FALSE;
-			}
-			sendNow(serviceId, CloudSimTags.CLOUDLET_RESUME_ACK, data);
-		}
-	}
 
 	@Override
 	public String toString() {

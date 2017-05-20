@@ -149,10 +149,6 @@ public class Cloudlet {
 	// Data cloudlet
 	/** The required files. */
 	private List<String> requiredFiles = null;   // list of required filenames
-	/**
-	 * the Id of the Service which owns this Cloudlet if it was started by a Service.
-	 */
-	private int serviceId = -1;
 
 	/**
 	 * Allocates a new Cloudlet object. The Cloudlet length, input and output file sizes should be
@@ -394,8 +390,7 @@ public class Cloudlet {
 			final UtilizationModel utilizationModelCpu,
 			final UtilizationModel utilizationModelRam,
 			final UtilizationModel utilizationModelBw,
-			final int userId,
-			final int serviceId) {
+			final int userId) {
 		this(
 				Id.pollId(Cloudlet.class),
 				cloudletLength,
@@ -413,7 +408,6 @@ public class Cloudlet {
 		requiredFiles = new LinkedList<String>();
 		
 		setUserId(userId);
-		setServiceId(serviceId);
 	}
 
 	// ////////////////////// INTERNAL CLASS ///////////////////////////////////
@@ -718,20 +712,6 @@ public class Cloudlet {
 		}
 	}
 	
-	/**
-	 * Sets the ID of the Service which owns Cloudlet. It is <tt>VERY</tt> important to set the Service ID,
-	 * when the cloudlet is started by a Service.
-	 * 
-	 * @param id the user ID
-	 * @pre id >= 0
-	 * @post $none
-	 */
-	public void setServiceId(final int id) {
-		serviceId = id;
-		if (record) {
-			write("Assigns the Cloudlet to Service" + CloudSim.getEntityName(id) + " (ID #" + id + ")");
-		}
-	}
 
 	/**
 	 * Gets the user or owner ID of this Cloudlet.
@@ -744,17 +724,6 @@ public class Cloudlet {
 		return userId;
 	}
 	
-	/**
-	 * Gets the ID of the Service which owns this Cloudlet,
-	 * in case it was started by a Service.
-	 * 
-	 * @return the user ID or <tt>-1</tt> if the user ID has not been set before
-	 * @pre $none
-	 * @post $result >= -1
-	 */
-	public int getServiceId() {
-		return serviceId;
-	}
 	
 
 	/**

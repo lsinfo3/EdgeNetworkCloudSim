@@ -39,19 +39,19 @@ public class EdgeDbService extends EdgeService {
 			UtilizationModel utilizationModel = new UtilizationModelFull();
 
 			NetworkCloudlet ncl = new NetworkCloudlet(40000, 1, 1000, 1000, 256, utilizationModel, utilizationModel,
-					utilizationModel, getUserId(), getId());
+					utilizationModel, getId());
 			ncl.setVmType(VmType.T2NANO);
 			cList.add(ncl);
 			setFirstCloudlet(ncl);
 
 			ncl = new NetworkCloudlet(40000, 1, 1000, 1000, 256, utilizationModel, utilizationModel, utilizationModel,
-					getUserId(), getId());
+					getId());
 			ncl.setVmType(VmType.T2NANO);
 			cList.add(ncl);
 			setSecondCloudlet(ncl);
 
 			ncl = new NetworkCloudlet(40000, 2, 1000, 1000, 256, utilizationModel, utilizationModel, utilizationModel,
-					getUserId(), getId());
+					getId());
 			ncl.setVmType(VmType.T2SMALL);
 			cList.add(ncl);
 			setThirdCloudlet(ncl);

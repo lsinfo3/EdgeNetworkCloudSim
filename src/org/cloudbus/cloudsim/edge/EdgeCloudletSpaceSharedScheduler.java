@@ -127,17 +127,15 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 			// check status if execution stage update the cloudlet finishtime
 			// CHECK WHETHER IT IS WAITING FOR THE PACKET
 			// if packet received change the status of job and update the time.
-			
-			
 
 			if ((cl.getCurrStagenum() != -1)) {
 				TaskStage st = cl.getStages().get(cl.getCurrStagenum());
 				if (st.getType() != NetworkConstants.EXECUTION) {
-//					System.out.println(TextUtil.toString(CloudSim.clock()) 
-//							+ " [DEBUG]: CL #" + cl.getCloudletId() 
-//							+ " Current stageNum " + cl.getCurrStagenum());
+					// System.out.println(TextUtil.toString(CloudSim.clock())
+					// + " [DEBUG]: CL #" + cl.getCloudletId()
+					// + " Current stageNum " + cl.getCurrStagenum());
 				}
-				
+
 				if (cl.getCurrStagenum() == NetworkConstants.FINISH) {
 					break;
 				}
@@ -155,35 +153,19 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 					List<HostPacket> pkttoremove = new ArrayList<HostPacket>();
 					if (pktlist != null) {
 						if (pktlist.isEmpty()) {
-//							changetonextstage(cl, st);
+							// changetonextstage(cl, st);
 							continue;
 						}
 						Iterator<HostPacket> it = pktlist.iterator();
 						HostPacket pkt = null;
 						if (it.hasNext()) {
 							pkt = it.next();
-							// Asumption packet will not arrive in the same cycle
+							// Asumption packet will not arrive in the same
+							// cycle
 							if (pkt.getReciever() == cl.getVmId()) {
 								if (pkt.getVirtualrecvid() == cl.getCloudletId()) {
 
-									
-									if (cl.getCloudletId() == 0) {
-										
-										CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
-												"Service #", TextUtil.toString(CloudSim.clock() - cl.getServiceTime()),
-												TextUtil.toString(st.getData()));
-										
-										cl.setServiceTime(CloudSim.clock());
-									}
-									if (cl.getCloudletId() == 1) {
-										
-										CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
-												"Service #", TextUtil.toString(CloudSim.clock() - cl.getServiceTime()),
-												TextUtil.toString(st.getData()));
-										
-										cl.setServiceTime(CloudSim.clock());
-									}
-									if (cl.getCloudletId() == 2) {
+									if (isCloudletOwnerBroker(cl)) {
 
 										CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
 												"Service #", TextUtil.toString(CloudSim.clock() - cl.getServiceTime()),
@@ -191,12 +173,10 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 
 										cl.setServiceTime(CloudSim.clock());
 									}
-									
-									
+
 									System.out.println(TextUtil.toString(CloudSim.clock()) + " [RECV]: CL #"
 											+ cl.getCloudletId() + " received a packet from CL #"
 											+ pkt.getVirtualsendid() + " with the data: " + pkt.getData());
-
 
 									pkt.setRecievetime(CloudSim.clock());
 									st.setTime(CloudSim.clock() - pkt.getSendtime());
@@ -216,13 +196,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 				}
 				if (st.getType() == NetworkConstants.WAIT_SEND) {
 
-					if (cl.getCloudletId() == 0) {
-						cl.setServiceTime(CloudSim.clock());
-					}
-					if (cl.getCloudletId() == 1) {
-						cl.setServiceTime(CloudSim.clock());
-					}
-					if (cl.getCloudletId() == 2) {
+					if (isCloudletOwnerBroker(cl)) {
 						cl.setServiceTime(CloudSim.clock());
 					}
 
@@ -317,6 +291,16 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 		setPreviousTime(currentTime);
 		return nextEvent;
 	}
+	
+	private boolean isCloudletOwnerBroker(Cloudlet cloudlet){
+		int brID = cloudlet.getUserId();
+		SimEntity entity = CloudSim.getEntity(brID);
+		if (entity instanceof EdgeDatacenterBroker) {
+			return true;
+
+		}
+		return false;
+	}
 
 	private void changetonextstage(NetworkCloudlet cl, TaskStage st) {
 		// for the new/next stage
@@ -331,13 +315,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 			for (i = cl.getCurrStagenum(); i < cl.getStages().size(); i++) {
 				if (cl.getStages().get(i).getType() == NetworkConstants.WAIT_SEND) {
 
-					if (cl.getCloudletId() == 0) {
-						cl.setServiceTime(CloudSim.clock());
-					}
-					if (cl.getCloudletId() == 1) {
-						cl.setServiceTime(CloudSim.clock());
-					}
-					if (cl.getCloudletId() == 2) {
+					if (isCloudletOwnerBroker(cl)) {
 						cl.setServiceTime(CloudSim.clock());
 					}
 
@@ -931,7 +909,7 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 	}
 
 	public Datacenter getCloudletDC(Cloudlet cl) {
-		SimEntity entity = CloudSim.getEntity(cl.getServiceId());
+		SimEntity entity = CloudSim.getEntity(cl.getUserId());
 		;
 		Vm vm;
 		if (cl.getVmId() != -1) {

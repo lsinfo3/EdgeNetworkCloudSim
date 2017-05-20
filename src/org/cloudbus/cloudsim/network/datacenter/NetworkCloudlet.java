@@ -62,9 +62,9 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 
 	public NetworkCloudlet(long cloudletLength, int pesNumber, long cloudletFileSize, long cloudletOutputSize,
 			long memory, UtilizationModel utilizationModelCpu, UtilizationModel utilizationModelRam,
-			UtilizationModel utilizationModelBw, int userId, int serviceId) {
+			UtilizationModel utilizationModelBw, int userId) {
 		super(cloudletLength, pesNumber, cloudletFileSize, cloudletOutputSize, utilizationModelCpu, utilizationModelRam,
-				utilizationModelBw, userId, serviceId);
+				utilizationModelBw, userId);
 
 		currStagenum = -1;
 		this.setMemory(memory);
