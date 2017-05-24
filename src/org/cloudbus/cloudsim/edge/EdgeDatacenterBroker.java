@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.cloudbus.cloudsim.Cloudlet;
@@ -112,11 +113,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 * The amount of services which have already sent their first cloudlet
 	 */
 	private int serviceAllCloudletsSent = 0;
-
-	/**
-	 * Whether or not a request is being processed
-	 */
-	private boolean processingRequest;
+	private Map<Integer, Boolean> serviceAllCloudletsSentMap;
 
 	/**
 	 * Which Cloudlet is responsible for which service.
@@ -125,7 +122,11 @@ public class EdgeDatacenterBroker extends SimEntity {
 
 	private Map<Integer, Boolean> servicesProcessingRequestMap;
 
-	private List<Request> requestList;
+	/**
+	 * List of IDs of request this broker has to process, important to process
+	 * the requests in the right order.
+	 */
+	private Map<Integer, List<Integer>> servicesTorequestIdList;
 
 	/**
 	 * Created a new DatacenterBroker object.
@@ -152,10 +153,10 @@ public class EdgeDatacenterBroker extends SimEntity {
 		setVmsCreatedList(new ArrayList<>());
 		setVmsToDatacentersMap(new HashMap<>());
 		setMessageToSend(new ArrayList<>());
-		setProcessingRequest(false);
 		this.lifeLength = lifeLength;
-		this.requestList = new ArrayList<>();
-		this.servicesProcessingRequestMap = new HashMap<>();
+		this.setServicesProcessingRequestMap(new HashMap<>());
+		this.setServiceAllCloudletsSentMap(new HashMap<>());
+		this.servicesTorequestIdList = new HashMap<>();
 	}
 
 	public EdgeDatacenterBroker(String name) throws Exception {
@@ -232,6 +233,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 				+ cloudlet.getCloudletId() + " received");
 
 		cloudletsSubmitted--;
+		resetCloudlet((NetworkCloudlet) cloudlet);
 		if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) {
 			// all Cloudlets executed
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId()
@@ -247,7 +249,6 @@ public class EdgeDatacenterBroker extends SimEntity {
 					"========================================================================================");
 			System.out.println(
 					"========================================================================================");
-			setProcessingRequest(false);
 			resetCloudlets();
 		} else { // some cloudlets haven't finished yet
 			if (getCloudletList().size() > 0 && cloudletsSubmitted == 0) {
@@ -261,19 +262,19 @@ public class EdgeDatacenterBroker extends SimEntity {
 	}
 
 	public void processServiceAllCloudletsSent(SimEvent ev) {
-		setServiceAllCloudletsSent(getServiceAllCloudletsSent() + 1);
+		getServiceAllCloudletsSentMap().put(ev.getSource(), true);
+		System.out.println("Amount of services : " + getServiceList().size());
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[REQUEST]: Broker : Service #" + ev.getSource()
+				+ " sent all its Cloudlets");
 
-		if (getServiceAllCloudletsSent() >= getServiceList().size()
-				&& getServiceAllCloudletsSent() % getServiceList().size() == 0) {
-			// Now submitting Cloudlets
-			System.out.println("Broker - All service sent all their Cloudlets");
-			System.out.println("Amount of services : " + getServiceList().size());
-			submitCloudlets();
-		} else {
-			System.out.println(
-					"Amount of services whose cloudlets were completely sent: " + getServiceAllCloudletsSent());
-			System.out.println("Amount of services : " + getServiceList().size());
+		int amount = 0;
+		for (Entry<Integer, Boolean> entry : getServiceAllCloudletsSentMap().entrySet()) {
+			if (entry.getValue())
+				amount++;
 		}
+		System.out.println("Amount of services whose cloudlets were completely sent: " + amount);
+		// Now submitting Cloudlet
+		submitCloudlet(CloudletList.getById(getCloudletList(), getServicesToBrokerCloudletsMap().get(ev.getSource())));
 	}
 
 	/**
@@ -282,6 +283,8 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 */
 	public void processServiceStartAck(SimEvent ev) {
 		getServicesToServiceCloudletsMap().put(ev.getSource(), (int[]) ev.getData());
+		System.out.println(TextUtil.toString(CloudSim.clock()) + ": [DEBUG]: Broker #" + getId()
+				+ " service Fisrt Cloudlet ID received from Service #" + ev.getSource());
 		if (getServiceList().size() == getServicesToServiceCloudletsMap().size()) {
 			// all service Fisrt Cloudlet ID have been received
 			System.out.println(TextUtil.toString(CloudSim.clock()) + ": [DEBUG]: Broker #" + getId()
@@ -297,12 +300,19 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 */
 	protected void processBrokerMessage(SimEvent ev) {
 		Object[] dat = (Object[]) ev.getData();
-		int serviceId = (int) dat[0];
-		Message msg = (Message) dat[1];
+		int requestId = (int) dat[0];
+		int serviceId = (int) dat[1];
+		Message msg = (Message) dat[2];
 
-		if (!isProcessingRequest() && !getServicesProcessingRequestMap().get(serviceId) && getCloudletsSubmitted() == 0
-				&& getCloudletList().size() > 0
-				&& getServicesToServiceCloudletsMap().size() == getServiceList().size()) {
+		Cloudlet brokerCloudlet = CloudletList.getById(getCloudletList(),
+				getServicesToBrokerCloudletsMap().get(serviceId));
+
+		if (!getServicesProcessingRequestMap().get(serviceId) && getCloudletList().contains(brokerCloudlet)
+				&& getServicesToServiceCloudletsMap().containsKey(serviceId)
+				&& this.getServicesTorequestIdList().get(serviceId).get(0) == requestId) {
+			//remove the request from the service request list
+			this.getServicesTorequestIdList().get(serviceId).remove(0);
+			//mark this service as busy
 			getServicesProcessingRequestMap().put(serviceId, true);
 			createStages(serviceId, msg);
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[REQUEST]: Broker #" + getId()
@@ -371,6 +381,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 			getCloudletList().add(ncl);
 			getServicesToBrokerCloudletsMap().put(serv.getId(), ncl.getCloudletId());
 			getServicesProcessingRequestMap().put(serv.getId(), false);
+			getServiceAllCloudletsSentMap().put(serv.getId(), false);
 			getVmList().add(eVm);
 		}
 		for (Vm vm : getVmList()) {
@@ -518,18 +529,12 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 */
 	public void presetEvent(final int id, final int tag, final Object data, final double delay) {
 		Object[] dat = (Object[]) data;
-		Object[] daten = new Object[2];
+		Object[] daten = new Object[3];
 		daten[0] = (int) dat[0];
-		daten[1] = (Message) dat[1];
-		double del = delay;
-		for (PresetEvent pe : presetEvents) {
-			if (pe.getDelay() == del) {
-				del++;
-				// break;
-			}
-		}
+		daten[1] = (int) dat[1];
+		daten[2] = (Message) dat[2];
 
-		presetEvents.add(new PresetEvent(id, tag, daten, del));
+		presetEvents.add(new PresetEvent(id, tag, daten, delay));
 	}
 
 	public void presetEvent(final int id, final int tag, final Request data, final double delay) {
@@ -741,15 +746,15 @@ public class EdgeDatacenterBroker extends SimEntity {
 	}
 
 	/**
-	 * @return the servicesToCloudletsMap
+	 * @return the servicesToServiceCloudletsMap
 	 */
 	public Map<Integer, int[]> getServicesToServiceCloudletsMap() {
 		return servicesToServiceCloudletsMap;
 	}
 
 	/**
-	 * @param servicesToCloudletsMap
-	 *            the servicesToCloudletsMap to set
+	 * @param servicesToServiceCloudletsMap
+	 *            the servicesToServiceCloudletsMap to set
 	 */
 	public void setServicesToServiceCloudletsMap(Map<Integer, int[]> servicesToCloudletsMap) {
 		this.servicesToServiceCloudletsMap = servicesToCloudletsMap;
@@ -833,10 +838,12 @@ public class EdgeDatacenterBroker extends SimEntity {
 		int firstCloudletId = serviceData[0];
 		int firstVmId = serviceData[1];
 
+		cloudlet.setStages(new ArrayList<TaskStage>());
+
 		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Broker #" + getId()
-				+ ": called createStages with service # " + serviceId + " and service 1st CL #" + firstCloudletId
+				+ ": called createStages with service # " + serviceId + ", service 1st CL #" + firstCloudletId
 				+ " and service 1st CL VM #" + firstVmId + " Cloudlet #" + cloudlet.getCloudletId() + " and Message "
-				+ msg + " and getCloudletSubmittedList(): " + getCloudletSubmittedList().size());
+				+ msg + " and # of Cloudlet Submitted: " + getCloudletSubmittedList().size());
 
 		long data = (msg != null) ? msg.getMips() + CloudSimTagsExt.DATA_SIZE : CloudSimTagsExt.DATA_SIZE;
 
@@ -892,10 +899,29 @@ public class EdgeDatacenterBroker extends SimEntity {
 		}
 
 		getCloudletList().removeAll(toRemove);
-		setProcessingRequest(true);
-		// for (SimEvent ev : getMessageToSend()) {
-		// processBrokerMessage(ev);
-		// }
+	}
+
+	public void submitCloudlet(Cloudlet cloudlet) {
+		int vmId = cloudlet.getVmId();
+
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId()
+				+ ": called submitCloudlet with Cloudlet #" + cloudlet.getCloudletId());
+
+		if (VmList.getById(getVmsCreatedList(), vmId) == null) {
+			Log.printLine(
+					TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": Postponing execution of cloudlet "
+							+ cloudlet.getCloudletId() + ": bount VM #" + cloudlet.getVmId() + " not available");
+		} else {
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": Sending cloudlet #"
+					+ cloudlet.getCloudletId() + " to VM #" + vmId);
+
+			sendNow(getUserDC().getId(), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
+			cloudletsSubmitted++;
+			getCloudletSubmittedList().add(cloudlet);
+
+			// remove submitted cloudlet from waiting list
+			getCloudletList().remove(cloudlet);
+		}
 
 	}
 
@@ -954,15 +980,6 @@ public class EdgeDatacenterBroker extends SimEntity {
 		this.serviceAllCloudletsSent = serviceAllCloudletsSent;
 	}
 
-	public boolean isProcessingRequest() {
-		return processingRequest;
-	}
-
-	public void setProcessingRequest(boolean processingRequest) {
-		this.processingRequest = processingRequest;
-	}
-
-
 	/**
 	 * Reset the Broker Cloudlets, to process the next request.
 	 */
@@ -978,7 +995,6 @@ public class EdgeDatacenterBroker extends SimEntity {
 
 		for (NetworkCloudlet networkCloudlet : getCloudletList()) {
 			networkCloudlet.reset();
-			networkCloudlet.setStages(new ArrayList<TaskStage>());
 		}
 	}
 
@@ -987,19 +1003,20 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 * 
 	 * @param cloudletId
 	 */
-	public void resetCloudlets(NetworkCloudlet networkCloudlet) {
+	public void resetCloudlet(NetworkCloudlet networkCloudlet) {
+		getCloudletReceivedList().remove(networkCloudlet);
 		getCloudletList().add(networkCloudlet);
 
 		for (Map.Entry<Integer, Integer> entry : getServicesToBrokerCloudletsMap().entrySet()) {
-			if(entry.getValue() == networkCloudlet.getCloudletId()){
+			if (entry.getValue() == networkCloudlet.getCloudletId()) {
 				int serviceId = entry.getKey();
 				getServicesProcessingRequestMap().put(serviceId, false);
+				getServiceAllCloudletsSentMap().put(serviceId, false);
 				break;
 			}
 		}
 
 		networkCloudlet.reset();
-		networkCloudlet.setStages(new ArrayList<TaskStage>());
 	}
 
 	public Map<Integer, Integer> getServicesToBrokerCloudletsMap() {
@@ -1016,6 +1033,30 @@ public class EdgeDatacenterBroker extends SimEntity {
 
 	public void setServicesProcessingRequestMap(Map<Integer, Boolean> servicesProcessingRequestMap) {
 		this.servicesProcessingRequestMap = servicesProcessingRequestMap;
+	}
+
+	public Map<Integer, Boolean> getServiceAllCloudletsSentMap() {
+		return serviceAllCloudletsSentMap;
+	}
+
+	public void setServiceAllCloudletsSentMap(Map<Integer, Boolean> serviceAllCloudletsSentMap) {
+		this.serviceAllCloudletsSentMap = serviceAllCloudletsSentMap;
+	}
+
+	public void addRequestId(int serviceId, int requestId) {
+		List<Integer> ids;
+		if (this.getServicesTorequestIdList().containsKey(serviceId)) {
+			ids = this.getServicesTorequestIdList().get(serviceId);
+			ids.add(requestId);
+		} else {
+			ids = new ArrayList<>();
+			ids.add(requestId);
+		}
+		this.getServicesTorequestIdList().put(serviceId, ids);
+	}
+
+	public Map<Integer, List<Integer>> getServicesTorequestIdList() {
+		return servicesTorequestIdList;
 	}
 
 }

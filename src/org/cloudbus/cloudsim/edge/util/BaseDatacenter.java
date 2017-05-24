@@ -109,7 +109,7 @@ public class BaseDatacenter {
 
 		List<EdgeHost> hostList = new ArrayList<EdgeHost>();
 
-//		int mips = 18870;
+		// int mips = 18870;
 		int mips = 18870 * 2;
 		int ram = 8048;
 		long storage = 1000000;
@@ -189,7 +189,7 @@ public class BaseDatacenter {
 	public static void createNetworkWorking() throws Exception {
 		ArrayList<NetworkDatacenter> dcs = new ArrayList<>();
 		ArrayList<AggregateSwitch> aggSwitch = new ArrayList<>();
-		for (int i = 0; i < 4 ; i++) {
+		for (int i = 0; i < 4; i++) {
 			dcs.add(createNetworkDatacenter("DC" + i, 1));
 		}
 		for (int i = 0; i < 3; i++) {
@@ -215,15 +215,28 @@ public class BaseDatacenter {
 		broker.addService(new EdgeWebService("EWS22"));
 		broker.addService(new EdgeDbService("EDS24"));
 
+		// Request List
+		List<Message> messageList = new ArrayList<>();
+		messageList.add(Message.ZERO);
+		messageList.add(Message.ONE);
+		messageList.add(Message.TEN);
+		messageList.add(Message.HUNDRED);
+
+		int requestId = 0;
+		Object[] data = new Object[3];
 		// Simulate the Broker sending deferred messages (e.g. new requests) to
 		// the Services
-		Object[] data = new Object[2];
-		for (Service service : broker.getServiceList()) {
-			data[0] = service.getId();
-			data[1] = Message.ZERO;
-			broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 6000);
+		for (Message message : messageList) {
+			for (Service service : broker.getServiceList()) {
+				data[0] = requestId;
+				data[1] = service.getId();
+				data[2] = message;
+				broker.addRequestId(service.getId(), requestId);
+				broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 6000);
+			}
+			requestId++;
 		}
-		
+
 		// maps CloudSim entities to BRITE entities
 		NetworkTopology.mapNode(udc.getId(), 0);
 		NetworkTopology.mapNode(getDcFirstEdgeSwitch(udc), 1);
@@ -326,12 +339,12 @@ public class BaseDatacenter {
 
 		for (Host hs : dc.getHostList()) {
 			EdgeHost hs1 = (EdgeHost) hs;
-//			hs1.bandwidth = NetworkConstants.BandWidthEdgeHost;
+			// hs1.bandwidth = NetworkConstants.BandWidthEdgeHost;
 			hs1.bandwidth = edgeswitch.downlinkbandwidth;
 			edgeswitch.hostlist.put(hs.getId(), hs1);
 			dc.HostToSwitchid.put(hs.getId(), edgeswitch.getId());
 			hs1.sw = edgeswitch;
-//			list of hosts connected to this switch for processing  
+			// list of hosts connected to this switch for processing
 			List<EdgeHost> hostList = (List<EdgeHost>) (List<?>) hs1.sw.fintimelistHost.get(0D);
 			if (hostList == null) {
 				hostList = new ArrayList<EdgeHost>();
