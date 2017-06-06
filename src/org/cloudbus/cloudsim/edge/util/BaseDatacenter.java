@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
@@ -221,18 +222,23 @@ public class BaseDatacenter {
 		messageList.add(Message.ONE);
 		messageList.add(Message.TEN);
 		messageList.add(Message.HUNDRED);
+		messageList.add(Message.THOUSAND);
 
 		int requestId = 0;
 		Object[] data = new Object[3];
-		// Simulate the Broker sending deferred messages (e.g. new requests) to
-		// the Services
-		for (Message message : messageList) {
+
+		// simulates 30 min = 30 * 60 * 1000 msec = 1800000 msec
+		// new request every 5 min = 5 * 60 * 1000 msec = 300000 msec
+		Random rand = new Random();
+		for (int requestStart = 6000; requestStart <= 1800000; requestStart += 300000) {
+			// randomly choose Request type.
+			Message message = messageList.get(rand.nextInt(messageList.size()));
 			for (Service service : broker.getServiceList()) {
 				data[0] = requestId;
 				data[1] = service.getId();
 				data[2] = message;
 				broker.addRequestId(service.getId(), requestId);
-				broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, 6000);
+				broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, requestStart);
 			}
 			requestId++;
 		}

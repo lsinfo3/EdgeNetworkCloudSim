@@ -307,23 +307,30 @@ public class EdgeDatacenterBroker extends SimEntity {
 		Cloudlet brokerCloudlet = CloudletList.getById(getCloudletList(),
 				getServicesToBrokerCloudletsMap().get(serviceId));
 
-		if (!getServicesProcessingRequestMap().get(serviceId) && getCloudletList().contains(brokerCloudlet)
-				&& getServicesToServiceCloudletsMap().containsKey(serviceId)
-				&& this.getServicesTorequestIdList().get(serviceId).get(0) == requestId) {
-			//remove the request from the service request list
-			this.getServicesTorequestIdList().get(serviceId).remove(0);
-			//mark this service as busy
-			getServicesProcessingRequestMap().put(serviceId, true);
-			createStages(serviceId, msg);
+		if (this.getLifeLength() > 0 && CloudSim.clock() > this.getLifeLength()) {
+			// Drop Request, since it is over this entity lifetime
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[REQUEST]: Broker #" + getId()
-					+ " process Request... sending to Service #" + serviceId);
-			sendNow(serviceId, CloudSimTagsExt.BROKER_MESSAGE, msg);
+					+ " DROPING REQUEST... to Service #" + serviceId + "... since over this broker lifetime");
+
 		} else {
-			// System.out.println(TextUtil.toString(CloudSim.clock()) +
-			// "[DEBUG]: Broker #" + getId()
-			// + " postponing message sending to Service #" + serviceId + "
-			// because broker not ready yet");
-			send(getId(), 1.0, CloudSimTagsExt.BROKER_MESSAGE, ev.getData());
+			if (!getServicesProcessingRequestMap().get(serviceId) && getCloudletList().contains(brokerCloudlet)
+					&& getServicesToServiceCloudletsMap().containsKey(serviceId)
+					&& this.getServicesTorequestIdList().get(serviceId).get(0) == requestId) {
+				// remove the request from the service request list
+				this.getServicesTorequestIdList().get(serviceId).remove(0);
+				// mark this service as busy
+				getServicesProcessingRequestMap().put(serviceId, true);
+				createStages(serviceId, msg);
+				Log.printLine(TextUtil.toString(CloudSim.clock()) + "[REQUEST]: Broker #" + getId()
+						+ " process Request... sending to Service #" + serviceId);
+				sendNow(serviceId, CloudSimTagsExt.BROKER_MESSAGE, msg);
+			} else {
+				// System.out.println(TextUtil.toString(CloudSim.clock()) +
+				// "[DEBUG]: Broker #" + getId()
+				// + " postponing message sending to Service #" + serviceId + "
+				// because broker not ready yet");
+				send(getId(), 1.0, CloudSimTagsExt.BROKER_MESSAGE, ev.getData());
+			}
 		}
 
 	}

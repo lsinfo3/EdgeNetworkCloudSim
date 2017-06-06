@@ -911,18 +911,27 @@ public abstract class Service extends SimEntity {
 	 *            a SimEvent object
 	 */
 	protected void processBrokerMessage(SimEvent ev) {
-		if (!cloudletGenerated) {
-			generateCloudlets();
-			setCloudletGenerated(true);
+		System.out.println(TextUtil.toString(CloudSim.clock()) + "[DEBUG]: Service #" + getId() + ": Message "
+				+ ((Message) ev.getData()).name() + " received from Broker #" + getUserId());
+
+		if (this.getLifeLength() > 0 && CloudSim.clock() > this.getLifeLength()) {
+			// Drop Request, since it is over this entity lifetime
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[REQUEST]: Service #" + getId()
+					+ " DROPING REQUEST... from Broker #" + ev.getSource() + "... since over this service lifetime");
+
+		} else {
+			if (!cloudletGenerated) {
+				generateCloudlets();
+				setCloudletGenerated(true);
+			}
+			for (int i = 0; i < getCloudletList().size(); i++) {
+				getCloudletList().get(i).setCloudletLength(
+						getCloudletList().get(i).getCloudletLength() + ((Message) ev.getData()).getMips());
+			}
+			createStages();
+			submitCloudlets();
 		}
-		System.out.println(TextUtil.toString(CloudSim.clock()) + "[DEBUG]: Service #" + getId()
-				+ ": Message "+ ((Message) ev.getData()).name() + " received from Broker #" + getUserId());
-		for (int i = 0; i < getCloudletList().size(); i++) {
-			getCloudletList().get(i).setCloudletLength(
-					getCloudletList().get(i).getCloudletLength() + ((Message) ev.getData()).getMips());
-		}
-		createStages();
-		submitCloudlets();
+
 	}
 
 	protected void processCloudletPausedAck(SimEvent ev) {
