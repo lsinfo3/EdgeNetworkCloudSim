@@ -143,6 +143,8 @@ public abstract class Service extends SimEntity {
 	 */
 	private boolean processingRequest;
 
+	private Map<Integer, Integer> vmCreationAttempts;
+
 	/**
 	 * Constr.
 	 * 
@@ -176,6 +178,7 @@ public abstract class Service extends SimEntity {
 		setDatacenterRequestedIdsList(new ArrayList<Integer>());
 		setVmsToDatacentersMap(new HashMap<Integer, Integer>());
 		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
+		setVmCreationAttempts(new HashMap<Integer, Integer>());
 
 	}
 
@@ -276,7 +279,8 @@ public abstract class Service extends SimEntity {
 				// all datacenters already queried
 				if (getVmsCreatedList().size() > 0) { // if some vm were created
 					System.out.println(TextUtil.toString(CloudSim.clock()) + ": [DEBUG]: Service #" + getId()
-							+ " some VMs were created");
+							+ " some VMs were created... But not all. Aborting");
+					finishExecution();
 				} else { // no vms created. abort
 					Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId()
 							+ ": none of the required VMs could be created. Aborting");
@@ -304,6 +308,12 @@ public abstract class Service extends SimEntity {
 				Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Trying to Create VM #"
 						+ vm.getId() + " in Datacenter #" + datacenterId);
 				sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
+				// Statistics
+				if (getVmCreationAttempts().containsKey(vm.getId())) {
+					getVmCreationAttempts().put(vm.getId(), getVmCreationAttempts().get(vm.getId()) + 1);
+				} else {
+					getVmCreationAttempts().put(vm.getId(), 1);
+				}
 				requestedVms++;
 			}
 		}
@@ -322,9 +332,25 @@ public abstract class Service extends SimEntity {
 	 */
 	protected void clearDatacenters() {
 		for (Vm vm : getVmsCreatedList()) {
-			Log.printLine(
-					TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Destroying VM #" + vm.getId());
-			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.VM_DESTROY, vm);
+			if (vm.getHost() == null || vm.getHost().getDatacenter() == null) {
+				Log.print("VM " + vm.getId() + " has not been assigned in a valid way and can not be terminated.");
+				continue;
+			}
+
+			// Update the cloudlets before we send the kill event
+			vm.getHost().updateVmsProcessing(CloudSim.clock());
+
+			String datacenterName = vm.getHost().getDatacenter().getName();
+
+			CustomLog.printConcatLine(CloudSim.clock(), ": ", getName(), ": Trying to Destroy VM #", vm.getId(), " in ",
+					datacenterName);
+			Log.printLine(CloudSim.clock() + ": Service #" + getId() + ": Trying to Destroy VM #" + vm.getId()
+					+ " in DC #" + getVmsToDatacentersMap().get(vm.getId()));
+
+			// Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #"
+			// + getId() + ": Destroying VM #" + vm.getId());
+			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.VM_DESTROY_ACK, vm);
+			incrementVmsDetructsRequested();
 		}
 
 		getVmsCreatedList().clear();
@@ -337,6 +363,13 @@ public abstract class Service extends SimEntity {
 	 * @post $none
 	 */
 	protected void finishExecution() {
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": VM CREATION STATS");
+		getVmCreationAttempts().forEach((k, v) -> System.out.println( "#" + k + ": " + v));
+
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": AUTO DESTRUCTION started");
+		// Notify Broker
+		sendNow(getUserId(), CloudSimTagsExt.SERVICE_DESTROYED_ITSELF);
+
 		sendNow(getId(), CloudSimTags.END_OF_SIMULATION);
 	}
 
@@ -440,6 +473,10 @@ public abstract class Service extends SimEntity {
 	 */
 	protected void incrementVmsAcks() {
 		vmsAcks++;
+	}
+
+	protected void incrementVmsDetructsRequested() {
+		this.vmDestructsRequested++;
 	}
 
 	/**
@@ -597,6 +634,7 @@ public abstract class Service extends SimEntity {
 	}
 
 	private void processVMDestroy(SimEvent ev) {
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": PROCESSING VM DESTROYED ACK");
 		int[] data = (int[]) ev.getData();
 		int datacenterId = data[0];
 		int vmId = data[1];
@@ -616,11 +654,20 @@ public abstract class Service extends SimEntity {
 
 			for (Cloudlet cloudlet : getCloudletSubmittedList()) {
 				if (!cloudlet.isFinished() && vmId == cloudlet.getVmId()) {
+					System.out.println(
+							TextUtil.toString(CloudSim.clock()) + ": Service #" + "TRYING TO TERMINATE CLOUDLET #"
+									+ cloudlet.getCloudletId() + " ASSOCIATED WITH VM #" + cloudlet.getVmId());
 					try {
-						vm.getCloudletScheduler().cloudletCancel(cloudlet.getCloudletId());
+						// Vm is always null at this point
+						// vm.getCloudletScheduler().cloudletCancel(cloudlet.getCloudletId());
 						cloudlet.setCloudletStatus(Cloudlet.FAILED_RESOURCE_UNAVAILABLE);
 					} catch (Exception e) {
 						CustomLog.logError(Level.SEVERE, e.getMessage(), e);
+						System.out.println(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId()
+								+ ": CLOUDLET TERMINATION DID NOT WORK!!!");
+						System.out.println(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": Level: "
+								+ Level.SEVERE + " - Exception Message: " + e.getMessage() + " - Exception Type: "
+								+ e.toString());
 					}
 
 					sendNow(cloudlet.getUserId(), CloudSimTags.CLOUDLET_RETURN, cloudlet);
@@ -779,6 +826,13 @@ public abstract class Service extends SimEntity {
 	@Override
 	public void processEvent(SimEvent ev) {
 
+		if (this.getLifeLength() > 0 && CloudSim.clock() > this.getLifeLength()) {
+			// Drop Request, since it is over this entity lifetime
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[REQUEST]: Service #" + getId()
+					+ " DROPING Event... from Entity #" + ev.getSource() + "... since over this service lifetime");
+			return;
+		}
+
 		switch (ev.getTag()) {
 		// Resource characteristics request
 		case CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST:
@@ -831,6 +885,11 @@ public abstract class Service extends SimEntity {
 		case CloudSimTags.END_OF_SIMULATION:
 			shutdownEntity();
 			break;
+		case CloudSimTagsExt.SERVICE_DESTROY_ITSELF_NOW:
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Service #" + getId()
+					+ " TIME TO LIVE reached: processing SERVICE_DESTROY_ITSELF_NOW.");
+			finishExecution();
+			break;
 		// other unknown tags are processed by this method
 		default:
 			processOtherEvent(ev);
@@ -855,8 +914,9 @@ public abstract class Service extends SimEntity {
 			}
 
 		} else {
-			System.out.println(TextUtil.toString(CloudSim.clock()) + ": [DEBUG]: Service #" + getId()
-					+ " all Vms not created yet, postponning Service start to 1.0 ");
+			// System.out.println(TextUtil.toString(CloudSim.clock()) + ":
+			// [DEBUG]: Service #" + getId()
+			// + " all Vms not created yet, postponning Service start to 1.0 ");
 			send(getId(), 1.0, CloudSimTagsExt.SERVICE_START_ACK, ev.getData());
 		}
 	}
@@ -1169,7 +1229,9 @@ public abstract class Service extends SimEntity {
 				// all the cloudlets sent finished. It means that some bount
 				// cloudlet is waiting its VM be created
 
-				System.out.println("Cloudlets waiting for VM creation!");
+				System.out.println(TextUtil.toString(CloudSim.clock()) + ": [DEBUG]: Service #" + getId()
+						+ " Cloudlets waiting for VM creation!");
+
 				// Notify Broker that our Cloudlet are done! but some bount
 				// cloudlet is waiting its VM be created
 				sendNow(getId(), CloudSimTagsExt.SERVICE_CLOUDLET_DONE_VM);
@@ -1277,6 +1339,14 @@ public abstract class Service extends SimEntity {
 	 */
 	protected void setVmsToDatacentersMap(Map<Integer, Integer> vmsToDatacentersMap) {
 		this.vmsToDatacentersMap = vmsToDatacentersMap;
+	}
+
+	public Map<Integer, Integer> getVmCreationAttempts() {
+		return vmCreationAttempts;
+	}
+
+	public void setVmCreationAttempts(Map<Integer, Integer> vmCreationAttempts) {
+		this.vmCreationAttempts = vmCreationAttempts;
 	}
 
 	protected void addCloudlet(Cloudlet cl) {

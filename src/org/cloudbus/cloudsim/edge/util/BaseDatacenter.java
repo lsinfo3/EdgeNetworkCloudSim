@@ -14,10 +14,12 @@ import org.cloudbus.cloudsim.NetworkTopology;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.VmSchedulerSpaceShared;
+import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.edge.CloudSimTagsExt;
 import org.cloudbus.cloudsim.edge.EdgeDatacenterBroker;
 import org.cloudbus.cloudsim.edge.EdgeHost;
 import org.cloudbus.cloudsim.edge.Message;
+import org.cloudbus.cloudsim.edge.random.ExponentialRNS;
 import org.cloudbus.cloudsim.edge.service.EdgeDbService;
 import org.cloudbus.cloudsim.edge.service.EdgeWebService;
 import org.cloudbus.cloudsim.edge.service.Service;
@@ -33,6 +35,11 @@ import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
 public class BaseDatacenter {
+
+	/**
+	 * simulates 30 min = 30 * 60 * 1000 msec = 1800000 msec
+	 */
+	private static double simulationTime = 1800000;
 
 	private BaseDatacenter() {
 
@@ -209,12 +216,50 @@ public class BaseDatacenter {
 
 		aggSwitch.get(2).uplinkswitches.add(aggSwitch.get(1));
 
-		// Create Brokers
+		// Create distributions
+		ExponentialRNS serviceLifetimeDist = new ExponentialRNS(0.000001);
+		ExponentialRNS interServiceStarttimeDist = new ExponentialRNS(0.000001);
+		List<Double> serviceStarts = new ArrayList<>();
 
-		// Add Services
-		broker.addService(new EdgeDbService("EDS3"));
-		broker.addService(new EdgeWebService("EWS22"));
-		broker.addService(new EdgeDbService("EDS24"));
+		// Generate the Service start times
+		// simulates 30 min = 30 * 60 * 1000 msec = 1800000 msec
+		for (double nextServiceStart = 0; nextServiceStart < simulationTime;) {
+			double next = interServiceStarttimeDist.next();
+			nextServiceStart += next;
+			serviceStarts.add(nextServiceStart);
+		}
+		// the last one is over the simulation time
+		serviceStarts.remove(serviceStarts.size() - 1);
+
+		Random rand = new Random();
+
+		Log.printLine(
+				TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter # OF SERVICES: " + serviceStarts.size());
+
+		// Add number of Service X based on the service start times.
+		for (int i = 0; i < serviceStarts.size(); i++) {
+			double next = serviceLifetimeDist.next();
+			// This sum can be bigger than the simulation time!!!
+			double startPlusLifetime = serviceStarts.get(i) + next;
+			// randomly choose Service type.
+			Service service = rand.nextInt(2) == 0 ? new EdgeDbService("EDS" + i, startPlusLifetime)
+					: new EdgeWebService("EDS" + i, startPlusLifetime);
+			// Service service = rand.nextInt(2) == 0 ? new EdgeDbService("EDS"
+			// + i, simulationTime)
+			// : new EdgeWebService("EDS" + i, simulationTime);
+			broker.addService(service);
+
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter TYPE OF NEXT SERVICE: "
+					+ service.getName());
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter START OF NEXT SERVICE: "
+					+ serviceStarts.get(i));
+			Log.printLine(
+					TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter LIFETIME OF NEXT SERVICE: " + next);
+			Log.printLine(TextUtil.toString(CloudSim.clock())
+					+ "[FATAL]: BaseDatacenter REAL LIFETIME OF NEXT SERVICE: " + startPlusLifetime);
+			System.out.println();
+			System.out.println();
+		}
 
 		// Request List
 		List<Message> messageList = new ArrayList<>();
@@ -224,23 +269,33 @@ public class BaseDatacenter {
 		messageList.add(Message.HUNDRED);
 		messageList.add(Message.THOUSAND);
 
-		int requestId = 0;
 		Object[] data = new Object[3];
+		int requestId;
 
-		// simulates 30 min = 30 * 60 * 1000 msec = 1800000 msec
-		// new request every 5 min = 5 * 60 * 1000 msec = 300000 msec
-		Random rand = new Random();
-		for (int requestStart = 6000; requestStart <= 1800000; requestStart += 300000) {
-			// randomly choose Request type.
-			Message message = messageList.get(rand.nextInt(messageList.size()));
-			for (Service service : broker.getServiceList()) {
+		List<Service> serviceList = broker.getServiceList();
+		for (int i = 0; i < serviceList.size(); i++) {
+			requestId = 0;
+			Service service = serviceList.get(i);
+			ExponentialRNS interRequestDist = new ExponentialRNS(0.00001);
+			double serviceStart = serviceStarts.get(i);
+
+			broker.addServiceFirstRequestTime(service.getId(), serviceStart);
+			// simulates 30 min = 30 * 60 * 1000 msec = 1800000 msec
+			for (double requestStart = serviceStart; requestStart <= simulationTime;) {
+				// randomly choose Request type.
+				Message message = messageList.get(rand.nextInt(messageList.size()));
 				data[0] = requestId;
 				data[1] = service.getId();
 				data[2] = message;
 				broker.addRequestId(service.getId(), requestId);
 				broker.presetEvent(broker.getId(), CloudSimTagsExt.BROKER_MESSAGE, data, requestStart);
+
+				double next = interRequestDist.next();
+				requestStart += next;
+				requestId++;
 			}
-			requestId++;
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter # of Request for Service #"
+					+ service.getId() + " = " + requestId);
 		}
 
 		// maps CloudSim entities to BRITE entities

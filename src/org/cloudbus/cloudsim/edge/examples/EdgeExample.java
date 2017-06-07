@@ -53,7 +53,8 @@ public class EdgeExample {
 
 			CloudSim.startSimulation();
 			
-//			 CloudSim.stopSimulation();
+			 CloudSim.terminateSimulation(1800000);
+			 CloudSim.stopSimulation();
 			Log.printLine("EdgeExample finished!");
 		} catch (Exception e) {
 			e.printStackTrace();

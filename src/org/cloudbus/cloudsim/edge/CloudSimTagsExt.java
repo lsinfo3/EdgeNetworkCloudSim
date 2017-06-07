@@ -45,6 +45,7 @@ public class CloudSimTagsExt {
 	public static final int SERVICE_ALL_CLOUDLETS_SENT = BASEEDGE + 17;
 	public static final int KEEP_UP = BASEEDGE + 18;
 	public static final int BROKER_REQUEST = BASEEDGE + 19;
+	public static final int SERVICE_DESTROYED_ITSELF = BASEEDGE + 20;
 	public static final long DATA_SIZE = 1000000000;
 	
 	

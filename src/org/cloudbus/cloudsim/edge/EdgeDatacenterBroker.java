@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.Objects;
 
 import org.cloudbus.cloudsim.Cloudlet;
@@ -26,6 +27,7 @@ import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.cloudbus.cloudsim.edge.service.Service;
 import org.cloudbus.cloudsim.edge.util.BaseDatacenter;
+import org.cloudbus.cloudsim.edge.util.CustomLog;
 import org.cloudbus.cloudsim.edge.util.Request;
 import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.edge.vm.T2Small;
@@ -75,6 +77,12 @@ public class EdgeDatacenterBroker extends SimEntity {
 
 	/** The vms destroyed. */
 	private int vmsDestroyed;
+
+	/** Number of VM destructions requested. */
+	private int vmDestructsRequested = 0;
+
+	/** Number of VM destructions acknowledged. */
+	private int vmDestructsAcks = 0;
 
 	/** The vms to datacenters map. */
 	private Map<Integer, Integer> vmsToDatacentersMap;
@@ -126,7 +134,12 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 * List of IDs of request this broker has to process, important to process
 	 * the requests in the right order.
 	 */
-	private Map<Integer, List<Integer>> servicesTorequestIdList;
+	private Map<Integer, List<Integer>> servicesTorequestIdMap;
+
+	/**
+	 * Mapping of services to the time of their first request
+	 */
+	private Map<Integer, Double> servicesToFirstrequestTimeMap;
 
 	/**
 	 * Created a new DatacenterBroker object.
@@ -156,7 +169,8 @@ public class EdgeDatacenterBroker extends SimEntity {
 		this.lifeLength = lifeLength;
 		this.setServicesProcessingRequestMap(new HashMap<>());
 		this.setServiceAllCloudletsSentMap(new HashMap<>());
-		this.servicesTorequestIdList = new HashMap<>();
+		this.setServicesToFirstrequestTimeMap(new HashMap<>());
+		this.servicesTorequestIdMap = new HashMap<>();
 	}
 
 	public EdgeDatacenterBroker(String name) throws Exception {
@@ -174,6 +188,13 @@ public class EdgeDatacenterBroker extends SimEntity {
 	@Override
 	public void processEvent(SimEvent ev) {
 
+		if (this.getLifeLength() > 0 && CloudSim.clock() > this.getLifeLength()) {
+			// Drop Event, since it is over this entity lifetime
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[REQUEST]: Broker #" + getId()
+					+ " DROPING Event... from Entity #" + ev.getSource() + "... since over this broker lifetime");
+			return;
+		}
+
 		switch (ev.getTag()) {
 		// Service send results back after processing Broker Message.
 		case CloudSimTagsExt.BROKER_MESSAGE_RETURN:
@@ -184,7 +205,9 @@ public class EdgeDatacenterBroker extends SimEntity {
 			processBrokerMessage(ev);
 			break;
 		case CloudSimTagsExt.BROKER_DESTROY_ITSELF_NOW:
-			// do nothing
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Broker #" + getId()
+					+ " TIME TO LIVE reached: processing SERVICE_DESTROY_ITSELF_NOW.");
+			finishExecution();
 			break;
 		case CloudSimTagsExt.SERVICE_START_ACK:
 			processServiceStartAck(ev);
@@ -233,6 +256,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 				+ cloudlet.getCloudletId() + " received");
 
 		cloudletsSubmitted--;
+		getCloudletSubmittedList().remove(cloudlet);
 		resetCloudlet((NetworkCloudlet) cloudlet);
 		if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) {
 			// all Cloudlets executed
@@ -254,8 +278,6 @@ public class EdgeDatacenterBroker extends SimEntity {
 			if (getCloudletList().size() > 0 && cloudletsSubmitted == 0) {
 				// all the cloudlets sent finished. It means that some bount
 				// cloudlet is waiting its VM be created
-
-				System.out.println("Cloudlets waiting for VM creation!");
 			}
 
 		}
@@ -293,6 +315,92 @@ public class EdgeDatacenterBroker extends SimEntity {
 	}
 
 	/**
+	 * @param ev
+	 */
+	public void processServiceDestroyedItself(SimEvent ev) {
+		int serviceId = ev.getSource();
+		System.out.println("PROCESSING SERVICE_DESTROYED_ITSELF FROM SERVICE #" + serviceId);
+
+		// set the flag to specify that this broker is no longer processing
+		getServicesProcessingRequestMap().put(serviceId, false);
+
+		NetworkCloudlet brokerCloudlet = CloudletList.getById(getCloudletList(),
+				getServicesToBrokerCloudletsMap().get(serviceId));
+
+		if (brokerCloudlet == null) {
+			// if null, then the cloudlet has already been submitted!
+			brokerCloudlet = CloudletList.getById(getCloudletSubmittedList(),
+					getServicesToBrokerCloudletsMap().get(serviceId));
+		}
+
+		EdgeVm brokerCloudletVm = VmList.getById(getVmList(), brokerCloudlet.getVmId());
+
+		// destroy the vm associated with this broker Cloudlet
+		destroyVm(brokerCloudletVm);
+
+	}
+
+	/**
+	 * Submits the list of vms after a given delay
+	 * 
+	 * @param list
+	 * @param delay
+	 */
+	public void createVmAfter(final Vm vm, final double delay) {
+		if (started) {
+			send(getUserDC().getId(), delay, CloudSimTags.VM_CREATE_ACK, vm);
+		} else {
+			presetEvent(getUserDC().getId(), CloudSimTags.VM_CREATE_ACK, vm, delay);
+		}
+	}
+
+	/**
+	 * Destroys the VMs after a specified time period. Used mostly for testing
+	 * purposes.
+	 * 
+	 * @param vm
+	 *            - the list of vms to terminate.
+	 * @param delay
+	 *            - the period to wait for.
+	 */
+	public void destroyVmAfter(final Vm vm, final double delay) {
+		if (started) {
+			send(getUserDC().getId(), delay, CloudSimTags.VM_DESTROY_ACK, vm);
+		} else {
+			presetEvent(getUserDC().getId(), CloudSimTags.VM_DESTROY_ACK, vm, delay);
+		}
+	}
+
+	/**
+	 * try to destroy the given Vm in the corresponding datacenter
+	 * 
+	 * @param vm
+	 */
+	protected void destroyVm(Vm vm) {
+
+		if (vm.getHost() == null || vm.getHost().getDatacenter() == null) {
+			Log.print("VM " + vm.getId() + " has not been assigned in a valid way and can not be terminated.");
+			return;
+		}
+
+		// Update the cloudlets before we send the kill event
+		vm.getHost().updateVmsProcessing(CloudSim.clock());
+
+		String datacenterName = vm.getHost().getDatacenter().getName();
+
+		CustomLog.printConcatLine(CloudSim.clock(), ": ", getName(), ": Trying to Destroy VM #", vm.getId(), " in ",
+				datacenterName);
+		Log.printLine(CloudSim.clock() + ": Service #" + getId() + ": Trying to Destroy VM #" + vm.getId() + " in DC #"
+				+ getVmsToDatacentersMap().get(vm.getId()));
+
+		// Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #"
+		// + getId() + ": Destroying VM #" + vm.getId());
+		sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.VM_DESTROY_ACK, vm);
+		incrementVmsDetructsRequested();
+
+	}
+
+	/**
 	 * process delayed message sending to Service.
 	 * 
 	 * @param ev
@@ -307,17 +415,31 @@ public class EdgeDatacenterBroker extends SimEntity {
 		Cloudlet brokerCloudlet = CloudletList.getById(getCloudletList(),
 				getServicesToBrokerCloudletsMap().get(serviceId));
 
+		Service service = (Service) CloudSim.getEntity(serviceId);
+
 		if (this.getLifeLength() > 0 && CloudSim.clock() > this.getLifeLength()) {
 			// Drop Request, since it is over this entity lifetime
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[REQUEST]: Broker #" + getId()
 					+ " DROPING REQUEST... to Service #" + serviceId + "... since over this broker lifetime");
 
+		} else if (service.getLifeLength() > 0 && CloudSim.clock() > service.getLifeLength()) {
+			// Drop Request, since it is over the service lifetime
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[REQUEST]: Broker #" + getId()
+					+ " DROPING REQUEST... to Service #" + serviceId + "... since over this service lifetime");
+
 		} else {
-			if (!getServicesProcessingRequestMap().get(serviceId) && getCloudletList().contains(brokerCloudlet)
-					&& getServicesToServiceCloudletsMap().containsKey(serviceId)
-					&& this.getServicesTorequestIdList().get(serviceId).get(0) == requestId) {
+			boolean isServiceProcessing = getServicesProcessingRequestMap().get(serviceId);
+			boolean containsBrokerId = getCloudletList().contains(brokerCloudlet);
+			boolean serviceHasCloudletMapping = getServicesToServiceCloudletsMap().containsKey(serviceId);
+			boolean RequestIsNext = this.getServicesTorequestIdMap().get(serviceId).get(0) == requestId;
+			// if (!getServicesProcessingRequestMap().get(serviceId) &&
+			// getCloudletList().contains(brokerCloudlet)
+			// && getServicesToServiceCloudletsMap().containsKey(serviceId)
+			// && this.getServicesTorequestIdList().get(serviceId).get(0) ==
+			// requestId) {
+			if (!isServiceProcessing && containsBrokerId && serviceHasCloudletMapping && RequestIsNext) {
 				// remove the request from the service request list
-				this.getServicesTorequestIdList().get(serviceId).remove(0);
+				this.getServicesTorequestIdMap().get(serviceId).remove(0);
 				// mark this service as busy
 				getServicesProcessingRequestMap().put(serviceId, true);
 				createStages(serviceId, msg);
@@ -416,6 +538,12 @@ public class EdgeDatacenterBroker extends SimEntity {
 		case CloudSimTagsExt.SERVICE_CLOUDLET_DONE:
 			System.out.println(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": Service #"
 					+ ev.getSource() + ": all Cloudlets processed!");
+			break;
+		case CloudSimTags.VM_DESTROY_ACK:
+			processVMDestroy(ev);
+			break;
+		case CloudSimTagsExt.SERVICE_DESTROYED_ITSELF:
+			processServiceDestroyedItself(ev);
 			break;
 		default:
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Broker #" + getId()
@@ -676,6 +804,22 @@ public class EdgeDatacenterBroker extends SimEntity {
 		this.vmsRequested = vmsRequested;
 	}
 
+	public int getVmDestructsRequested() {
+		return vmDestructsRequested;
+	}
+
+	public void setVmDestructsRequested(int vmDestructsRequested) {
+		this.vmDestructsRequested = vmDestructsRequested;
+	}
+
+	public int getVmDestructsAcks() {
+		return vmDestructsAcks;
+	}
+
+	public void setVmDestructsAcks(int vmDestructsAcks) {
+		this.vmDestructsAcks = vmDestructsAcks;
+	}
+
 	/**
 	 * @return the vmsAcks
 	 */
@@ -776,14 +920,16 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 * @post $none
 	 */
 	protected void createVmsInDatacenter(int datacenterId) {
-		// send as much vms as possible for this datacenter before trying the
-		// next one
 		int requestedVms = 0;
 		for (Vm vm : getVmList()) {
 			if (!getVmsToDatacentersMap().containsKey(vm.getId())) {
-				Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": Trying to Create VM #"
-						+ vm.getId() + " in Datacenter #" + datacenterId);
-				sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
+				int associatedServiceId = getServiceIdForCloudletId(getCloudletIdForVmId(vm.getId()));
+				double associatedServiceFirstRequest = getServicesToFirstrequestTimeMap().get(associatedServiceId);
+
+				Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": Will try to Create VM #"
+						+ vm.getId() + " in Datacenter #" + datacenterId + " in " + associatedServiceFirstRequest
+						+ " msec");
+				send(datacenterId, associatedServiceFirstRequest, CloudSimTags.VM_CREATE_ACK, vm);
 				requestedVms++;
 			}
 		}
@@ -822,12 +968,24 @@ public class EdgeDatacenterBroker extends SimEntity {
 					+ vmId + " failed in Datacenter #" + datacenterId);
 		}
 
+		// get the Broker Cloudlet ID corresponding to this VM Id
+		int brokerCloudletId = getCloudletIdForVmId(vmId);
+		// get the Service ID corresponding to this Broker Cloudlet ID
+		int serviceId = getServiceIdForCloudletId(brokerCloudletId);
+
+		// start the service
+		startService(serviceId);
+		// notify the service to start creating its VMs
+		send(serviceId, 1.0, CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW);
+
 		// all the requested VMs have been created
 		if (getVmsCreatedList().size() == getVmList().size() - getVmsDestroyed()) {
-			for (Service s : getServiceList()) {
-				startService(s.getId());
-				send(s.getId(), 1.0, CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW);
-			}
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Broker #" + getId()
+					+ ": all the requested VMs have been created");
+			// for (Service s : getServiceList()) {
+			// startService(s.getId());
+			// send(s.getId(), 1.0, CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW);
+			// }
 		} else {
 			// all the acks received, but some VMs were not created
 			if (getVmsRequested() == getVmsAcks()) {
@@ -836,6 +994,22 @@ public class EdgeDatacenterBroker extends SimEntity {
 				finishExecution();
 			}
 		}
+	}
+
+	public int getCloudletIdForVmId(int vmId) {
+		for (NetworkCloudlet ncl : getCloudletList()) {
+			if (ncl.getVmId() == vmId)
+				return ncl.getCloudletId();
+		}
+		return -1;
+	}
+
+	public int getServiceIdForCloudletId(int cloudletId) {
+		for (Map.Entry<Integer, Integer> entry : getServicesToBrokerCloudletsMap().entrySet()) {
+			if (entry.getValue() == cloudletId)
+				return entry.getKey();
+		}
+		return -1;
 	}
 
 	public void createStages(int serviceId, Message msg) {
@@ -932,6 +1106,10 @@ public class EdgeDatacenterBroker extends SimEntity {
 
 	}
 
+	protected void incrementVmsDetructsRequested() {
+		this.setVmDestructsRequested(this.getVmDestructsRequested() + 1);
+	}
+
 	/**
 	 * Destroy the virtual machines running in datacenters.
 	 * 
@@ -939,13 +1117,86 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 * @post $none
 	 */
 	protected void clearDatacenters() {
+
 		for (Vm vm : getVmsCreatedList()) {
-			Log.printLine(
-					TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": Destroying VM #" + vm.getId());
-			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.VM_DESTROY, vm);
+			if (vm.getHost() == null || vm.getHost().getDatacenter() == null) {
+				Log.print("VM " + vm.getId() + " has not been assigned in a valid way and can not be terminated.");
+				continue;
+			}
+
+			// Update the cloudlets before we send the kill event
+			vm.getHost().updateVmsProcessing(CloudSim.clock());
+
+			String datacenterName = vm.getHost().getDatacenter().getName();
+
+			CustomLog.printConcatLine(CloudSim.clock(), ": ", getName(), ": Trying to Destroy VM #", vm.getId(), " in ",
+					datacenterName);
+			Log.printLine(CloudSim.clock() + ": Broker #" + getId() + ": Trying to Destroy VM #" + vm.getId()
+					+ " in DC #" + getVmsToDatacentersMap().get(vm.getId()));
+
+			// Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #"
+			// + getId() + ": Destroying VM #" + vm.getId());
+			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.VM_DESTROY_ACK, vm);
+			incrementVmsDetructsRequested();
 		}
 
 		getVmsCreatedList().clear();
+	}
+
+	/**
+	 * Increments the counter of VM destruction acknowledgments.
+	 */
+	protected void incrementVmDesctructsAcks() {
+		setVmDestructsAcks(getVmDestructsAcks() + 1);
+	}
+
+	private void processVMDestroy(SimEvent ev) {
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": PROCESSING VM DESTROYED ACK");
+		int[] data = (int[]) ev.getData();
+		int datacenterId = data[0];
+		int vmId = data[1];
+		int result = data[2];
+
+		if (result == CloudSimTags.TRUE) {
+			Vm vm = VmList.getById(getVmsCreatedList(), vmId);
+
+			// One more ack. to consider
+			incrementVmDesctructsAcks();
+
+			// Remove the vm from the created list
+			getVmsCreatedList().remove(vm);
+			finilizeVM(vm);
+
+			// Kill all cloudlets associated with this VM
+
+			for (Cloudlet cloudlet : getCloudletSubmittedList()) {
+				if (!cloudlet.isFinished() && vmId == cloudlet.getVmId()) {
+					System.out.println(CloudSim.clock() + ": Broker #" + getId() + " TRYING TO TERMINATE CLOUDLET #"
+							+ cloudlet.getCloudletId() + " ASSOCIATED WITH VM #" + cloudlet.getVmId());
+					try {
+						vm.getCloudletScheduler().cloudletCancel(cloudlet.getCloudletId());
+						cloudlet.setCloudletStatus(Cloudlet.FAILED_RESOURCE_UNAVAILABLE);
+					} catch (Exception e) {
+						CustomLog.logError(Level.SEVERE, e.getMessage(), e);
+						System.out.println(
+								CloudSim.clock() + ": Broker #" + getId() + "CLOUDLET TERMINATION DID NOT WORK!!!");
+						System.out.println(CloudSim.clock() + ": Broker #" + getId() + Level.SEVERE + e.getMessage()
+								+ e.toString());
+					}
+
+					sendNow(cloudlet.getUserId(), CloudSimTags.CLOUDLET_RETURN, cloudlet);
+				}
+			}
+
+			// Use the standard log for consistency ....
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": VM #" + vmId
+					+ " has been destroyed in Datacenter #" + datacenterId);
+		} else {
+			// Use the standard log for consistency ....
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": Desctuction of VM #" + vmId
+					+ " failed in Datacenter #" + datacenterId);
+		}
+
 	}
 
 	private void finilizeVM(final Vm vm) {
@@ -1052,18 +1303,29 @@ public class EdgeDatacenterBroker extends SimEntity {
 
 	public void addRequestId(int serviceId, int requestId) {
 		List<Integer> ids;
-		if (this.getServicesTorequestIdList().containsKey(serviceId)) {
-			ids = this.getServicesTorequestIdList().get(serviceId);
+		if (this.getServicesTorequestIdMap().containsKey(serviceId)) {
+			ids = this.getServicesTorequestIdMap().get(serviceId);
 			ids.add(requestId);
 		} else {
 			ids = new ArrayList<>();
 			ids.add(requestId);
 		}
-		this.getServicesTorequestIdList().put(serviceId, ids);
+		this.getServicesTorequestIdMap().put(serviceId, ids);
 	}
 
-	public Map<Integer, List<Integer>> getServicesTorequestIdList() {
-		return servicesTorequestIdList;
+	public Map<Integer, List<Integer>> getServicesTorequestIdMap() {
+		return servicesTorequestIdMap;
 	}
 
+	public Map<Integer, Double> getServicesToFirstrequestTimeMap() {
+		return servicesToFirstrequestTimeMap;
+	}
+
+	public void setServicesToFirstrequestTimeMap(Map<Integer, Double> servicesToFirstrequestTimeMap) {
+		this.servicesToFirstrequestTimeMap = servicesToFirstrequestTimeMap;
+	}
+
+	public void addServiceFirstRequestTime(int serviceId, double firstRequestTime) {
+		getServicesToFirstrequestTimeMap().put(serviceId, firstRequestTime);
+	}
 }

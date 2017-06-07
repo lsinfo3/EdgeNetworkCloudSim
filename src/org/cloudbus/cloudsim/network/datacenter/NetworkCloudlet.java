@@ -322,6 +322,20 @@ public class NetworkCloudlet extends Cloudlet implements Comparable<Object> {
 	public void setServiceTime(double serviceTime) {
 		this.serviceTime = serviceTime;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		NetworkCloudlet other = (NetworkCloudlet) obj;
+		if (getCloudletId() != other.getCloudletId())
+			return false;
+		return true;
+	}
 	
 	
 

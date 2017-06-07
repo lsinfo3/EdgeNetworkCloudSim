@@ -64,7 +64,7 @@ public class EdgeHost extends NetworkHost {
 		return smallerTime;
 
 	}
-	
+
 	/**
 	 * Send packet check whether a packet belongs to a local VM or to a VM
 	 * hosted on other machine.
@@ -123,13 +123,12 @@ public class EdgeHost extends NetworkHost {
 		for (NetworkPacket hs : packetTosendGlobal) {
 			double delay = (hs.getPkt().getData()) / (avband * 1000);
 			NetworkConstants.totaldatatransfer += hs.getPkt().getData();
-			
+
 			CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
 					"Host#" + getId() + "->#" + sw.getId(),
-					TextUtil.toString((hs.getPkt().getData())+ "/(" + avband + "*" + 1000+")"),
-					delay,
+					TextUtil.toString((hs.getPkt().getData()) + "/(" + avband + "*" + 1000 + ")"), delay,
 					TextUtil.toString(hs.getPkt().getData()));
-			
+
 			CloudSim.send(getDatacenter().getId(), sw.getId(), delay, CloudSimTags.Network_Event_UP, hs);
 			// send to switch with delay
 		}
@@ -150,9 +149,16 @@ public class EdgeHost extends NetworkHost {
 
 			// insert the packet in recievedlist of VM
 			Vm vm = VmList.getById(getVmList(), hs.getPkt().getReciever());
-			List<HostPacket> pktlist = ((EdgeCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv
-					.get(hs.getPkt().getSender());
+			List<HostPacket> pktlist = null;
+			try {
+				pktlist = ((EdgeCloudletSpaceSharedScheduler) vm.getCloudletScheduler()).pktrecv
+						.get(hs.getPkt().getSender());
 
+			} catch (Exception e) {
+				System.out.println(TextUtil.toString(CloudSim.clock()) + ": EdgeHost #" + getId()
+						+ ": recvpackets() - VM (is null) has already been destroyed !!!");
+				continue;
+			}
 			System.out.println(String.format("%s\t%s\t%s", TextUtil.toString(CloudSim.clock()), "EdgeHost #" + getId(),
 					"RECVD PKT from Host #" + hs.getSenderhostid()));
 			if (pktlist == null) {
