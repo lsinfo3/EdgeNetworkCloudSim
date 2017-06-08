@@ -235,11 +235,16 @@ public class BaseDatacenter {
 		// Add DB Services
 		addServices(broker, webServiceStarts, false);
 
+		// List of all Services
 		List<Service> serviceList = broker.getServiceList();
+		// List of all Web Services
 		List<Service> webServiceList = ServiceList.getWebServices(serviceList);
+		// List of all DB Services
 		List<Service> dbServiceList = ServiceList.getDbServices(serviceList);
 
+		// add requests for Web Services
 		addRequests(broker, webServiceStarts, webServiceList);
+		// add requests for DB Services
 		addRequests(broker, dbServiceStarts, dbServiceList);
 
 		// maps CloudSim entities to BRITE entities
