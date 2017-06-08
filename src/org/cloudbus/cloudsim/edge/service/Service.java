@@ -364,7 +364,8 @@ public abstract class Service extends SimEntity {
 	 */
 	protected void finishExecution() {
 		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": VM CREATION STATS");
-		getVmCreationAttempts().forEach((k, v) -> System.out.println( "#" + k + ": " + v));
+		getVmCreationAttempts().forEach((k, v) -> System.out
+				.println(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": VM #" + k + ": " + v));
 
 		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId() + ": AUTO DESTRUCTION started");
 		// Notify Broker
