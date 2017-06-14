@@ -218,9 +218,9 @@ public class BaseDatacenter {
 		aggSwitch.get(2).uplinkswitches.add(aggSwitch.get(1));
 
 		// Generate Web Service start times
-		List<Double> webServiceStarts = getServiceStartTime();
+		List<Double> webServiceStarts = getServiceStartTime(0.000001);
 		// Generate DB Service start times
-		List<Double> dbServiceStarts = getServiceStartTime();
+		List<Double> dbServiceStarts = getServiceStartTime(0.000001);
 
 		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter # OF Web SERVICES: "
 				+ webServiceStarts.size());
@@ -231,21 +231,14 @@ public class BaseDatacenter {
 		System.out.println();
 
 		// Add Web Services
-		addServices(broker, dbServiceStarts, true);
+		addServices(broker, dbServiceStarts, 1, 0.000001);
 		// Add DB Services
-		addServices(broker, webServiceStarts, false);
+		addServices(broker, webServiceStarts, 0, 0.000001);
 
-		// List of all Services
-		List<Service> serviceList = broker.getServiceList();
-		// List of all Web Services
-		List<Service> webServiceList = ServiceList.getWebServices(serviceList);
-		// List of all DB Services
-		List<Service> dbServiceList = ServiceList.getDbServices(serviceList);
-
-		// add requests for Web Services
-		addRequests(broker, webServiceStarts, webServiceList);
 		// add requests for DB Services
-		addRequests(broker, dbServiceStarts, dbServiceList);
+		addRequests(broker, dbServiceStarts, 1, 0.00001);
+		// add requests for Web Services
+		addRequests(broker, webServiceStarts, 0, 0.00001);
 
 		// maps CloudSim entities to BRITE entities
 		NetworkTopology.mapNode(udc.getId(), 0);
@@ -287,11 +280,14 @@ public class BaseDatacenter {
 	/**
 	 * generate a list of service start times.
 	 * 
+	 * @param lambda
+	 *            distribution coefficient
+	 * 
 	 * @return list of service start times
 	 */
-	public static List<Double> getServiceStartTime() {
+	public static List<Double> getServiceStartTime(double lambda) {
 		List<Double> serviceStarts = new ArrayList<>();
-		ExponentialRNS interServiceStarttimeDist = new ExponentialRNS(0.000001);
+		ExponentialRNS interServiceStarttimeDist = new ExponentialRNS(lambda);
 		for (double nextServiceStart = 0; nextServiceStart < simulationTime;) {
 			double next = interServiceStarttimeDist.next();
 			nextServiceStart += next;
@@ -308,19 +304,33 @@ public class BaseDatacenter {
 	 * @param serviceStarts
 	 *            the services start times.
 	 * @param serviceType
-	 *            the type of the service, true => DB, false => Web
+	 *            the type of the service, 0 => DB, 1 => Web
+	 * @param lambda
+	 *            distribution coefficient
 	 */
-	public static void addServices(EdgeDatacenterBroker broker, List<Double> serviceStarts, boolean serviceType) {
-		ExponentialRNS serviceLifetimeDist = new ExponentialRNS(0.000001);
+	public static void addServices(EdgeDatacenterBroker broker, List<Double> serviceStarts, int serviceType,
+			double lambda) {
+		ExponentialRNS serviceLifetimeDist = new ExponentialRNS(lambda);
 		Service service;
 		// Add number of Web Service X based on the service start times.
 		for (int i = 0; i < serviceStarts.size(); i++) {
 			double next = serviceLifetimeDist.next();
 			// This sum can be bigger than the simulation time!!!
 			double startPlusLifetime = serviceStarts.get(i) + next;
-			// randomly choose Service type.
-			service = (serviceType) ? new EdgeDbService("EDS" + i, startPlusLifetime)
-					: new EdgeWebService("EWS" + i, startPlusLifetime);
+			// choose Service type.
+			switch (serviceType) {
+			case 0:
+				service = new EdgeDbService("EDS" + i, startPlusLifetime);
+				break;
+			case 1:
+				service = new EdgeWebService("EWS" + i, startPlusLifetime);
+				break;
+
+			default:
+				service = null;
+				break;
+			}
+
 			broker.addService(service);
 
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter NEXT SERVICE: "
@@ -341,22 +351,42 @@ public class BaseDatacenter {
 	 *            the Broker the services will be added to.
 	 * @param serviceStarts
 	 *            the services start times.
-	 * @param serviceList
-	 *            list of services
+	 * @param serviceType
+	 *            the type of the service, 0 => DB, 1 => Web
+	 * @param lambda
+	 *            distribution coefficient
 	 */
-	public static void addRequests(EdgeDatacenterBroker broker, List<Double> serviceStarts, List<Service> serviceList) {
+	public static void addRequests(EdgeDatacenterBroker broker, List<Double> serviceStarts, int serviceType,
+			double lambda) {
 		// Request Type List
 		List<Message> messageList = getMessageList();
+		List<Service> serviceList = broker.getServiceList();
+		List<Service> serviceTypeList;
+
+		// List of Services of the given type
+
+		switch (serviceType) {
+		case 0:
+			serviceTypeList = ServiceList.getDbServices(serviceList);
+			break;
+		case 1:
+			serviceTypeList = ServiceList.getWebServices(serviceList);
+			break;
+
+		default:
+			serviceTypeList = new ArrayList<>();
+			break;
+		}
 
 		Object[] data = new Object[3];
 		int requestId;
 		Service service;
 		Random rand = new Random();
 
-		for (int i = 0; i < serviceList.size(); i++) {
+		for (int i = 0; i < serviceTypeList.size(); i++) {
 			requestId = 0;
-			service = serviceList.get(i);
-			ExponentialRNS interRequestDist = new ExponentialRNS(0.00001);
+			service = serviceTypeList.get(i);
+			ExponentialRNS interRequestDist = new ExponentialRNS(lambda);
 			double serviceStart = serviceStarts.get(i);
 
 			broker.addServiceFirstRequestTime(service.getId(), serviceStart);
