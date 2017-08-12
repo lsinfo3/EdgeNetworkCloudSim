@@ -272,7 +272,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 		setDatacenterIdsList(CloudSim.getCloudResourceList());
 		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
 
-		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId()
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId()
 				+ ": Cloud Resource List received with " + getDatacenterIdsList().size() + " resource(s)");
 
 		for (Integer datacenterId : getDatacenterIdsList()) {
@@ -496,10 +496,10 @@ public class EdgeDatacenterBroker extends SimEntity {
 		// Update the cloudlets before we send the kill event
 		vm.getHost().updateVmsProcessing(CloudSim.clock());
 
-		Log.printLine(CloudSim.clock() + ": Service #" + getId() + ": Trying to Destroy VM #" + vm.getId() + " in DC #"
+		Log.printLine(CloudSim.clock() + ": Broker #" + getId() + ": Trying to Destroy VM #" + vm.getId() + " in DC #"
 				+ getVmsToDatacentersMap().get(vm.getId()));
 
-		// Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #"
+		// Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #"
 		// + getId() + ": Destroying VM #" + vm.getId());
 		sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.VM_DESTROY_ACK, vm);
 		incrementVmsDetructsRequested();
@@ -1215,7 +1215,8 @@ public class EdgeDatacenterBroker extends SimEntity {
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": Sending cloudlet #"
 					+ cloudlet.getCloudletId() + " to VM #" + vmId);
 
-			sendNow(getUserDC().getId(), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
+			sendNow(getVmsToDatacentersMap().get(vmId), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
+//			sendNow(getUserDC().getId(), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
 			cloudletsSubmitted++;
 			getCloudletSubmittedList().add(cloudlet);
 			// remove submitted cloudlets from waiting list
@@ -1239,7 +1240,8 @@ public class EdgeDatacenterBroker extends SimEntity {
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": Sending cloudlet #"
 					+ cloudlet.getCloudletId() + " to VM #" + vmId);
 
-			sendNow(getUserDC().getId(), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
+			sendNow(getVmsToDatacentersMap().get(vmId), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
+//			sendNow(getUserDC().getId(), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
 			cloudletsSubmitted++;
 			getCloudletSubmittedList().add(cloudlet);
 
@@ -1273,7 +1275,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 			Log.printLine(CloudSim.clock() + ": Broker #" + getId() + ": Trying to Destroy VM #" + vm.getId()
 					+ " in DC #" + getVmsToDatacentersMap().get(vm.getId()));
 
-			// Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #"
+			// Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #"
 			// + getId() + ": Destroying VM #" + vm.getId());
 			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.VM_DESTROY_ACK, vm);
 			incrementVmsDetructsRequested();
