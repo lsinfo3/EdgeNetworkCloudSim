@@ -277,7 +277,7 @@ public abstract class Service extends SimEntity {
 
 		if (getVmsCreatedList().size() == getVmList().size() - getVmsDestroyed()) {
 			// all the requested VMs have been created
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Service #" + getId()
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [INFO]: Service #" + getId()
 					+ ": all the requested VMs have been created");
 			
 			printChain();
@@ -760,7 +760,7 @@ public abstract class Service extends SimEntity {
 		int datacenterId = -1;
 		double delay = Double.MAX_VALUE;
 
-		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: Service #: " + getId() + " Issue with UserDC");
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[INFO]: Service #: " + getId() + " Issue with UserDC");
 		int userDcId = ((EdgeDatacenterBroker) CloudSim.getEntity(getUserId())).getUserDC().getId();
 
 		for (Integer dcId : datacenterIdsList) {
@@ -918,7 +918,7 @@ public abstract class Service extends SimEntity {
 			shutdownEntity();
 			break;
 		case CloudSimTagsExt.SERVICE_DESTROY_ITSELF_NOW:
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Service #" + getId()
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [INFO]: Service #" + getId()
 					+ " TIME TO LIVE reached: processing SERVICE_DESTROY_ITSELF_NOW.");
 			finishExecution();
 			break;

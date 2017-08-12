@@ -3,6 +3,4 @@ bin/
 .project
 src/jars/cloudsim*
 .classpath
-*.lck
 src/org/cloudbus/cloudsim/edge/examples/results/
-

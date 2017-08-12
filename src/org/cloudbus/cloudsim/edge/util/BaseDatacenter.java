@@ -227,9 +227,9 @@ public class BaseDatacenter {
 		// Generate DB Service start times
 		List<Double> dbServiceStarts = getServiceStartTime(0.000001);
 
-		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter # OF Web SERVICES: "
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[INFO]: BaseDatacenter # OF Web SERVICES: "
 				+ webServiceStarts.size());
-		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter # OF DB SERVICES: "
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[INFO]: BaseDatacenter # OF DB SERVICES: "
 				+ dbServiceStarts.size());
 
 		System.out.println();
@@ -329,13 +329,13 @@ public class BaseDatacenter {
 		EdgeDatacenterBroker broker;
 		List<Double> serviceStart = new ArrayList<>();
 
-		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter # USERS: "
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[INFO]: BaseDatacenter # USERS: "
 				+ (numUserWeb + numUserDb + numUserStreaming));
 
 		for (int i = 0; i < numUserWeb; i++) {
 			broker = new EdgeDatacenterBroker("Broker_WEB" + i);
 			Log.printLine(
-					TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter # Broker: " + broker.getName());
+					TextUtil.toString(CloudSim.clock()) + "[INFO]: BaseDatacenter # Broker: " + broker.getName());
 			System.out.println();
 			serviceStart.clear();
 			serviceStart.add(webServiceStarts.get(i));
@@ -353,7 +353,7 @@ public class BaseDatacenter {
 		for (int i = 0; i < numUserDb; i++) {
 			broker = new EdgeDatacenterBroker("Broker_DB" + i);
 			Log.printLine(
-					TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter # Broker: " + broker.getName());
+					TextUtil.toString(CloudSim.clock()) + "[INFO]: BaseDatacenter # Broker: " + broker.getName());
 			System.out.println();
 			serviceStart.clear();
 			serviceStart.add(dbServiceStarts.get(i));
@@ -371,7 +371,7 @@ public class BaseDatacenter {
 		for (int i = 0; i < numUserStreaming; i++) {
 			broker = new EdgeDatacenterBroker("Broker_STREAMING" + i);
 			Log.printLine(
-					TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter # Broker: " + broker.getName());
+					TextUtil.toString(CloudSim.clock()) + "[INFO]: BaseDatacenter # Broker: " + broker.getName());
 			System.out.println();
 			serviceStart.clear();
 			serviceStart.add(streamingServiceStarts.get(i));
@@ -482,14 +482,14 @@ public class BaseDatacenter {
 
 			broker.addService(service);
 
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter NEXT SERVICE: "
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[INFO]: BaseDatacenter NEXT SERVICE: "
 					+ service.getName() + ": #" + service.getId());
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter START OF NEXT SERVICE: "
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[INFO]: BaseDatacenter START OF NEXT SERVICE: "
 					+ serviceStarts.get(i));
 			Log.printLine(
-					TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter LIFETIME OF NEXT SERVICE: " + next);
+					TextUtil.toString(CloudSim.clock()) + "[INFO]: BaseDatacenter LIFETIME OF NEXT SERVICE: " + next);
 			Log.printLine(TextUtil.toString(CloudSim.clock())
-					+ "[FATAL]: BaseDatacenter REAL LIFETIME OF NEXT SERVICE: " + startPlusLifetime);
+					+ "[INFO]: BaseDatacenter REAL LIFETIME OF NEXT SERVICE: " + startPlusLifetime);
 			System.out.println();
 			System.out.println();
 		}
@@ -556,7 +556,7 @@ public class BaseDatacenter {
 				requestStart += next;
 				requestId++;
 			}
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: BaseDatacenter # of Request for Service "
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[INFO]: BaseDatacenter # of Request for Service "
 					+ service.getName() + " = " + requestId);
 		}
 	}

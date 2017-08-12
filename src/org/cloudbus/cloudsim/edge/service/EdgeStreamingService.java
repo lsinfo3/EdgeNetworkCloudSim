@@ -35,7 +35,7 @@ public class EdgeStreamingService extends EdgeService {
 
 	protected void generateCloudlets() {
 		if (!isCloudletGenerated()) {
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Service #" + getId()
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [INFO]: Service #" + getId()
 					+ ": called generateCloudlets ");
 			List<Cloudlet> cList = new ArrayList<Cloudlet>();
 			UtilizationModel utilizationModel = new UtilizationModelFull();
@@ -85,7 +85,7 @@ public class EdgeStreamingService extends EdgeService {
 	}
 
 	public void createStages() {
-		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Service #" + getId()
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [INFO]: Service #" + getId()
 				+ ": called createStages with " + " getCloudletReceivedList #" + getCloudletReceivedList().size()
 				+ " and getCloudletSubmittedList(): " + getCloudletSubmittedList().size());
 		assignVmToCloudlets();

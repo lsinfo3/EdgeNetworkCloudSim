@@ -224,7 +224,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 			processBrokerMessage(ev);
 			break;
 		case CloudSimTagsExt.BROKER_DESTROY_ITSELF_NOW:
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Broker #" + getId()
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [INFO]: Broker #" + getId()
 					+ " TIME TO LIVE reached: processing SERVICE_DESTROY_ITSELF_NOW.");
 			finishExecution();
 			break;
@@ -332,7 +332,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 		} catch (Exception e) {
 			Random rand = new Random();
 			datacenterId = querrableDcIds.get(rand.nextInt(querrableDcIds.size()));
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: EdgeDatacenterBroker " + getName()
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[INFO]: EdgeDatacenterBroker " + getName()
 					+ " choosed UDC #" + datacenterId);
 			return datacenterId;
 		}
@@ -986,7 +986,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 *            the userDC to set
 	 */
 	public void setUserDC(NetworkDatacenter userDC) {
-		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: Broker #: " + getId() + " calling setUserDC");
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[INFO]: Broker #: " + getId() + " calling setUserDC");
 		this.userDC = userDC;
 	}
 
@@ -1106,7 +1106,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 
 		if (getVmsCreatedList().size() == getVmList().size() - getVmsDestroyed()) {
 			// all the requested VMs have been created
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Broker #" + getId()
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [INFO]: Broker #" + getId()
 					+ ": all the requested VMs have been created");
 		} else {
 			// all the acks received, but some VMs were not created
@@ -1164,7 +1164,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 
 		cloudlet.setStages(new ArrayList<TaskStage>());
 
-		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Broker #" + getId()
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [INFO]: Broker #" + getId()
 				+ ": called createStages with service # " + serviceId + ", service 1st CL #" + firstCloudletId
 				+ " and service 1st CL VM #" + firstVmId + " Cloudlet #" + cloudlet.getCloudletId() + " and Message "
 				+ msg + " and # of Cloudlet Submitted: " + getCloudletSubmittedList().size());
@@ -1184,7 +1184,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 
 		cloudlet.setNumStage(2);
 
-		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Broker #" + getId() + " Cloudlet #"
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [INFO]: Broker #" + getId() + " Cloudlet #"
 				+ cloudlet.getCloudletId() + " has " + cloudlet.getStages().size() + " Stages");
 
 	}
