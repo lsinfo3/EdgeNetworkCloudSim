@@ -10,6 +10,7 @@ import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.edge.CloudSimTagsExt;
+import org.cloudbus.cloudsim.edge.ServiceTyp;
 import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.edge.vm.T2Large;
 import org.cloudbus.cloudsim.edge.vm.T2Nano;
@@ -23,12 +24,12 @@ public class EdgeWebService extends EdgeService {
 
 	public EdgeWebService(String name, double lifeLength) {
 		super("EdgeWebService-" + name, lifeLength);
-		// TODO Auto-generated constructor stub
+		 setServiceTyp(ServiceTyp.WEB);
 	}
 
 	public EdgeWebService(String name) {
 		super("EdgeWebService-" + name);
-		// TODO Auto-generated constructor stub
+		 setServiceTyp(ServiceTyp.WEB);
 	}
 
 	@Override
@@ -45,18 +46,21 @@ public class EdgeWebService extends EdgeService {
 			ncl.setVmType(VmType.T2SMALL);
 			cList.add(ncl);
 			setFirstCloudlet(ncl);
+			addCloudletIdServiceMapping(ncl.getCloudletId(), this);
 
 			ncl = new NetworkCloudlet(40000, 1, 1000, 1000, 256, utilizationModel, utilizationModel, utilizationModel,
 					getId());
 			ncl.setVmType(VmType.T2NANO);
 			cList.add(ncl);
 			setSecondCloudlet(ncl);
+			addCloudletIdServiceMapping(ncl.getCloudletId(), this);
 
 			ncl = new NetworkCloudlet(40000, 4, 1000, 1000, 256, utilizationModel, utilizationModel, utilizationModel,
 					getId());
 			ncl.setVmType(VmType.T2Large);
 			cList.add(ncl);
 			setThirdCloudlet(ncl);
+			addCloudletIdServiceMapping(ncl.getCloudletId(), this);
 
 			setCloudletList(cList);
 			createStages();
@@ -137,6 +141,11 @@ public class EdgeWebService extends EdgeService {
 			}
 
 		}
+	}
+	
+	public void startEntity() {
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service WEB #" + getId() + " is starting...");
+		super.startEntity();
 	}
 
 }

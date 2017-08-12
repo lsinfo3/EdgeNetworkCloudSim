@@ -10,6 +10,7 @@ import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.edge.CloudSimTagsExt;
+import org.cloudbus.cloudsim.edge.ServiceTyp;
 import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.edge.vm.T2Nano;
 import org.cloudbus.cloudsim.edge.vm.T2Small;
@@ -22,19 +23,19 @@ public class EdgeDbService extends EdgeService {
 
 	public EdgeDbService(String name, double lifeLength) {
 		super("EdgeDbService-" + name, lifeLength);
-		// TODO Auto-generated constructor stub
+		setServiceTyp(ServiceTyp.DB);
 	}
 
 	public EdgeDbService(String name) {
 		super("EdgeDbService-" + name);
-		// TODO Auto-generated constructor stub
+		setServiceTyp(ServiceTyp.DB);
 	}
 
 	@Override
 	protected void generateCloudlets() {
 		if (!isCloudletGenerated()) {
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Service #" + getId()
-			+ ": called generateCloudlets " );
+					+ ": called generateCloudlets ");
 			List<Cloudlet> cList = new ArrayList<Cloudlet>();
 			UtilizationModel utilizationModel = new UtilizationModelFull();
 
@@ -43,18 +44,21 @@ public class EdgeDbService extends EdgeService {
 			ncl.setVmType(VmType.T2NANO);
 			cList.add(ncl);
 			setFirstCloudlet(ncl);
+			addCloudletIdServiceMapping(ncl.getCloudletId(), this);
 
 			ncl = new NetworkCloudlet(40000, 1, 1000, 1000, 256, utilizationModel, utilizationModel, utilizationModel,
 					getId());
 			ncl.setVmType(VmType.T2NANO);
 			cList.add(ncl);
 			setSecondCloudlet(ncl);
+			addCloudletIdServiceMapping(ncl.getCloudletId(), this);
 
 			ncl = new NetworkCloudlet(40000, 2, 1000, 1000, 256, utilizationModel, utilizationModel, utilizationModel,
 					getId());
 			ncl.setVmType(VmType.T2SMALL);
 			cList.add(ncl);
 			setThirdCloudlet(ncl);
+			addCloudletIdServiceMapping(ncl.getCloudletId(), this);
 
 			setCloudletList(cList);
 			createStages();
@@ -80,9 +84,8 @@ public class EdgeDbService extends EdgeService {
 
 	public void createStages() {
 		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Service #" + getId()
-		+ ": called createStages with "
-		+ " getCloudletReceivedList #" + getCloudletReceivedList().size()
-		+ " and getCloudletSubmittedList(): " + getCloudletSubmittedList().size());
+				+ ": called createStages with " + " getCloudletReceivedList #" + getCloudletReceivedList().size()
+				+ " and getCloudletSubmittedList(): " + getCloudletSubmittedList().size());
 		assignVmToCloudlets();
 		ArrayList<Cloudlet> cList = (ArrayList<Cloudlet>) getCloudletList();
 		for (int i = 0; i < cList.size(); i++) {
@@ -135,6 +138,11 @@ public class EdgeDbService extends EdgeService {
 			}
 
 		}
+	}
+
+	public void startEntity() {
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service DB #" + getId() + " is starting...");
+		super.startEntity();
 	}
 
 }

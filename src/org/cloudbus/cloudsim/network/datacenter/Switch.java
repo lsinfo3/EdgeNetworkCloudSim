@@ -90,7 +90,19 @@ public class Switch extends SimEntity {
 
 	@Override
 	public void startEntity() {
-		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Switch #" + getId() + " is starting...");
+		String level = "";
+		switch (this.level) {
+		case NetworkConstants.ROOT_LEVEL:
+			level = "ROOT";
+			break;
+		case NetworkConstants.Agg_LEVEL:
+			level = "AGG";
+			break;
+		case NetworkConstants.EDGE_LEVEL:
+			level = "EDGE";
+			break;
+		}
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Switch " + level + " #" + getId() + " is starting...");
 		schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST);
 	}
 
@@ -293,7 +305,6 @@ public class Switch extends SimEntity {
 
 	protected void processpacketforward(SimEvent ev) {
 		// search for the host and packets..send to them
-		
 
 		if (downlinkswitchpktlist != null) {
 			for (Entry<Integer, List<NetworkPacket>> es : downlinkswitchpktlist.entrySet()) {
@@ -310,8 +321,7 @@ public class Switch extends SimEntity {
 
 						CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
 								"#" + this.getId() + "->#" + tosend,
-								TextUtil.toString(hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
-								delay,
+								TextUtil.toString(hspkt.pkt.data + "/(" + avband + "*" + 1000 + ")"), delay,
 								TextUtil.toString(hspkt.pkt.data));
 
 						this.send(tosend, delay, CloudSimTags.Network_Event_DOWN, hspkt);
@@ -328,17 +338,16 @@ public class Switch extends SimEntity {
 					// sharing bandwidth between packets
 					double bw = NetworkTopology.isNetworkEnabled() ? NetworkTopology.getBw(getId(), tosend)
 							: uplinkbandwidth;
-					
+
 					double avband = bw / hspktlist.size();
 					Iterator<NetworkPacket> it = hspktlist.iterator();
 					while (it.hasNext()) {
 						NetworkPacket hspkt = it.next();
 						double delay = hspkt.pkt.data / (avband * 1000);
-						
+
 						CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
 								"#" + this.getId() + "->#" + tosend,
-								TextUtil.toString(hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
-								delay,
+								TextUtil.toString(hspkt.pkt.data + "/(" + avband + "*" + 1000 + ")"), delay,
 								TextUtil.toString(hspkt.pkt.data));
 
 						this.send(tosend, delay, CloudSimTags.Network_Event_UP, hspkt);
@@ -359,10 +368,10 @@ public class Switch extends SimEntity {
 
 						CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
 								"#" + this.getId() + "->Host#" + es.getKey(),
-								TextUtil.toString(downlinkbandwidth + " | " + hspkt.pkt.data + "/(" + avband + "*" + 1000+")"),
-								delay,
-								TextUtil.toString(hspkt.pkt.data));
-						
+								TextUtil.toString(
+										downlinkbandwidth + " | " + hspkt.pkt.data + "/(" + avband + "*" + 1000 + ")"),
+								delay, TextUtil.toString(hspkt.pkt.data));
+
 						this.send(getId(), delay, CloudSimTags.Network_Event_Host, hspkt);
 					}
 					hspktlist.clear();

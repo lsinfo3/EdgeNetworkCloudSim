@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.edge.service.EdgeDbService;
+import org.cloudbus.cloudsim.edge.service.EdgeStreamingService;
 import org.cloudbus.cloudsim.edge.service.EdgeWebService;
 import org.cloudbus.cloudsim.edge.service.Service;
 
@@ -54,6 +55,19 @@ public class ServiceList {
 		List<T> results = new ArrayList<>();
 		for (T service : serviceList) {
 			if (service instanceof EdgeDbService)
+				results.add(service);
+		}
+		return results;
+	}
+	/**
+	 * @param serviceList
+	 *            the service list
+	 * @return a list of EdgeStreamingService
+	 */
+	public static <T extends Service> List<T> getStreamingServices(List<T> serviceList) {
+		List<T> results = new ArrayList<>();
+		for (T service : serviceList) {
+			if (service instanceof EdgeStreamingService)
 				results.add(service);
 		}
 		return results;

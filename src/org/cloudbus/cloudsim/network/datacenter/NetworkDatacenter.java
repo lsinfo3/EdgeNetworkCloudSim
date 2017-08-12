@@ -139,8 +139,8 @@ public class NetworkDatacenter extends Datacenter {
 		if (result) {
 			VmToSwitchid.put(vm.getId(), ((NetworkHost) vm.getHost()).sw.getId());
 			VmtoHostlist.put(vm.getId(), vm.getHost().getId());
-			System.out.println(TextUtil.toString(CloudSim.clock()) + ": Datacenter #" + getId() + " - VM #" + vm.getId() + " is created on Host #"
-					+ vm.getHost().getId());
+			System.out.println(TextUtil.toString(CloudSim.clock()) + ": Datacenter #" + getId() + " - VM #" + vm.getId()
+					+ " is created on Host #" + vm.getHost().getId());
 
 			getVmList().add(vm);
 
@@ -185,8 +185,8 @@ public class NetworkDatacenter extends Datacenter {
 		if (result) {
 			VmToSwitchid.put(vm.getId(), ((NetworkHost) vm.getHost()).sw.getId());
 			VmtoHostlist.put(vm.getId(), vm.getHost().getId());
-			System.out.println(TextUtil.toString(CloudSim.clock()) + ": Datacenter #" + getId() + " - VM #" + vm.getId() + " is created on Host #"
-					+ vm.getHost().getId());
+			System.out.println(TextUtil.toString(CloudSim.clock()) + ": Datacenter #" + getId() + " - VM #" + vm.getId()
+					+ " is created on Host #" + vm.getHost().getId());
 
 			getVmList().add(vm);
 
@@ -213,6 +213,10 @@ public class NetworkDatacenter extends Datacenter {
 	@Override
 	protected void processCloudletSubmit(SimEvent ev, boolean ack) {
 		updateCloudletProcessing();
+		
+		int userId = -1;
+		int vmId = -1;
+		Host host = null;
 
 		try {
 			// gets the Cloudlet object
@@ -239,10 +243,10 @@ public class NetworkDatacenter extends Datacenter {
 
 					// unique tag = operation tag
 					int tag = CloudSimTags.CLOUDLET_SUBMIT_ACK;
-					 sendNow(cl.getUserId(), tag, data);
+					sendNow(cl.getUserId(), tag, data);
 				}
 
-				 sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
+				sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
 
 				return;
 			}
@@ -251,13 +255,13 @@ public class NetworkDatacenter extends Datacenter {
 			cl.setResourceParameter(getId(), getCharacteristics().getCostPerSecond(),
 					getCharacteristics().getCostPerBw());
 
-			 int userId = cl.getUserId();
-			int vmId = cl.getVmId();
+			userId = cl.getUserId();
+			vmId = cl.getVmId();
 
 			// time to transfer the files
 			double fileTransferTime = predictFileTransferTime(cl.getRequiredFiles());
 
-			Host host = getVmAllocationPolicy().getHost(vmId, userId);
+			host = getVmAllocationPolicy().getHost(vmId, userId);
 			Vm vm = host.getVm(vmId, userId);
 			CloudletScheduler scheduler = vm.getCloudletScheduler();
 			double estimatedFinishTime = scheduler.cloudletSubmit(cl, fileTransferTime);
@@ -279,13 +283,16 @@ public class NetworkDatacenter extends Datacenter {
 
 				// unique tag = operation tag
 				int tag = CloudSimTags.CLOUDLET_SUBMIT_ACK;
-				 sendNow(cl.getUserId(), tag, data);
+				sendNow(cl.getUserId(), tag, data);
 			}
 		} catch (ClassCastException c) {
 			Log.printLine(getName() + ".processCloudletSubmit(): " + "ClassCastException error.");
 			c.printStackTrace();
 		} catch (Exception e) {
 			Log.printLine(getName() + ".processCloudletSubmit(): " + "Exception error.");
+			Log.printLine("CL VM ID: " + vmId);
+			Log.printLine("CL USER ID: " + userId);
+			Log.printLine("HOST: " + host);
 			e.printStackTrace();
 		}
 
@@ -308,7 +315,7 @@ public class NetworkDatacenter extends Datacenter {
 				while (vm.getCloudletScheduler().isFinishedCloudlets()) {
 					Cloudlet cl = vm.getCloudletScheduler().getNextFinishedCloudlet();
 					if (cl != null) {
-						 sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
+						sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
 					}
 				}
 			}
@@ -360,31 +367,29 @@ public class NetworkDatacenter extends Datacenter {
 		// begins executing ....
 		switch (type) {
 		case CloudSimTags.CLOUDLET_CANCEL:
-			 processCloudletCancel(cloudletId, userId, vmId);
+			processCloudletCancel(cloudletId, userId, vmId);
 			break;
 
 		case CloudSimTags.CLOUDLET_PAUSE:
-			 processCloudletPause(cloudletId, userId, vmId, false);
+			processCloudletPause(cloudletId, userId, vmId, false);
 			break;
 
 		case CloudSimTags.CLOUDLET_PAUSE_ACK:
-			 processCloudletPause(cloudletId, userId, vmId, true);
+			processCloudletPause(cloudletId, userId, vmId, true);
 			break;
 
 		case CloudSimTags.CLOUDLET_RESUME:
-			 processCloudletResume(cloudletId, userId, vmId, false);
+			processCloudletResume(cloudletId, userId, vmId, false);
 			break;
 
 		case CloudSimTags.CLOUDLET_RESUME_ACK:
-			 processCloudletResume(cloudletId, userId, vmId, true);
+			processCloudletResume(cloudletId, userId, vmId, true);
 			break;
 		default:
 			break;
 		}
 
 	}
-
-
 
 	@Override
 	public String toString() {
@@ -404,5 +409,22 @@ public class NetworkDatacenter extends Datacenter {
 	 */
 	public void setUserDC(boolean userDC) {
 		this.userDC = userDC;
+	}
+
+	public void startEntity() {
+		String typ = isUserDC() ? "User" : "";
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Datacenter " + typ + " #" + getId() + " is starting...");
+		// this resource should register to regional GIS.
+		// However, if not specified, then register to system GIS (the
+		// default CloudInformationService) entity.
+		int gisID = CloudSim.getEntityId(getRegionalCisName());
+		if (gisID == -1) {
+			gisID = CloudSim.getCloudInfoServiceEntityId();
+		}
+
+		// send the registration to GIS
+		sendNow(gisID, CloudSimTags.REGISTER_RESOURCE, getId());
+		// Below method is for a child class to override
+		registerOtherEntity();
 	}
 }

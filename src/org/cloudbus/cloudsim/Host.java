@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.edge.util.CustomLog;
 import org.cloudbus.cloudsim.edge.util.TextUtil;
 import org.cloudbus.cloudsim.lists.PeList;
 import org.cloudbus.cloudsim.provisioners.BwProvisioner;
@@ -84,6 +85,10 @@ public class Host {
 
 		setPeList(peList);
 		setFailed(false);
+
+		CustomLog.printServer("\t%s\t\t%s\t\t\t%s\t\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\t\t\t%s",
+				TextUtil.toString(CloudSim.clock()), "#" + id, "#" + "-", ramProvisioner.getAvailableRam(),
+				peList.size(), getAvailableMips(), bwProvisioner.getAvailableBw(), storage, 0);
 	}
 
 	/**
@@ -140,7 +145,7 @@ public class Host {
 			}
 
 			getVmScheduler().getVmsMigratingIn().add(vm.getUid());
-			if (!getVmScheduler().allocatePesForVm(vm, vm.getCurrentRequestedMips())) {
+			if (!allocatePesForVm(vm, vm.getCurrentRequestedMips())) {
 				Log.printLine("[ERROR]:[VmScheduler.addMigratingInVm] Allocation of VM #" + vm.getId() + " to Host #"
 						+ getId() + " failed by MIPS");
 				System.exit(0);
@@ -182,7 +187,7 @@ public class Host {
 			}
 			getRamProvisioner().allocateRamForVm(vm, vm.getCurrentRequestedRam());
 			getBwProvisioner().allocateBwForVm(vm, vm.getCurrentRequestedBw());
-			getVmScheduler().allocatePesForVm(vm, vm.getCurrentRequestedMips());
+			allocatePesForVm(vm, vm.getCurrentRequestedMips());
 			setStorage(getStorage() - vm.getSize());
 		}
 	}
@@ -212,31 +217,40 @@ public class Host {
 	 */
 	public boolean vmCreate(Vm vm) {
 		if (getStorage() < vm.getSize()) {
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + ":  Allocation of VM #"
-					+ vm.getId() + " failed by storage");
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + " Datacenter #"
+					+ getDatacenter().getId() + ":  Allocation of VM #" + vm.getId() + " failed by storage");
+			CustomLog.printVmRequest("%s\t\t%s\t\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t\t%s",
+					TextUtil.toString(CloudSim.clock()), "#" + getId(), "#" + vm.getId(), "#" + getDatacenter().getId(),
+					"#" + vm.getUserId(), "failed by storage");
 			return false;
 		}
 
 		if (!getRamProvisioner().allocateRamForVm(vm, vm.getCurrentRequestedRam())) {
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + ":  Allocation of VM #"
-					+ vm.getId() + " failed by RAM");
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + " Datacenter #"
+					+ getDatacenter().getId() + ":  Allocation of VM #" + vm.getId() + " failed by RAM");
+			CustomLog.printVmRequest("%s\t\t%s\t\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t\t%s",
+					TextUtil.toString(CloudSim.clock()), "#" + getId(), "#" + vm.getId(), "#" + getDatacenter().getId(),
+					"#" + vm.getUserId(), "failed by RAM");
 			return false;
 		}
 
 		if (!getBwProvisioner().allocateBwForVm(vm, vm.getCurrentRequestedBw())) {
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + ":  Allocation of VM #"
-					+ vm.getId() + " failed by BW");
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + " Datacenter #"
+					+ getDatacenter().getId() + ":  Allocation of VM #" + vm.getId() + " failed by BW");
 			getRamProvisioner().deallocateRamForVm(vm);
+			CustomLog.printVmRequest("%s\t\t%s\t\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t\t%s",
+					TextUtil.toString(CloudSim.clock()), "#" + getId(), "#" + vm.getId(), "#" + getDatacenter().getId(),
+					"#" + vm.getUserId(), "failed by BW");
 			return false;
 		}
 
-		if (!getVmScheduler().allocatePesForVm(vm, vm.getCurrentRequestedMips())) {
-			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + ":  Allocation of VM #"
-					+ vm.getId() + " failed by MIPS");
+		if (!allocatePesForVm(vm, vm.getCurrentRequestedMips())) {
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [ERROR]: Host #" + getId() + " Datacenter #"
+					+ getDatacenter().getId() + ":  Allocation of VM #" + vm.getId() + " failed by MIPS");
+			CustomLog.printVmRequest("%s\t\t%s\t\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t\t%s",
+					TextUtil.toString(CloudSim.clock()), "#" + getId(), "#" + vm.getId(), "#" + getDatacenter().getId(),
+					"#" + vm.getUserId(), "failed by MIPS");
 
-			// CustomLog.printf(Level.WARNING, "%s\t%s\t%s",
-			// TextUtil.toString(CloudSim.clock()), "Host #" + getId(),
-			// "Allocation of VM #" + vm.getId() + " failed by MIPS");
 			getRamProvisioner().deallocateRamForVm(vm);
 			getBwProvisioner().deallocateBwForVm(vm);
 			return false;
@@ -245,6 +259,16 @@ public class Host {
 		setStorage(getStorage() - vm.getSize());
 		getVmList().add(vm);
 		vm.setHost(this);
+		System.out.println(TextUtil.toString(CloudSim.clock()) + ": Host #" + getId() + " - VM #" + vm.getId()
+				+ " is created on Datacenter #" + getDatacenter().getId());
+
+		CustomLog.printVmRequest("%s\t\t%s\t\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+				"#" + getId(), "#" + vm.getId(), "#" + getDatacenter().getId(), "#" + vm.getUserId(), "success");
+
+		CustomLog.printServer("\t%s\t\t%s\t\t\t%s\t\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\t\t\t%s",
+				TextUtil.toString(CloudSim.clock()), "#" + getId(), "#" + getDatacenter().getId(),
+				getRamProvisioner().getAvailableRam(), getNumberOfFreePes(), getAvailableMips(),
+				getBwProvisioner().getAvailableBw(), getStorage(), getVmList().size());
 		return true;
 	}
 
@@ -258,9 +282,15 @@ public class Host {
 	 */
 	public void vmDestroy(Vm vm) {
 		if (vm != null) {
+			CustomLog.printVmRequest("%s\t\t%s\t\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+					"#" + getId(), "#" + vm.getId(), "#" + getDatacenter().getId(), "#" + vm.getUserId(), "destroy");
 			vmDeallocate(vm);
 			getVmList().remove(vm);
 			vm.setHost(null);
+			CustomLog.printServer("\t%s\t\t%s\t\t\t%s\t\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\t\t\t%s",
+					TextUtil.toString(CloudSim.clock()), "#" + getId(), "#" + getDatacenter().getId(),
+					getRamProvisioner().getAvailableRam(), getNumberOfFreePes(), getAvailableMips(),
+					getBwProvisioner().getAvailableBw(), getStorage(), getVmList().size());
 		}
 	}
 
@@ -273,10 +303,16 @@ public class Host {
 	public void vmDestroyAll() {
 		vmDeallocateAll();
 		for (Vm vm : getVmList()) {
+			CustomLog.printVmRequest("%s\t\t%s\t\t\t\t%s\t\t\t%s\t\t\t%s\t\t\t\t%s", TextUtil.toString(CloudSim.clock()),
+					"#" + getId(), "#" + vm.getId(), "#" + getDatacenter().getId(), "#" + vm.getUserId(), "destroy");
 			vm.setHost(null);
 			setStorage(getStorage() + vm.getSize());
 		}
 		getVmList().clear();
+		CustomLog.printServer("\t%s\t\t%s\t\t\t%s\t\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\t\t\t%s",
+				TextUtil.toString(CloudSim.clock()), "#" + getId(), "#" + getDatacenter().getId(),
+				getRamProvisioner().getAvailableRam(), getNumberOfFreePes(), getAvailableMips(),
+				getBwProvisioner().getAvailableBw(), getStorage(), getVmList().size());
 	}
 
 	/**
@@ -288,7 +324,7 @@ public class Host {
 	protected void vmDeallocate(Vm vm) {
 		getRamProvisioner().deallocateRamForVm(vm);
 		getBwProvisioner().deallocateBwForVm(vm);
-		getVmScheduler().deallocatePesForVm(vm);
+		deallocatePesForVm(vm);
 		setStorage(getStorage() + vm.getSize());
 	}
 

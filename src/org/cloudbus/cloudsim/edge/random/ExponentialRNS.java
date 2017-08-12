@@ -30,5 +30,12 @@ public class ExponentialRNS extends RNS
 		double x=-Math.log(super.nextDouble())*mean;
 		return x;
 	}
+	
+	public static void main(String[] args) {
+		ExponentialRNS er = new ExponentialRNS(.000001);
+		for (int i = 0; i < 10; i++) {
+			System.out.println(er.next());
+		}
+	}
 
 }

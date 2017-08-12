@@ -10,15 +10,19 @@ package org.cloudbus.cloudsim.edge;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.Objects;
+import java.util.Random;
 
 import org.cloudbus.cloudsim.Cloudlet;
+import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Log;
+import org.cloudbus.cloudsim.NetworkTopology;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
@@ -113,11 +117,6 @@ public class EdgeDatacenterBroker extends SimEntity {
 	private final double lifeLength;
 
 	/**
-	 * queue for request that have to be processed.
-	 */
-	private List<SimEvent> messageToSend;
-
-	/**
 	 * The amount of services which have already sent their first cloudlet
 	 */
 	private int serviceAllCloudletsSent = 0;
@@ -141,6 +140,15 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 */
 	private Map<Integer, Double> servicesToFirstrequestTimeMap;
 
+	/** The datacenter ids list. */
+	private List<Integer> datacenterIdsList;
+
+	/** The datacenter requested ids list. */
+	private List<Integer> datacenterRequestedIdsList;
+
+	/** The datacenter characteristics list. */
+	private Map<Integer, DatacenterCharacteristics> datacenterCharacteristicsList;
+	
 	/**
 	 * Created a new DatacenterBroker object.
 	 * 
@@ -165,12 +173,15 @@ public class EdgeDatacenterBroker extends SimEntity {
 		setServicesToBrokerCloudletsMap(new HashMap<>());
 		setVmsCreatedList(new ArrayList<>());
 		setVmsToDatacentersMap(new HashMap<>());
-		setMessageToSend(new ArrayList<>());
 		this.lifeLength = lifeLength;
 		this.setServicesProcessingRequestMap(new HashMap<>());
 		this.setServiceAllCloudletsSentMap(new HashMap<>());
 		this.setServicesToFirstrequestTimeMap(new HashMap<>());
 		this.servicesTorequestIdMap = new HashMap<>();
+
+		setDatacenterIdsList(new LinkedList<Integer>());
+		setDatacenterRequestedIdsList(new ArrayList<Integer>());
+		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
 	}
 
 	public EdgeDatacenterBroker(String name) throws Exception {
@@ -196,6 +207,14 @@ public class EdgeDatacenterBroker extends SimEntity {
 		}
 
 		switch (ev.getTag()) {
+		// Resource characteristics request
+		case CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST:
+			processResourceCharacteristicsRequest(ev);
+			break;
+		// Resource characteristics answer
+		case CloudSimTags.RESOURCE_CHARACTERISTICS:
+			processResourceCharacteristics(ev);
+			break;
 		// Service send results back after processing Broker Message.
 		case CloudSimTagsExt.BROKER_MESSAGE_RETURN:
 			processBrokerMessageReturn(ev);
@@ -239,6 +258,97 @@ public class EdgeDatacenterBroker extends SimEntity {
 			processOtherEvent(ev);
 			break;
 		}
+	}
+
+	/**
+	 * Process a request for the characteristics of a PowerDatacenter.
+	 * 
+	 * @param ev
+	 *            a SimEvent object
+	 * @pre ev != $null
+	 * @post $none
+	 */
+	protected void processResourceCharacteristicsRequest(SimEvent ev) {
+		setDatacenterIdsList(CloudSim.getCloudResourceList());
+		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
+
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Service #" + getId()
+				+ ": Cloud Resource List received with " + getDatacenterIdsList().size() + " resource(s)");
+
+		for (Integer datacenterId : getDatacenterIdsList()) {
+			sendNow(datacenterId, CloudSimTags.RESOURCE_CHARACTERISTICS, getId());
+		}
+	}
+
+	/**
+	 * Process the return of a request for the characteristics of a
+	 * PowerDatacenter.
+	 * 
+	 * @param ev
+	 *            a SimEvent object
+	 * @pre ev != $null
+	 * @post $none
+	 */
+	protected void processResourceCharacteristics(SimEvent ev) {
+		DatacenterCharacteristics characteristics = (DatacenterCharacteristics) ev.getData();
+		getDatacenterCharacteristicsList().put(characteristics.getId(), characteristics);
+
+		if (getDatacenterCharacteristicsList().size() == getDatacenterIdsList().size()) {
+			setDatacenterRequestedIdsList(new ArrayList<Integer>());
+			submitVmList();
+			createVmsInDatacenter(getNextDcIdWithShortestDelay());
+		}
+	}
+
+	/**
+	 * get the next datacenter with the shortest delay to this broker. meaning
+	 * the next best Dc after those that have already been requested.
+	 * 
+	 * @pre Network enable
+	 * @post none
+	 * @return the next datacenter with the shortest delay
+	 */
+	public int getNextDcIdWithShortestDelay() {
+		int datacenterId = -1;
+		double delay = Double.MAX_VALUE;
+		int userDcId = -1;
+
+		// get the list of UDCs which have not been querried yet.
+		List<Integer> querrableDcIds = new ArrayList<>();
+		for (Integer dcId : datacenterIdsList) {
+			if (((NetworkDatacenter) CloudSim.getEntity(dcId)).isUserDC()
+					&& !getDatacenterRequestedIdsList().contains(dcId)) {
+				querrableDcIds.add(dcId);
+			}
+		}
+
+		if (querrableDcIds.size() == 0) {
+			// All DCs have been querried
+			return datacenterId;
+		}
+
+		try {
+			userDcId = getUserDC().getId();
+		} catch (Exception e) {
+			Random rand = new Random();
+			datacenterId = querrableDcIds.get(rand.nextInt(querrableDcIds.size()));
+			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: EdgeDatacenterBroker " + getName()
+					+ " choosed UDC #" + datacenterId);
+			return datacenterId;
+		}
+
+		// this part is necessary when the user has more than one UVM
+		for (Integer dcId : querrableDcIds) {
+			if (userDcId == -1)
+				return dcId;
+
+			double tmpDelay = NetworkTopology.getDelay(userDcId, dcId);
+			if (tmpDelay < delay && !(getDatacenterRequestedIdsList().contains(dcId))) {
+				datacenterId = dcId;
+				delay = tmpDelay;
+			}
+		}
+		return datacenterId;
 	}
 
 	/**
@@ -386,10 +496,6 @@ public class EdgeDatacenterBroker extends SimEntity {
 		// Update the cloudlets before we send the kill event
 		vm.getHost().updateVmsProcessing(CloudSim.clock());
 
-		String datacenterName = vm.getHost().getDatacenter().getName();
-
-		CustomLog.printConcatLine(CloudSim.clock(), ": ", getName(), ": Trying to Destroy VM #", vm.getId(), " in ",
-				datacenterName);
 		Log.printLine(CloudSim.clock() + ": Service #" + getId() + ": Trying to Destroy VM #" + vm.getId() + " in DC #"
 				+ getVmsToDatacentersMap().get(vm.getId()));
 
@@ -450,8 +556,8 @@ public class EdgeDatacenterBroker extends SimEntity {
 				// System.out.println(TextUtil.toString(CloudSim.clock()) +
 				// "[DEBUG]: Broker #" + getId()
 				// + " postponing message sending to Service #" + serviceId + "
-				// because broker not ready yet");
-				send(getId(), 1.0, CloudSimTagsExt.BROKER_MESSAGE, ev.getData());
+				// for 100ms because broker not ready yet");
+				send(getId(), 100.0, CloudSimTagsExt.BROKER_MESSAGE, ev.getData());
 			}
 		}
 
@@ -601,8 +707,11 @@ public class EdgeDatacenterBroker extends SimEntity {
 		}
 
 		Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + " is starting...");
-		submitVmList();
-		createVmsInDatacenter(getUserDC().getId());
+
+		schedule(getId(), 0, CloudSimTags.RESOURCE_CHARACTERISTICS_REQUEST);
+
+		// submitVmList();
+		// createVmsInDatacenter(getUserDC().getId());
 
 	}
 
@@ -877,6 +986,7 @@ public class EdgeDatacenterBroker extends SimEntity {
 	 *            the userDC to set
 	 */
 	public void setUserDC(NetworkDatacenter userDC) {
+		Log.printLine(TextUtil.toString(CloudSim.clock()) + "[FATAL]: Broker #: " + getId() + " calling setUserDC");
 		this.userDC = userDC;
 	}
 
@@ -925,14 +1035,23 @@ public class EdgeDatacenterBroker extends SimEntity {
 			if (!getVmsToDatacentersMap().containsKey(vm.getId())) {
 				int associatedServiceId = getServiceIdForCloudletId(getCloudletIdForVmId(vm.getId()));
 				double associatedServiceFirstRequest = getServicesToFirstrequestTimeMap().get(associatedServiceId);
+				double realStart = associatedServiceFirstRequest - CloudSim.clock();
 
-				Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": Will try to Create VM #"
-						+ vm.getId() + " in Datacenter #" + datacenterId + " in " + associatedServiceFirstRequest
-						+ " msec");
-				send(datacenterId, associatedServiceFirstRequest, CloudSimTags.VM_CREATE_ACK, vm);
+				if (realStart > 0) {
+					Log.printLine(
+							TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": Will try to Create VM #"
+									+ vm.getId() + " in Datacenter #" + datacenterId + " in " + realStart + " msec");
+					send(datacenterId, realStart, CloudSimTags.VM_CREATE_ACK, vm);
+				} else {
+					Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId()
+							+ ": Will try to Create VM #" + vm.getId() + " in Datacenter #" + datacenterId + " ASAP");
+					sendNow(datacenterId, CloudSimTags.VM_CREATE_ACK, vm);
+				}
 				requestedVms++;
 			}
 		}
+
+		getDatacenterRequestedIdsList().add(datacenterId);
 
 		setVmsRequested(requestedVms);
 		setVmsAcks(0);
@@ -952,48 +1071,72 @@ public class EdgeDatacenterBroker extends SimEntity {
 		int vmId = data[1];
 		int result = data[2];
 
+		incrementVmsAcks();
+
 		if (result == CloudSimTags.TRUE) {
 			getVmsToDatacentersMap().put(vmId, datacenterId);
 			getVmsCreatedList().add(VmList.getById(getVmList(), vmId));
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId() + ": VM #" + vmId
 					+ " created in Datacenter #" + datacenterId + ", Host #"
 					+ VmList.getById(getVmsCreatedList(), vmId).getHost().getId());
-			// CustomLog.printf("%s\t\t%s\t\t%s\t\t%s",
-			// TextUtil.toString(CloudSim.clock()), "Broker #" + getId(),
-			// "VM #" + vmId,
-			// "DC #" + datacenterId + " Host #" +
-			// VmList.getById(getVmsCreatedList(), vmId).getHost().getId());
+
+			try {
+				// was the User DC already set?
+				getUserDC().getId();
+				// do nothing if it was.
+			} catch (Exception e) {
+				// if not, set it now.
+				setUserDC((NetworkDatacenter) CloudSim.getEntity(datacenterId));
+			}
+
+			// get the Broker Cloudlet ID corresponding to this VM Id
+			int brokerCloudletId = getCloudletIdForVmId(vmId);
+			// get the Service ID corresponding to this Broker Cloudlet ID
+			int serviceId = getServiceIdForCloudletId(brokerCloudletId);
+
+			// start the service
+			startService(serviceId);
+			// notify the service to start creating its VMs
+			send(serviceId, 1.0, CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW);
+
 		} else {
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + "[ERROR]: Broker #" + getId() + ": Creation of VM #"
 					+ vmId + " failed in Datacenter #" + datacenterId);
 		}
 
-		// get the Broker Cloudlet ID corresponding to this VM Id
-		int brokerCloudletId = getCloudletIdForVmId(vmId);
-		// get the Service ID corresponding to this Broker Cloudlet ID
-		int serviceId = getServiceIdForCloudletId(brokerCloudletId);
-
-		// start the service
-		startService(serviceId);
-		// notify the service to start creating its VMs
-		send(serviceId, 1.0, CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW);
-
-		// all the requested VMs have been created
 		if (getVmsCreatedList().size() == getVmList().size() - getVmsDestroyed()) {
+			// all the requested VMs have been created
 			Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Broker #" + getId()
 					+ ": all the requested VMs have been created");
-			// for (Service s : getServiceList()) {
-			// startService(s.getId());
-			// send(s.getId(), 1.0, CloudSimTagsExt.SERVICE_SUBMIT_VMS_NOW);
-			// }
 		} else {
 			// all the acks received, but some VMs were not created
 			if (getVmsRequested() == getVmsAcks()) {
-				Log.printLine(TextUtil.toString(CloudSim.clock()) + ": [FATAL]: Broker #" + getId()
-						+ ": none of the required VMs could be created. Aborting");
-				finishExecution();
+				// find id of the next datacenter that has not been tried
+				int dcId = getNextDcIdWithShortestDelay();
+				if (dcId != -1) {
+					createVmsInDatacenter(dcId);
+					return;
+				}
+
+				// all datacenters already queried
+				if (getVmsCreatedList().size() > 0) { // if some vm were created
+					System.out.println(TextUtil.toString(CloudSim.clock()) + ": [DEBUG]: Broker #" + getId()
+							+ " some VMs were created... But not all. Continue");
+//					finishExecution();
+				} else { // no vms created. abort
+					Log.printLine(TextUtil.toString(CloudSim.clock()) + ": Broker #" + getId()
+							+ ": none of the required VMs could be created. Aborting");
+					finishExecution();
+				}
 			}
 		}
+	}
+
+	/**
+	 * Increment vms acks.
+	 */
+	protected void incrementVmsAcks() {
+		vmsAcks++;
 	}
 
 	public int getCloudletIdForVmId(int vmId) {
@@ -1127,10 +1270,6 @@ public class EdgeDatacenterBroker extends SimEntity {
 			// Update the cloudlets before we send the kill event
 			vm.getHost().updateVmsProcessing(CloudSim.clock());
 
-			String datacenterName = vm.getHost().getDatacenter().getName();
-
-			CustomLog.printConcatLine(CloudSim.clock(), ": ", getName(), ": Trying to Destroy VM #", vm.getId(), " in ",
-					datacenterName);
 			Log.printLine(CloudSim.clock() + ": Broker #" + getId() + ": Trying to Destroy VM #" + vm.getId()
 					+ " in DC #" + getVmsToDatacentersMap().get(vm.getId()));
 
@@ -1206,21 +1345,6 @@ public class EdgeDatacenterBroker extends SimEntity {
 				vmEX.setStatus(VMStatus.TERMINATED);
 			}
 		}
-	}
-
-	/**
-	 * @return the messageToSend
-	 */
-	public List<SimEvent> getMessageToSend() {
-		return messageToSend;
-	}
-
-	/**
-	 * @param messageToSend
-	 *            the messageToSend to set
-	 */
-	public void setMessageToSend(List<SimEvent> messageToSend) {
-		this.messageToSend = messageToSend;
 	}
 
 	/**
@@ -1327,5 +1451,30 @@ public class EdgeDatacenterBroker extends SimEntity {
 
 	public void addServiceFirstRequestTime(int serviceId, double firstRequestTime) {
 		getServicesToFirstrequestTimeMap().put(serviceId, firstRequestTime);
+	}
+
+	public List<Integer> getDatacenterIdsList() {
+		return datacenterIdsList;
+	}
+
+	public void setDatacenterIdsList(List<Integer> datacenterIdsList) {
+		this.datacenterIdsList = datacenterIdsList;
+	}
+
+	public List<Integer> getDatacenterRequestedIdsList() {
+		return datacenterRequestedIdsList;
+	}
+
+	public void setDatacenterRequestedIdsList(List<Integer> datacenterRequestedIdsList) {
+		this.datacenterRequestedIdsList = datacenterRequestedIdsList;
+	}
+
+	public Map<Integer, DatacenterCharacteristics> getDatacenterCharacteristicsList() {
+		return datacenterCharacteristicsList;
+	}
+
+	public void setDatacenterCharacteristicsList(
+			Map<Integer, DatacenterCharacteristics> datacenterCharacteristicsList) {
+		this.datacenterCharacteristicsList = datacenterCharacteristicsList;
 	}
 }

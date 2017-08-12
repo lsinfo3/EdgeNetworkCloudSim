@@ -165,10 +165,19 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 							if (pkt.getReciever() == cl.getVmId()) {
 								if (pkt.getVirtualrecvid() == cl.getCloudletId()) {
 
+									// if this Cloudlet belongs to a Broker
 									if (isCloudletOwnerBroker(cl)) {
 
 										CustomLog.printf("%s\t\t%s\t\t%s\t\t\t%s", TextUtil.toString(CloudSim.clock()),
-												"Service #", TextUtil.toString(CloudSim.clock() - cl.getServiceTime()),
+												"Service #" + Service.getServiceWithCloudletId(pkt.getVirtualsendid()).getId(),
+												TextUtil.toString(CloudSim.clock() - cl.getServiceTime()),
+												TextUtil.toString(st.getData()));
+
+										Service s = Service.getServiceWithCloudletId(pkt.getVirtualsendid());
+										CustomLog.printResponse("\t%s\t\t%s\t\t\t\t%s\t\t\t\t%s\t\t\t\t%s",
+												TextUtil.toString(CloudSim.clock()), "#" + s.getId(),
+												s.getServiceTyp().getName(),
+												TextUtil.toString(CloudSim.clock() - cl.getServiceTime()),
 												TextUtil.toString(st.getData()));
 
 										cl.setServiceTime(CloudSim.clock());
@@ -291,8 +300,8 @@ public class EdgeCloudletSpaceSharedScheduler extends CloudletScheduler {
 		setPreviousTime(currentTime);
 		return nextEvent;
 	}
-	
-	private boolean isCloudletOwnerBroker(Cloudlet cloudlet){
+
+	private boolean isCloudletOwnerBroker(Cloudlet cloudlet) {
 		int brID = cloudlet.getUserId();
 		SimEntity entity = CloudSim.getEntity(brID);
 		if (entity instanceof EdgeDatacenterBroker) {
