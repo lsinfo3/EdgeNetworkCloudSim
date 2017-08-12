@@ -18,37 +18,41 @@ public class EdgeExample {
 
 		Log.printLine("Starting EdgeExample...");
 
+		String exampleFolderPath = System.getProperty("user.dir") + System.getProperty("file.separator") + "src"
+				+ System.getProperty("file.separator") + "org" + System.getProperty("file.separator") + "cloudbus"
+				+ System.getProperty("file.separator") + "cloudsim" + System.getProperty("file.separator") + "edge"
+				+ System.getProperty("file.separator") + "examples";
+		String briteFolderPath = exampleFolderPath + System.getProperty("file.separator") + "brites";
+		String resultFolderPath = exampleFolderPath + System.getProperty("file.separator") + "results";
+
 		try {
 
 			Properties props = new Properties();
-			props.setProperty("FilePath", "C:\\Users\\kwam8\\Nextcloud\\Semester\\results\\results_baseline.txt");
+			props.setProperty("FilePath",
+					resultFolderPath + System.getProperty("file.separator") + "results_baseline.txt");
 			props.setProperty("ServerFilePath",
-					"C:\\Users\\kwam8\\Nextcloud\\Semester\\results\\baseline\\server_utilization.txt");
+					resultFolderPath + System.getProperty("file.separator") + "server_utilization.txt");
 			props.setProperty("ResponseFilePath",
-					"C:\\Users\\kwam8\\Nextcloud\\Semester\\results\\baseline\\response_time.txt");
+					resultFolderPath + System.getProperty("file.separator") + "response_time.txt");
 			props.setProperty("VmRequestFilePath",
-					"C:\\Users\\kwam8\\Nextcloud\\Semester\\results\\baseline\\vm_request.txt");
+					resultFolderPath + System.getProperty("file.separator") + "vm_request.txt");
 			props.setProperty("serviceChainFilePath",
-					"C:\\Users\\kwam8\\Nextcloud\\Semester\\results\\baseline\\service_chain.txt");
-			// props.setProperty("FilePath",
-			// "C:\\Users\\kwam8\\Nextcloud\\Semester\\results\\results_double_bw.txt");
-			// props.setProperty("FilePath",
-			// "C:\\Users\\kwam8\\Nextcloud\\Semester\\results\\results_double_delay.txt");
-			// props.setProperty("FilePath",
-			// "C:\\Users\\kwam8\\Nextcloud\\Semester\\results\\results_double_data.txt");
+					resultFolderPath + System.getProperty("file.separator") + "service_chain.txt");
 			props.setProperty("LogRealTimeClock", "true");
 			props.setProperty("LogFormat", "getMessage");
 
 			CustomLog.configLogger(props);
 
-			CustomLog.printf("\t%s\t\t%s\t\t\t%s\t\t\t\t\t%s\t\t%s", "Time", "Entity", "Transmission Time", "Real Time", "Data");
-			CustomLog.printResponse("\t\t%s\t%s\t\t%s\t\t\t%s\t\t\t%s", "Time", "Service ID", "Service Typ", "Transmission Time", "Data");
+			CustomLog.printf("\t%s\t\t%s\t\t\t%s\t\t\t\t\t%s\t\t%s", "Time", "Entity", "Transmission Time", "Real Time",
+					"Data");
+			CustomLog.printResponse("\t\t%s\t%s\t\t%s\t\t\t%s\t\t\t%s", "Time", "Service ID", "Service Typ",
+					"Transmission Time", "Data");
 			CustomLog.printVmRequest("\t%s\t\t%s\t\t\t%s\t\t%s\t\t%s\t\t%s", "Time", "Host ID", "VM ID", "DC ID",
 					"Owner ID", "Reason");
 			CustomLog.printServer("\t\t%s\t\t%s\t\t%s\t\t%s\t\t\t%s\t\t%s\t\t\t%s\t\t\t%s\t\t%s", "Time", "Host ID",
 					"DC ID", "RAM", "CPU", "MIPS", "BW", "Storage", "Num Of VMs");
-			CustomLog.printServiceChain("\t\t%s\t\t%s\t\t%s\t\t\t%s\t\t\t\t%s", "Time", "Service ID",
-					"first", "second", "third");
+			CustomLog.printServiceChain("\t\t%s\t\t%s\t\t%s\t\t\t%s\t\t\t\t%s", "Time", "Service ID", "first", "second",
+					"third");
 
 			// before creating any entities.
 			int num_user = 1; // number of cloud users
@@ -60,14 +64,14 @@ public class EdgeExample {
 
 			// load the network topology file
 			NetworkTopology
-					// .buildNetworkTopology("C:\\Users\\kwam8\\Nextcloud\\Semester\\brites\\first\\topology_double_delay.brite");
-					// .buildNetworkTopology("C:\\Users\\kwam8\\Nextcloud\\Semester\\brites\\first\\topology_double_bw.brite");
-					// .buildNetworkTopology("C:\\Users\\kwam8\\Nextcloud\\Semester\\brites\\first\\topology_baseline.brite");
-
-					// .buildNetworkTopology("C:\\Users\\kwam8\\Nextcloud\\Semester\\brites\\second\\topology_double_delay.brite");
-					// .buildNetworkTopology("C:\\Users\\kwam8\\Nextcloud\\Semester\\brites\\second\\topology_double_bw.brite");
+					// .buildNetworkTopology(briteFolderPath +
+					// System.getProperty("file.separator") +
+					// "topology_double_delay.brite");
+					// .buildNetworkTopology(briteFolderPath +
+					// System.getProperty("file.separator") +
+					// "topology_double_bw.brite");
 					.buildNetworkTopology(
-							"C:\\Users\\kwam8\\Nextcloud\\Semester\\brites\\second\\topology_baseline.brite");
+							briteFolderPath + System.getProperty("file.separator") + "topology_baseline.brite");
 
 			BaseDatacenter
 					// .createNetworkWorkingFirst();
